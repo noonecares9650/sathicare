@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SathiCare - Secure Futures, Together</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:#020617}
+@keyframes slideIn{0%{transform:translateX(-100px);opacity:0}100%{transform:translateX(0);opacity:1}}
+.mascot-animate{animation:slideIn .8s ease-out forwards}
+@keyframes popIn{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
+.pop-anim{animation:popIn .3s ease-out forwards}
+.tab-on{background:#10b981;color:#020617}
+input[type=range]{accent-color:#10b981}
+.plan-card{transition:transform .15s ease,border-color .15s ease}
+.plan-card:hover{transform:translateY(-2px);border-color:rgba(16,185,129,.5)}
+.sc-table{border-collapse:collapse;width:100%}
+.sc-table th,.sc-table td{padding:6px 8px;text-align:right;white-space:nowrap}
+.sc-table th:first-child,.sc-table td:first-child{text-align:left}
+.sc-table thead th{color:#6ee7b7;font-weight:700;font-size:10px;text-transform:uppercase;border-bottom:1px solid #1e293b}
+.sc-table tbody tr:nth-child(even){background:#0f172a}
+.sc-table td{font-size:11px;color:#cbd5e1}
+</style>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased selection:bg-emerald-500 selection:text-white">
+
+<!-- WELCOME / TUTORIAL POPUP -->
+<div id="welcomePopup" class="fixed inset-0 z-[60] hidden items-center justify-center p-4 bg-slate-950/85 backdrop-blur-sm" onclick="if(event.target===this)closeWelcome()">
+  <div class="pop-anim bg-gradient-to-b from-slate-900 to-slate-950 border border-emerald-500/30 w-full max-w-md rounded-3xl p-6 md:p-7 relative shadow-2xl overflow-hidden">
+    <div class="absolute -top-16 -left-16 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <button onclick="closeWelcome()" aria-label="Close" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg z-10">✕</button>
+    <div class="relative text-center">
+      <div class="w-20 h-20 mx-auto rounded-2xl bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-4xl shadow-inner">🦊</div>
+      <span class="inline-block mt-3 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-semibold px-3 py-1 rounded-full">Sathi Guide</span>
+      <h3 class="text-xl md:text-2xl font-bold mt-4 leading-snug">Ruko zara! 👋 Pehle 2-min tutorial dekh lo</h3>
+      <p class="text-slate-400 text-sm mt-2 leading-relaxed">Taaki aapko exactly pata ho kaise kaam karta hai aur genuine lead refer karke kaise <span class="text-emerald-400 font-semibold">₹500 tak</span> kamaya jaata hai. Yeh dekhna mandatory hai taaki koi confusion na rahe.</p>
+      <button onclick="watchTutorial()" class="mt-5 w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3.5 rounded-xl text-sm transition shadow-xl shadow-emerald-500/20">▶ Watch Tutorial Now</button>
+      <button onclick="closeWelcome()" class="mt-3 text-xs text-slate-500 hover:text-slate-300 transition underline underline-offset-2">Skip for now, let me explore the site</button>
+      <p id="welcomeCount" class="mt-3 text-[10px] text-slate-600"></p>
+    </div>
+  </div>
+</div>
+
+<!-- FLOATING WHATSAPP -->
+<a id="waFloat" href="#" target="_blank" rel="noopener" class="fixed bottom-5 right-5 z-50 bg-emerald-500 hover:bg-emerald-400 text-slate-950 w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-2xl shadow-emerald-500/30 transition" aria-label="Chat on WhatsApp">💬</a>
+
+<div class="bg-emerald-600/20 border-b border-emerald-500/30 text-emerald-400 text-xs py-2.5 px-4 text-center font-bold tracking-wide">
+  🔥 EARN UPTO ₹500 CASH PER GENUINE LEAD • Trusted LIC Framework
+</div>
+
+<header class="sticky top-0 z-40 backdrop-blur-md bg-slate-950/80 border-b border-slate-800" style="top:env(safe-area-inset-top,0px)">
+  <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center font-bold text-xl text-slate-950 shadow-lg shadow-emerald-500/20">S</div>
+      <div>
+        <span class="text-xl font-bold tracking-tight">Sathi<span class="text-emerald-400">Care</span></span>
+        <span class="block text-[10px] text-slate-400 tracking-wider uppercase font-semibold">Partner Network</span>
+      </div>
+    </div>
+    <div class="flex items-center space-x-6">
+      <a href="#vision" class="text-sm text-slate-300 hover:text-white transition hidden md:block">Vision &amp; Mission</a>
+      <a href="#faq" class="text-sm text-slate-300 hover:text-white transition hidden md:block">Trust &amp; Safety</a>
+      <a href="#contact" class="text-sm text-slate-300 hover:text-white transition hidden md:block">Contact</a>
+      <button onclick="openModal()" id="authBtn" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-5 py-2.5 rounded-xl font-semibold text-sm transition shadow-lg shadow-emerald-500/10">Partner Login</button>
+    </div>
+  </div>
+</header>
+
+<section class="max-w-7xl mx-auto px-6 pt-8">
+  <div class="mascot-animate bg-gradient-to-r from-slate-900 to-slate-900/90 border border-emerald-500/30 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 shadow-2xl relative overflow-hidden">
+    <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="flex-shrink-0 relative">
+      <div class="w-24 h-24 rounded-2xl bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-4xl">🦊</div>
+      <span class="absolute -bottom-2 -right-2 bg-emerald-500 text-slate-950 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Guide</span>
+    </div>
+    <div class="flex-grow text-center md:text-left">
+      <h3 class="text-emerald-400 font-semibold text-xs tracking-wider uppercase mb-1">Sathi Guide says:</h3>
+      <p class="text-lg md:text-xl font-medium text-slate-200 leading-snug">"Paisa bachana koi rocket science nahi hai, bas sahi jagah chuna hua kadam hai. Apno ka kal secure karo aur sath me extra savings banao—bina kisi pressure ke!"</p>
+      <p class="text-xs text-emerald-400 mt-2 font-semibold">💡 Refer genuine clients and get up to ₹500 reward per conversion.</p>
+    </div>
+  </div>
+</section>
+
+<section class="max-w-7xl mx-auto px-6 py-16 md:py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+  <div>
+    <span class="inline-block bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold px-3 py-1 rounded-full mb-6">Earn ₹500 Cash Per Lead • Zero Investment</span>
+    <h1 class="text-4xl md:text-6xl font-bold tracking-tight leading-tight mb-6">Ghar Baithe Banao <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200">Extra Income.</span></h1>
+    <p class="text-slate-400 text-base md:text-lg leading-relaxed mb-8">Akele chaloge toh thak jaoge, milkar chalenge toh sapne pure honge. Bina kisi target ke, sirf trusted LIC savings aur protection plans ke genuine customers refer karo.</p>
+    <div class="flex flex-col sm:flex-row flex-wrap gap-3">
+      <button onclick="openModal('signup')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-6 py-4 rounded-xl font-bold text-center transition shadow-xl shadow-emerald-500/20">Start Earning Today</button>
+      <button onclick="openDirectory()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 px-6 py-4 rounded-xl font-bold text-center transition">📖 Know All Plans</button>
+      <a href="#vision" class="border-2 border-emerald-500 hover:bg-emerald-500 hover:text-slate-950 text-emerald-400 px-6 py-4 rounded-xl font-bold text-center transition">Learn How It Works</a>
+    </div>
+
+    <!-- ULIP / NIVESH PLUS PROMO -->
+    <div class="mt-10 bg-gradient-to-br from-emerald-900/30 to-slate-900 border border-emerald-500/30 rounded-3xl p-6">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-xs bg-emerald-500 text-slate-950 font-bold px-2.5 py-1 rounded-lg">ULIP SPOTLIGHT</span>
+        <span class="text-sm font-bold text-emerald-300">LIC Nivesh Plus (Plan 849)</span>
+      </div>
+      <p class="text-xs text-slate-400 leading-relaxed mb-4">Ek single lump-sum invest karo aur professionally-managed market-linked funds mein wealth-building growth ka fayda uthao — sath mein life cover bhi milta hai. Aap apne risk-appetite ke hisaab se fund choose kar sakte ho (equity-heavy growth se leke balanced/secured funds tak), aur fund switch bhi kar sakte ho. Long-term (20-25 saal) market-linked plans mein compounding se corpus kaafi bada ban sakta hai.</p>
+      <div class="grid grid-cols-3 gap-2 text-center" id="ulipTiers"></div>
+      <p class="text-[10px] text-slate-500 mt-3">Ranges above are illustrative only (assumed 8%–10%/year growth) — actual returns depend on market performance and are not guaranteed by LIC. Please read the ULIP sales brochure and risk factors before investing.</p>
+    </div>
+  </div>
+
+  <!-- ADVANCED LIC PLAN RECOMMENDER -->
+  <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl">
+    <h3 class="text-lg font-semibold mb-1 text-emerald-400">LIC Plan Recommendation Calculator</h3>
+    <p class="text-xs text-slate-500 mb-5">Fill in your details, get a focused shortlist of matching LIC plans to explore.</p>
+    <div class="space-y-4">
+      <div>
+        <label for="lrIncome" class="block text-xs text-slate-400 mb-1">Monthly Income (₹)</label>
+        <input type="number" id="lrIncome" placeholder="e.g. 35000" min="0" step="1000" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+      </div>
+      <div>
+        <label for="lrInvest" class="block text-xs text-slate-400 mb-1">Monthly Investment in Policy (₹, min ₹1,000)</label>
+        <input type="number" id="lrInvest" value="1000" min="1000" step="100" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        <p id="lrInvestErr" class="hidden text-[11px] text-red-400 mt-1">Minimum monthly investment is ₹1,000.</p>
+      </div>
+      <div>
+        <label for="lrRate" class="block text-xs text-slate-400 mb-1">Return Expectation</label>
+        <select id="lrRate" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+          <option value="6">Conservative (~6%/yr — endowment/bonus style)</option>
+          <option value="8" selected>Moderate (~8%/yr)</option>
+          <option value="10">Growth-focused (~10%/yr — ULIP style, market-linked)</option>
+        </select>
+      </div>
+      <button id="lrSubmit" type="button" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3.5 rounded-xl text-sm transition shadow-lg shadow-emerald-500/20">Find Best LIC Plans</button>
+
+      <div id="lrResult" class="hidden space-y-3">
+        <div class="flex items-center justify-between pt-1">
+          <span class="text-[11px] uppercase tracking-wide text-emerald-400 font-bold">Curated Plan Shortlist</span>
+          <span class="text-[11px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-lg">Illustration only</span>
+        </div>
+        <div id="lrCards" class="space-y-3"></div>
+        <p class="text-[11px] text-slate-500 leading-relaxed pt-1">Illustrative figures based on your inputs and chosen return rate, not an official LIC quotation. Please confirm exact eligibility and figures with a licensed LIC advisor.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KNOW ALL PLANS DIRECTORY -->
+<div id="directoryModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-[65] hidden items-center justify-center p-4" onclick="if(event.target===this)closeDirectory()">
+  <div class="pop-anim bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-3xl p-6 md:p-7 relative shadow-2xl max-h-[85vh] overflow-y-auto">
+    <button onclick="closeDirectory()" aria-label="Close" class="absolute top-5 right-5 text-slate-400 hover:text-white text-lg">✕</button>
+    <h3 class="text-xl font-bold mb-1">📖 Know All Plans</h3>
+    <p class="text-xs text-slate-500 mb-5">Tap any plan to open its calculator. Plan numbers shown are LIC's official plan numbers, verified against licindia.in.</p>
+    <div id="directoryList" class="space-y-5"></div>
+  </div>
+</div>
+
+<!-- PLAN EXPLORER / DEEP-DIVE MODAL -->
+<div id="subCalcModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-[70] hidden items-center justify-center p-4" onclick="if(event.target===this)closeSubCalc()">
+  <div class="pop-anim bg-slate-900 border border-emerald-500/30 w-full max-w-xl rounded-3xl p-6 md:p-7 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+    <button onclick="closeSubCalc()" aria-label="Close" class="absolute top-5 right-5 text-slate-400 hover:text-white text-lg">✕</button>
+    <span class="text-[11px] uppercase tracking-wide text-emerald-400 font-bold">Plan Explorer</span>
+    <h3 id="scName" class="text-xl font-bold mt-1 mb-1"></h3>
+    <p id="scDesc" class="text-xs text-slate-400 leading-relaxed mb-4"></p>
+
+    <div id="scBenefits" class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-xs text-emerald-300 leading-relaxed mb-4 space-y-1"></div>
+
+    <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 mb-3">
+      <p class="text-[11px] text-slate-400 mb-2 font-semibold">Proposer Details</p>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label for="scName2" class="block text-xs text-slate-400 mb-1">Proposer Name</label>
+          <input type="text" id="scName2" placeholder="Your name" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label for="scAge" class="block text-xs text-slate-400 mb-1">Age</label>
+          <input type="number" id="scAge" value="30" min="1" max="80" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <div>
+        <label for="scSA" class="block text-xs text-slate-400 mb-1">Sum Assured (₹)</label>
+        <input type="number" id="scSA" value="500000" min="0" step="50000" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+      </div>
+      <div>
+        <label for="scPremOpt" class="block text-xs text-slate-400 mb-1">Premium Option</label>
+        <select id="scPremOpt" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+          <option value="regular">Regular Premium</option>
+          <option value="limited">Limited Premium (PPT)</option>
+          <option value="single">Single Premium</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <div>
+        <label for="scFreq" class="block text-xs text-slate-400 mb-1">Frequency</label>
+        <select id="scFreq" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+          <option value="monthly">Monthly</option>
+          <option value="quarterly">Quarterly</option>
+          <option value="halfyearly">Half-Yearly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+      </div>
+      <div>
+        <label for="scPremium" class="block text-xs text-slate-400 mb-1"><span id="scPremiumLabel">Premium (₹, min ₹1,000)</span></label>
+        <input type="number" id="scPremium" value="1000" min="1000" step="100" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+      </div>
+    </div>
+    <button id="scCalc" type="button" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition shadow-lg shadow-emerald-500/20 mb-4">Show Breakdown</button>
+
+    <div id="scOut" class="hidden space-y-3">
+      <div id="scFreqGrid" class="grid grid-cols-2 gap-2 text-xs">
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3"><p class="text-slate-400">Monthly</p><p id="scMonthly" class="font-bold text-slate-200 text-sm">-</p></div>
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3"><p class="text-slate-400">Quarterly</p><p id="scQuarterly" class="font-bold text-slate-200 text-sm">-</p></div>
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3"><p class="text-slate-400">Half-Yearly</p><p id="scHalf" class="font-bold text-slate-200 text-sm">-</p></div>
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3"><p class="text-slate-400">Yearly</p><p id="scYearly" class="font-bold text-slate-200 text-sm">-</p></div>
+      </div>
+      <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+        <p class="text-[11px] text-slate-400" id="scPerDayLabel">Roughly, that's a saving of</p>
+        <p id="scPerDay" class="text-base font-bold text-emerald-300">-</p>
+      </div>
+      <div class="bg-slate-950 border border-emerald-500/30 rounded-xl p-4">
+        <p class="text-[11px] text-slate-400" id="scOutLabel">Estimated maturity value (principal + illustrative bonus)</p>
+        <p id="scOutVal" class="text-2xl font-bold text-emerald-300">-</p>
+        <p class="text-[11px] text-slate-500 mt-1">Over an assumed term of <span id="scTerm"></span> years, PPT <span id="scPPT"></span> years.</p>
+      </div>
+      <div id="scGuidance" class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-300 leading-relaxed"></div>
+
+      <div class="overflow-x-auto rounded-xl border border-slate-800">
+        <table class="sc-table">
+          <thead><tr><th>Year</th><th id="scColPrem">Premium</th><th id="scColCum">Cum. Paid</th><th>Cover</th><th>Ind. Value</th><th>Loan?</th></tr></thead>
+          <tbody id="scTableBody"></tbody>
+        </table>
+      </div>
+      <p class="text-[11px] text-slate-500 leading-relaxed">Illustrative estimate only, not an official LIC benefit illustration. Loan eligibility generally opens up after the policy acquires a surrender value (commonly after 2–3 years of premiums / immediately for single premium), subject to LIC's actual terms. Final premium and benefits depend on medical and underwriting outcome.</p>
+    </div>
+  </div>
+</div>
+
+<section id="tutorial" class="max-w-5xl mx-auto px-6 py-16 scroll-mt-24">
+  <div class="text-center mb-8">
+    <h2 class="text-xs uppercase tracking-widest text-emerald-400 font-bold mb-3">Watch &amp; Learn</h2>
+    <h3 class="text-3xl font-bold tracking-tight">How SathiCare Works</h3>
+    <p class="text-slate-400 text-sm mt-3">2-minute tutorial — samjho kaise refer karo aur ₹500 tak kamao har genuine lead par.</p>
+  </div>
+  <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+    <div class="aspect-video bg-slate-950 flex items-center justify-center">
+      <div class="text-center px-6">
+        <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl">▶</div>
+        <p class="text-slate-400 text-sm">Tutorial video goes here — swap this block for your YouTube/Vimeo embed.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="vision" class="border-t border-slate-800/80 bg-slate-900/40 py-20">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center max-w-2xl mx-auto mb-16">
+      <h2 class="text-xs uppercase tracking-widest text-emerald-400 font-bold mb-3">Our Core Philosophy</h2>
+      <h3 class="text-3xl font-bold tracking-tight">Vision &amp; Mission</h3>
+      <p class="text-slate-400 text-sm mt-3">Our ultimate goal is not just selling insurance, but building long-term financial security and trust in every household.</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-xl mb-6">🎯</div>
+        <h4 class="text-xl font-bold mb-3">Our Vision</h4>
+        <p class="text-slate-400 text-sm leading-relaxed">To empower youth across every town and city in India with a reliable platform to generate steady pocket income, while extending a robust financial safety shield to every family.</p>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-xl mb-6">🚀</div>
+        <h4 class="text-xl font-bold mb-3">Our Mission</h4>
+        <p class="text-slate-400 text-sm leading-relaxed">To operate with absolute transparency and trust. We meticulously verify every lead, ensure timely payouts to our partners, and eliminate apprehensions by promoting trusted LIC policies with total confidence.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="max-w-4xl mx-auto px-6 py-20">
+  <div class="text-center mb-16">
+    <h2 class="text-xs uppercase tracking-widest text-emerald-400 font-bold mb-3">Clear &amp; Transparent</h2>
+    <h3 class="text-3xl font-bold tracking-tight">Frequently Answered Doubts (LIC Trust)</h3>
+  </div>
+  <div class="space-y-4" id="faqList">
+    <div class="faq-item bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+      <h4 class="font-semibold text-base mb-2 text-slate-200">Q: Kya LIC me paisa doobne ka koi risk hai?</h4>
+      <p class="text-sm text-slate-400 leading-relaxed">Ans: Bilkul nahi! LIC Government of India ki statutory corporation hai jise 100% Sovereign Guarantee milti hai. Iska matlab hai ki aapka ek-ek paisa sarkar ki guarantee ke sath secure hai.</p>
+    </div>
+    <div class="faq-item bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+      <h4 class="font-semibold text-base mb-2 text-slate-200">Q: Partner ko commission ya payout kaise milta hai?</h4>
+      <p class="text-sm text-slate-400 leading-relaxed">Ans: Jaise hi aapka refer kiya hua customer genuine policy process complete kar leta hai, aapka payout direct aapke UPI (Google Pay / PhonePe) par ₹500 tak transfer kar diya jata hai.</p>
+    </div>
+    <div class="faq-item bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+      <h4 class="font-semibold text-base mb-2 text-slate-200">Q: Lead submit karne ke baad kitna time lagta hai payout aane mein?</h4>
+      <p class="text-sm text-slate-400 leading-relaxed">Ans: Policy verify aur complete hone ke baad, typically kuch working days ke andar payout process ho jata hai. Aap apne dashboard mein har lead ka live status (Under Process / Policy Completed / No Response / Rejected) dekh sakte ho.</p>
+    </div>
+    <div class="faq-item-extra hidden bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+      <h4 class="font-semibold text-base mb-2 text-slate-200">Q: Agar mera lead "No Response" ya "Rejected" show ho raha hai toh?</h4>
+      <p class="text-sm text-slate-400 leading-relaxed">Ans: Iska matlab customer contact nahi ho paya ya policy process aage nahi badha. Aap chaho toh naya updated number ke sath dobara same lead resubmit kar sakte ho, ya support se WhatsApp par baat kar sakte ho.</p>
+    </div>
+    <div class="faq-item-extra hidden bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+      <h4 class="font-semibold text-base mb-2 text-slate-200">Q: Kya main ek se zyada lead submit kar sakta hoon?</h4>
+      <p class="text-sm text-slate-400 leading-relaxed">Ans: Haan, jitne genuine leads chaho utne submit kar sakte ho — har converted lead par alag se payout milta hai. Sirf duplicate ya fake entries avoid karo.</p>
+    </div>
+    <div class="faq-item-extra hidden bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+      <h4 class="font-semibold text-base mb-2 text-slate-200">Q: Website use karne ke liye koi charge lagta hai?</h4>
+      <p class="text-sm text-slate-400 leading-relaxed">Ans: Nahi, SathiCare partner banna aur leads refer karna bilkul free hai — koi registration fee ya hidden charge nahi hai.</p>
+    </div>
+    <div class="faq-item-extra hidden bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+      <h4 class="font-semibold text-base mb-2 text-slate-200">Q: Support se contact kaise karein?</h4>
+      <p class="text-sm text-slate-400 leading-relaxed">Ans: Neeche diye gaye Contact section se seedha WhatsApp par apna sawaal likh kar bhej sakte ho, ya floating WhatsApp button use kar sakte ho.</p>
+    </div>
+  </div>
+  <div class="text-center mt-6">
+    <button id="faqToggle" onclick="toggleFaq()" class="text-sm font-semibold text-emerald-400 hover:text-emerald-300 underline underline-offset-4">See More Questions ▾</button>
+  </div>
+</section>
+
+<!-- CONTACT SECTION -->
+<section id="contact" class="max-w-4xl mx-auto px-6 py-16 scroll-mt-24">
+  <div class="text-center mb-10">
+    <h2 class="text-xs uppercase tracking-widest text-emerald-400 font-bold mb-3">We're Here to Help</h2>
+    <h3 class="text-3xl font-bold tracking-tight">Contact SathiCare</h3>
+    <p class="text-slate-400 text-sm mt-3">💚 Har sawaal ka jawab hai — bina kisi jhijhak ke apni baat rakho, ya ek free guide session le lo.</p>
+  </div>
+  <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div>
+        <label for="ctEmail" class="block text-xs text-slate-400 mb-1">Your Email Address <span class="text-slate-600">(optional)</span></label>
+        <input type="email" id="ctEmail" placeholder="you@example.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+      </div>
+      <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-xs text-emerald-300 flex items-center">🚀 Genuine partners ko har mahine ₹500/lead tak ka reward + free guidance milta hai.</div>
+    </div>
+    <label for="ctIssue" class="block text-xs text-slate-400 mb-1">Describe your problem or issue, or take a guide session for free...</label>
+    <textarea id="ctIssue" rows="3" placeholder="Describe your problem or issue, or take a guide session for free..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 resize-none mb-2"></textarea>
+    <p class="text-[11px] text-slate-500 mb-4">"Ek sawaal poochne se kuch nahi jaata, aur na poochne se sab kuch reh jaata hai." — Sathi Guide 🦊</p>
+    <button id="ctWaBtn" disabled onclick="ctConnectWhatsapp()" class="w-full flex items-center justify-center gap-2 bg-slate-800 text-slate-500 cursor-not-allowed font-bold py-3.5 rounded-xl text-sm transition">💬 Connect to WhatsApp</button>
+  </div>
+</section>
+
+<footer class="border-t border-slate-800 bg-slate-950 py-12">
+  <div class="max-w-7xl mx-auto px-6 text-center">
+    <p class="text-sm font-bold text-slate-200 mb-2">SathiCare Partner Network</p>
+    <p class="text-xs text-slate-500 max-w-xl mx-auto mb-6">Disclaimer: Insurance is the subject matter of solicitation. All policies are officially issued through authorised LIC framework under strict regulatory compliance.</p>
+    <p class="text-xs text-slate-600">© 2026 SathiCare. All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- AUTH / DASHBOARD MODAL -->
+<div id="modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4" onclick="if(event.target===this)closeModal()">
+  <div class="bg-slate-900 border border-slate-800 w-full max-w-md p-8 rounded-3xl relative shadow-2xl max-h-[90vh] overflow-y-auto">
+    <button onclick="closeModal()" aria-label="Close" class="absolute top-6 right-6 text-slate-400 hover:text-white text-xl">✕</button>
+
+    <!-- LOGIN / SIGNUP -->
+    <div id="authView">
+      <h3 class="text-xl font-bold mb-4">Partner Portal</h3>
+      <div class="flex bg-slate-950 rounded-xl p-1 mb-4 text-sm font-semibold">
+        <button id="tabLogin" onclick="setTab('login')" class="flex-1 py-2 rounded-lg transition">Login</button>
+        <button id="tabSignup" onclick="setTab('signup')" class="flex-1 py-2 rounded-lg transition">Sign up</button>
+      </div>
+      <div class="flex bg-slate-950 rounded-xl p-1 mb-4 text-xs font-semibold">
+        <button id="methodPhone" onclick="setMethod('phone')" class="flex-1 py-1.5 rounded-lg transition">📱 Mobile</button>
+        <button id="methodEmail" onclick="setMethod('email')" class="flex-1 py-1.5 rounded-lg transition">✉️ Email</button>
+      </div>
+      <button type="button" onclick="googleNotice()" class="w-full border border-slate-700 hover:border-slate-500 text-slate-300 py-2.5 rounded-xl text-sm font-medium transition mb-2 flex items-center justify-center gap-2">🔵 Continue with Google</button>
+      <p id="googleMsg" class="hidden text-[11px] text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2 mb-3">Google Sign-In needs a live backend/OAuth setup that this preview page doesn't have — please use Mobile or Email login below for now.</p>
+      <form id="authForm" class="space-y-4" novalidate>
+        <div id="nameWrap">
+          <label for="fName" class="block text-xs text-slate-400 mb-1">Full Name</label>
+          <input id="fName" type="text" autocomplete="name" placeholder="Your name" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div id="phoneWrap">
+          <label for="fPhone" class="block text-xs text-slate-400 mb-1">Mobile Number</label>
+          <input id="fPhone" type="tel" inputmode="numeric" maxlength="10" autocomplete="tel" placeholder="10-digit mobile number" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div id="emailWrap" class="hidden">
+          <label for="fEmail" class="block text-xs text-slate-400 mb-1">Email Address</label>
+          <input id="fEmail" type="email" autocomplete="email" placeholder="you@example.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label for="fPass" class="block text-xs text-slate-400 mb-1">Password</label>
+          <input id="fPass" type="password" autocomplete="current-password" placeholder="At least 6 characters" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div id="confirmWrap" class="hidden">
+          <label for="fPass2" class="block text-xs text-slate-400 mb-1">Confirm Password</label>
+          <input id="fPass2" type="password" autocomplete="new-password" placeholder="Re-enter password" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <p id="authErr" class="text-xs text-red-400 hidden" role="alert"></p>
+        <button id="authSubmit" type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3.5 rounded-xl text-sm transition shadow-lg shadow-emerald-500/20">Login</button>
+        <button type="button" onclick="openForgot()" id="forgotLink" class="w-full text-center text-[11px] text-slate-500 hover:text-slate-300 underline underline-offset-2">Forgot password?</button>
+        <p class="text-[11px] text-slate-500">Accounts are saved on this device and browser only.</p>
+      </form>
+    </div>
+
+    <!-- FORGOT PASSWORD -->
+    <div id="forgotView" class="hidden">
+      <h3 class="text-xl font-bold mb-1">Reset Password</h3>
+      <p class="text-xs text-slate-500 mb-4">This preview has no real SMS/email server to verify identity, so it lets you reset directly against your registered mobile/email. In production this step would be secured with a verified OTP or reset link.</p>
+      <div id="forgotStep1" class="space-y-4">
+        <div>
+          <label for="fgHandle" class="block text-xs text-slate-400 mb-1">Registered Mobile or Email</label>
+          <input id="fgHandle" type="text" placeholder="10-digit mobile or email" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <p id="fgErr1" class="text-xs text-red-400 hidden"></p>
+        <button type="button" onclick="findForgotAccount()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition">Continue</button>
+      </div>
+      <div id="forgotStep2" class="hidden space-y-4 mt-4">
+        <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-xs text-emerald-300">Account found for <span id="fgAccountShown" class="font-bold"></span>. Set a new password below.</div>
+        <div>
+          <label for="fgNewPass" class="block text-xs text-slate-400 mb-1">New Password</label>
+          <input id="fgNewPass" type="password" placeholder="At least 6 characters" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <p id="fgErr2" class="text-xs text-red-400 hidden"></p>
+        <button type="button" onclick="confirmReset()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition">Update Password</button>
+      </div>
+      <button type="button" onclick="closeForgot()" class="w-full mt-4 text-center text-xs text-slate-500 hover:text-slate-300 underline underline-offset-2">← Back to login</button>
+    </div>
+
+    <!-- OTP VERIFICATION (LOGIN) -->
+    <div id="otpView" class="hidden">
+      <h3 class="text-xl font-bold mb-1">Verify OTP</h3>
+      <p class="text-xs text-slate-500 mb-4">This preview has no real SMS/email server, so the OTP is shown right here instead of being sent — in production this would go out via a real SMS/email OTP service.</p>
+      <div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 text-xs text-amber-300 mb-4">Demo OTP for <span id="otpHandleShown" class="font-semibold"></span>: <span id="otpShown" class="font-bold text-sm"></span></div>
+      <label for="otpInput" class="block text-xs text-slate-400 mb-1">Enter 6-digit OTP</label>
+      <input id="otpInput" inputmode="numeric" maxlength="6" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 mb-3">
+      <p id="otpErr" class="text-xs text-red-400 hidden mb-3"></p>
+      <button type="button" onclick="verifyLoginOtp()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition mb-2">Verify &amp; Continue</button>
+      <button type="button" onclick="cancelOtp()" class="w-full text-center text-xs text-slate-500 hover:text-slate-300 underline underline-offset-2">← Cancel</button>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashView" class="hidden">
+      <div class="text-center mb-4">
+        <div class="w-14 h-14 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-2">✅</div>
+        <h3 class="text-lg font-bold">Welcome, <span id="dName"></span>!</h3>
+        <p class="text-xs text-slate-400">Logged in as <span id="dHandle"></span></p>
+      </div>
+
+      <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-xs text-emerald-300 mb-4">🦊 Sathi Guide: Agar tutorial abhi tak nahi dekha, toh <button onclick="watchTutorial()" class="underline font-semibold">yahan dekho</button> — samajhna zaroori hai kaam kaise karta hai, tabhi genuine leads milenge!</div>
+
+      <div class="flex bg-slate-950 rounded-xl p-1 mb-4 text-xs font-semibold flex-wrap" id="dashTabs">
+        <button id="dashTabStats" onclick="setDashTab('stats')" class="flex-1 py-2 rounded-lg transition">Overview</button>
+        <button id="dashTabLead" onclick="setDashTab('lead')" class="flex-1 py-2 rounded-lg transition">Submit New Lead</button>
+        <button id="dashTabAdmin" onclick="setDashTab('admin')" class="hidden flex-1 py-2 rounded-lg transition">🔐 Leads Sheet</button>
+        <button id="dashTabUsers" onclick="setDashTab('users')" class="hidden flex-1 py-2 rounded-lg transition">👥 Admin Control</button>
+      </div>
+
+      <div id="dashStats">
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div class="bg-slate-950 border border-slate-800 p-3 rounded-xl"><p class="text-[10px] text-slate-400">Total Earnings</p><p id="stEarn" class="text-lg font-bold text-emerald-400">₹0</p></div>
+          <div class="bg-slate-950 border border-slate-800 p-3 rounded-xl"><p class="text-[10px] text-slate-400">Active Balance</p><p id="stBal" class="text-lg font-bold text-emerald-400">₹0</p></div>
+          <div class="bg-slate-950 border border-slate-800 p-3 rounded-xl"><p class="text-[10px] text-slate-400">Leads Submitted</p><p id="stLeads" class="text-lg font-bold text-slate-200">0</p></div>
+          <div class="bg-slate-950 border border-slate-800 p-3 rounded-xl"><p class="text-[10px] text-slate-400">Successful Conversions</p><p id="stConv" class="text-lg font-bold text-slate-200">0</p></div>
+        </div>
+        <div id="leadListWrap" class="hidden mb-4">
+          <p class="text-[11px] text-slate-400 mb-2">Your recent leads</p>
+          <div id="leadList" class="space-y-1.5 max-h-32 overflow-y-auto"></div>
+        </div>
+      </div>
+
+      <form id="leadForm" class="hidden space-y-3">
+        <div>
+          <label for="ldName" class="block text-xs text-slate-400 mb-1">Lead's Name</label>
+          <input id="ldName" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label for="ldPhone" class="block text-xs text-slate-400 mb-1">Lead's Mobile</label>
+          <input id="ldPhone" required inputmode="numeric" maxlength="10" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label for="ldInterest" class="block text-xs text-slate-400 mb-1">Interested In</label>
+          <select id="ldInterest" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500"></select>
+        </div>
+        <p id="leadMsg" class="text-xs text-emerald-400 hidden">✅ Lead saved to the system.</p>
+        <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition">Submit Lead</button>
+      </form>
+
+      <div id="dashAdmin" class="hidden">
+        <p class="text-[11px] text-slate-400 mb-2">All leads across all partners (this browser only — see note below)</p>
+        <div class="overflow-x-auto rounded-xl border border-slate-800">
+          <table class="sc-table">
+            <thead><tr><th>Date</th><th>Partner</th><th>Partner Phone</th><th>Partner Email</th><th>Lead Name</th><th>Lead Mobile</th><th>Plan</th><th>Status</th></tr></thead>
+            <tbody id="adminLeadTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="dashUsers" class="hidden">
+        <p class="text-[11px] text-slate-400 mb-2">All registered partner accounts (this browser only — see note below)</p>
+        <div class="overflow-x-auto rounded-xl border border-slate-800">
+          <table class="sc-table">
+            <thead><tr><th>Name</th><th>Email</th><th>Mobile</th><th>Password</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="adminUserTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="flex gap-3 mt-5">
+        <button onclick="closeModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-medium py-3 rounded-xl text-sm transition">Close</button>
+        <button onclick="logout()" class="flex-1 border border-slate-700 hover:border-red-400 hover:text-red-300 text-slate-300 font-medium py-3 rounded-xl text-sm transition">Log out</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const inr = n => '₹ ' + Math.round(n).toLocaleString('en-IN');
+const ADMIN_PHONE = '9650264613';
+
+/* ---------- WhatsApp ---------- */
+function waLink(text) { return 'https://wa.me/919650264613?text=' + encodeURIComponent(text); }
+(function () { $('waFloat').href = waLink('👋 Hello SathiCare Team, mujhe partner program aur leads ke baare me janna hai! 🚀'); })();
+
+/* ---------- FAQ See More / See Less ---------- */
+function toggleFaq() {
+  const extras = document.querySelectorAll('.faq-item-extra');
+  const expanded = !extras[0].classList.contains('hidden');
+  extras.forEach(el => el.classList.toggle('hidden', expanded));
+  $('faqToggle').textContent = expanded ? 'See More Questions ▾' : 'Show Less ▴';
+}
+
+/* ---------- Contact / WhatsApp connect (enabled only once issue text is entered) ---------- */
+function ctUpdateBtn() {
+  const has = $('ctIssue').value.trim().length > 0;
+  const btn = $('ctWaBtn');
+  btn.disabled = !has;
+  btn.className = 'w-full flex items-center justify-center gap-2 font-bold py-3.5 rounded-xl text-sm transition ' + (has ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20' : 'bg-slate-800 text-slate-500 cursor-not-allowed');
+}
+$('ctIssue').addEventListener('input', ctUpdateBtn);
+function ctConnectWhatsapp() {
+  const issue = $('ctIssue').value.trim();
+  if (!issue) return;
+  const email = $('ctEmail').value.trim();
+  const msg = '👋 Hello SathiCare Team! 🚀\n📝 Issue: ' + issue + (email ? '\n✉️ Email: ' + email : '');
+  window.open(waLink(msg), '_blank');
+}
+
+/* ---------- Welcome / Tutorial Popup (frequency-capped) ---------- */
+const POPUP_KEY = 'sathi_popup_views', WATCHED_KEY = 'sathi_tutorial_watched', MAX_POPUPS = 6;
+function getViews() { return parseInt(localStorage.getItem(POPUP_KEY) || '0', 10); }
+function openWelcome() { $('welcomePopup').classList.remove('hidden'); $('welcomePopup').classList.add('flex'); document.body.style.overflow = 'hidden'; }
+function closeWelcome() { $('welcomePopup').classList.add('hidden'); $('welcomePopup').classList.remove('flex'); document.body.style.overflow = ''; }
+function watchTutorial() {
+  try { localStorage.setItem(WATCHED_KEY, '1'); } catch (e) {}
+  closeWelcome(); closeModal();
+  document.getElementById('tutorial').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeWelcome(); closeModal(); closeSubCalc(); closeDirectory(); } });
+(function () {
+  let watched = false, views = 0;
+  try { watched = localStorage.getItem(WATCHED_KEY) === '1'; views = getViews(); } catch (e) {}
+  if (watched || views >= MAX_POPUPS) return;
+  views += 1;
+  try { localStorage.setItem(POPUP_KEY, String(views)); } catch (e) {}
+  window.addEventListener('DOMContentLoaded', () => { $('welcomeCount').textContent = 'Shown ' + views + ' of ' + MAX_POPUPS + ' times'; openWelcome(); });
+})();
+
+/* ---------- LIC Plan Library (verified plan numbers where confirmed against licindia.in) ---------- */
+const CATEGORY_PLANS = {
+  'Endowment Plans': [
+    { name: 'LIC Jeevan Labh', no: '736', type: 'savings', term: 21, ppt: 15, growth: 1.55, desc: 'Limited-premium endowment plan combining savings with life cover — pay for a limited term, stay covered for longer.' },
+    { name: 'LIC New Jeevan Anand', no: '715', type: 'savings', term: 20, ppt: 20, growth: 1.5, desc: 'Endowment plan where life cover continues even after maturity — a popular protection-plus-savings combo.' },
+    { name: 'LIC Bima Jyoti', no: '760', type: 'savings', term: 20, ppt: 20, growth: 1.5, desc: 'Non-linked endowment plan with guaranteed additions during the policy term, on top of the life cover.' }
+  ],
+  'Children Plans': [
+    { name: "LIC New Children's Money Back Plan", no: '732', type: 'moneyback', term: 20, ppt: 20, growth: 1.4, desc: 'Pays out at intervals to help fund a child\'s education milestones, plus a maturity payout.' },
+    { name: 'LIC Jeevan Tarun', no: '734', type: 'moneyback', term: 25, ppt: 25, growth: 1.45, desc: 'Child-focused plan with survival benefits from age 20 onward and a lump sum at maturity.' }
+  ],
+  'WholeLife Plans': [
+    { name: 'LIC Jeevan Umang', no: '745', type: 'savings', term: 30, ppt: 20, growth: 1.9, desc: 'Whole-life plan paying an annual survival benefit from the end of the premium term, plus a maturity payout at age 100.' }
+  ],
+  'Single Premium Plans': [
+    { name: 'LIC Jeevan Utsav (Single Premium)', no: '883', type: 'single', term: 1, ppt: 1, growth: 1.35, desc: 'Pay once, get lifelong guaranteed income plus a life cover — single-premium whole-life style plan.' },
+    { name: 'LIC Single Premium Endowment Plan', no: '717', type: 'single', term: 1, ppt: 1, growth: 1.3, desc: 'One lump-sum payment for savings plus protection cover across the policy term.' }
+  ],
+  'Pension Plans': [
+    { name: 'LIC New Jeevan Shanti', no: '758', type: 'pension', term: 1, ppt: 1, growth: 1, desc: 'Deferred or immediate annuity plan — pay once, receive guaranteed pension income for life from your chosen age.' },
+    { name: 'LIC Jeevan Akshay-VII', no: '857', type: 'pension', term: 1, ppt: 1, growth: 1, desc: 'Immediate annuity plan: pay a lump sum and start receiving a regular pension right away.' }
+  ],
+  'Term Plans': [
+    { name: 'LIC New Tech-Term', no: '954', type: 'term', term: 30, ppt: 30, growth: 0, desc: 'Pure protection term plan online, high life cover at a low premium, no maturity payout.' },
+    { name: 'LIC New Jeevan Amar', no: '955', type: 'term', term: 30, ppt: 30, growth: 0, desc: 'Flexible term plan with level or increasing cover, also available offline through advisors.' }
+  ],
+  'Ulip Plans': [
+    { name: 'LIC Nivesh Plus', no: '849', type: 'ulip', term: 15, ppt: 1, growth: 2.0, desc: 'Single-premium ULIP — wealth-building via market-linked funds with life cover attached and fund switching.' },
+    { name: 'LIC Index Plus', no: '873', type: 'ulip', term: 15, ppt: 15, growth: 2.1, desc: 'Regular-premium ULIP linked to Nifty 50/100 index funds, with life cover and refund of mortality charges at maturity.' }
+  ],
+  'Mahila Plans': [
+    { name: "LIC New Tech-Term (women's preferential rate)", no: '954', type: 'term', term: 30, ppt: 30, growth: 0, desc: 'LIC does not list a separate "Mahila" product currently; several term plans give women a preferential premium rate — this is the closest match.' }
+  ],
+  'Micro Plans': [
+    { name: 'LIC Saral Jeevan Bima', no: '859', type: 'term', term: 30, ppt: 30, growth: 0, desc: 'A simple, standardised low-cost term plan, designed to be easy to understand and affordable.' },
+    { name: 'LIC Bima Jyoti', no: '760', type: 'savings', term: 15, ppt: 15, growth: 1.4, desc: 'Endowment plan with a modest minimum sum assured, suited to smaller, steady savings goals.' }
+  ],
+  'MoneyBack Plans': [
+    { name: 'LIC New Money Back Plan - 20 Years', no: '720', type: 'moneyback', term: 20, ppt: 20, growth: 1.4, desc: 'Pays a percentage of the sum assured at fixed intervals, balance plus bonus at maturity.' },
+    { name: 'LIC New Money Back Plan - 25 Years', no: '721', type: 'moneyback', term: 25, ppt: 25, growth: 1.45, desc: 'Same money-back structure over a longer 25-year term.' }
+  ]
+};
+const FREQ_MULT = { monthly: 12, quarterly: 4, halfyearly: 2, yearly: 1 };
+const BENEFITS_TEXT = {
+  savings: ['🛡️ Accidental death: nominee ko sum assured + accrued bonus milta hai, plus accidental rider se additional payout ho sakta hai (combined risk cover badh jaata hai).', '💚 Natural death: bhi sum assured + vested bonus + final bonus (agar declared) milta hai.', '⏳ Limited Premium Payment: 20-25 saal ke term me sirf 10-15 saal premium bharo, coverage aur maturity benefit poore term tak chalta rehta hai.', '🔁 Triple Benefit: (1) family ko turant payout, (2) Premium Waiver Rider liya ho toh baaki premiums LIC khud bharta hai, (3) maturity par poora payout milta hai jaise sab premium bhare gaye ho.'],
+  term: ['🛡️ Accidental death: base sum assured ke sath agar accidental rider liya hai toh extra payout milta hai — combined cover kaafi high ho jaata hai.', '💚 Natural death: pura sum assured nominee ko milta hai — koi maturity payout nahi hota agar policyholder survive karta hai.', '💰 Bahut kam premium me bada cover milta hai — pure protection, savings component nahi hota.'],
+  moneyback: ['🛡️ Accidental aur natural dono death par sum assured + bonus milta hai.', '💵 Policy term ke dauraan fixed intervals par ek hissa payout hota rehta hai, baaki maturity par.', '⏳ Limited Premium option available — coverage poore term tak continue rehta hai.'],
+  pension: ['💰 Ek baar premium bharo, life-long guaranteed pension milta hai.', '👨‍👩‍👧 Joint life option se spouse ko bhi pension continue milta hai.', '🔒 Purchase price generally 100% capital vapas milta hai (as per plan terms) nominee ko death hone par.'],
+  ulip: ['📈 Market-linked wealth-building — professionally managed funds, apke risk-appetite ke hisaab se fund choose kar sakte ho.', '🛡️ Life cover included — death par higher of fund value ya sum assured milta hai.', '💱 Fund switch aur partial withdrawal options milte hain.', '⚠️ Returns market performance par depend karte hain — guaranteed nahi hote.'],
+  single: ['🛡️ Ek hi premium me life-long cover aur guaranteed income milta hai.', '💚 Death benefit turant activate ho jata hai policy start hote hi.']
+};
+
+function futureValueMonthlySIP(monthly, annualRatePct, years) {
+  const r = annualRatePct / 100 / 12, n = years * 12;
+  if (r === 0) return monthly * n;
+  return monthly * ((Math.pow(1 + r, n) - 1) / r) * (1 + r);
+}
+
+function buildPlanCard(plan, invest, ratePct) {
+  const div = document.createElement('div');
+  div.className = 'plan-card bg-slate-950 border border-slate-800 rounded-2xl p-4' + (plan.type === 'ulip' ? ' ring-1 ring-emerald-500/40' : '');
+  let figure = '';
+  if (plan.type === 'term') {
+    figure = 'Illustrative life cover: <span class="text-emerald-300 font-bold">' + inr(invest * 12 * 200) + '</span>';
+  } else if (plan.type === 'pension') {
+    figure = 'Illustrative annual pension (approx.): <span class="text-emerald-300 font-bold">' + inr(invest * 12 * 0.07) + '</span>';
+  } else if (plan.type === 'single') {
+    figure = 'Explore for single-premium maturity illustration';
+  } else {
+    const term = plan.term || 20;
+    const fv = futureValueMonthlySIP(invest, ratePct, term);
+    figure = 'Illustrative value in ' + term + ' yrs at ' + ratePct + '%/yr: <span class="text-emerald-300 font-bold">' + inr(fv) + '</span>';
+  }
+  div.innerHTML = '<div class="flex items-start justify-between gap-3">' +
+    '<div><p class="font-bold text-emerald-300 text-sm">' + plan.name + (plan.no ? ' <span class="text-slate-500 font-normal text-[10px]">(Plan ' + plan.no + ')</span>' : '') + (plan.type === 'ulip' ? ' <span class="text-[9px] bg-emerald-500 text-slate-950 font-bold px-1.5 py-0.5 rounded">ULIP</span>' : '') + '</p>' +
+    '<p class="text-[11px] text-slate-400 mt-1 leading-relaxed">' + plan.desc + '</p>' +
+    '<p class="text-[11px] text-slate-300 mt-2">' + figure + '</p></div>' +
+    '<button type="button" class="flex-shrink-0 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[11px] font-bold px-3 py-2 rounded-lg transition">Explore</button></div>';
+  div.querySelector('button').addEventListener('click', () => openSubCalc(plan));
+  return div;
+}
+
+// Curated 10-plan shortlist across categories, always shown (not filtered down to one).
+const CURATED_SHORTLIST = [
+  CATEGORY_PLANS['Endowment Plans'][0],   // Jeevan Labh
+  CATEGORY_PLANS['Endowment Plans'][1],   // New Jeevan Anand
+  CATEGORY_PLANS['Ulip Plans'][0],        // Nivesh Plus
+  CATEGORY_PLANS['Ulip Plans'][1],        // Index Plus
+  CATEGORY_PLANS['Term Plans'][0],        // New Tech-Term
+  CATEGORY_PLANS['Term Plans'][1],        // New Jeevan Amar
+  CATEGORY_PLANS['Children Plans'][0],    // Children's Money Back
+  CATEGORY_PLANS['Children Plans'][1],    // Jeevan Tarun
+  CATEGORY_PLANS['Pension Plans'][1],     // Jeevan Akshay-VII
+  CATEGORY_PLANS['Mahila Plans'][0]       // Term with women's rate
+];
+
+$('lrSubmit').addEventListener('click', () => {
+  const invest = Math.max(0, parseFloat($('lrInvest').value) || 0);
+  $('lrInvestErr').classList.toggle('hidden', invest >= 1000);
+  if (invest < 1000) return;
+  const ratePct = parseFloat($('lrRate').value);
+  const cards = $('lrCards'); cards.innerHTML = '';
+  CURATED_SHORTLIST.forEach(p => cards.appendChild(buildPlanCard(p, invest, ratePct)));
+
+  // Nivesh Plus tiered single-premium illustration, scaled to the chosen return rate.
+  const nivesh = document.createElement('div');
+  nivesh.className = 'bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4';
+  nivesh.innerHTML = '<p class="text-xs font-bold text-emerald-300 mb-2">💎 Nivesh Plus — single lump-sum tiers (illustrative, ' + ratePct + '%/yr, 25 yrs)</p>' +
+    '<div class="grid grid-cols-3 gap-2 text-center">' + [125000, 250000, 500000].map(amt => {
+      const fv = amt * Math.pow(1 + ratePct / 100, 25);
+      return '<div class="bg-slate-950 border border-slate-800 rounded-xl p-2"><p class="text-[10px] text-slate-400">' + inr(amt) + '</p><p class="text-[11px] font-bold text-emerald-300 mt-1">' + inr(fv) + '</p></div>';
+    }).join('') + '</div>';
+  cards.appendChild(nivesh);
+
+  $('lrResult').classList.remove('hidden');
+  $('lrResult').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+});
+
+/* ---------- ULIP tiers (Nivesh Plus) — illustrative range, not guaranteed ---------- */
+(function () {
+  const tiers = [125000, 250000, 500000];
+  const wrap = $('ulipTiers');
+  tiers.forEach(amt => {
+    const lo = Math.round(amt * Math.pow(1.08, 25));
+    const hi = Math.round(amt * Math.pow(1.10, 25));
+    const d = document.createElement('div');
+    d.className = 'bg-slate-950 border border-slate-800 rounded-xl p-2.5';
+    d.innerHTML = '<p class="text-[10px] text-slate-400">' + inr(amt) + ' one-time</p><p class="text-[11px] font-bold text-emerald-300 mt-1">' + inr(lo) + '–' + inr(hi) + '</p><p class="text-[9px] text-slate-600">in ~25 yrs, illustrative</p>';
+    wrap.appendChild(d);
+  });
+})();
+
+/* ---------- Directory ---------- */
+function openDirectory() {
+  const wrap = $('directoryList'); wrap.innerHTML = '';
+  Object.keys(CATEGORY_PLANS).forEach(cat => {
+    const sec = document.createElement('div');
+    sec.innerHTML = '<h4 class="text-xs uppercase tracking-wide text-emerald-400 font-bold mb-2">' + cat + '</h4>';
+    const list = document.createElement('div'); list.className = 'space-y-2';
+    CATEGORY_PLANS[cat].forEach(p => {
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'w-full text-left bg-slate-950 border border-slate-800 hover:border-emerald-500/50 rounded-xl p-3 flex items-center justify-between transition';
+      row.innerHTML = '<span class="text-sm text-slate-200 font-medium">' + p.name + (p.no ? ' <span class="text-slate-500 text-[10px]">(Plan ' + p.no + ')</span>' : '') + '</span><span class="text-emerald-400 text-xs">→</span>';
+      row.addEventListener('click', () => { closeDirectory(); openSubCalc(p); });
+      list.appendChild(row);
+    });
+    sec.appendChild(list);
+    wrap.appendChild(sec);
+  });
+  $('directoryModal').classList.remove('hidden'); $('directoryModal').classList.add('flex');
+  document.body.style.overflow = 'hidden';
+}
+function closeDirectory() { $('directoryModal').classList.add('hidden'); $('directoryModal').classList.remove('flex'); document.body.style.overflow = ''; }
+
+/* ---------- Plan Explorer / deep-dive sub-calculator ---------- */
+let scPlan = null;
+function openSubCalc(plan) {
+  scPlan = plan;
+  $('scName').textContent = plan.name + (plan.no ? ' (Plan ' + plan.no + ')' : '');
+  $('scDesc').textContent = plan.desc;
+  $('scBenefits').innerHTML = (BENEFITS_TEXT[plan.type] || []).map(t => '<p>' + t + '</p>').join('');
+  const isSingle = plan.type === 'single' || plan.type === 'ulip' && plan.name.includes('Nivesh');
+  $('scPremOpt').value = (plan.type === 'single' || plan.type === 'pension') ? 'single' : (plan.type === 'ulip' ? (plan.name.includes('Nivesh') ? 'single' : 'regular') : 'regular');
+  $('scFreq').value = 'monthly';
+  $('scPremium').value = 1000;
+  $('scAge').value = 30;
+  $('scName2').value = '';
+  $('scSA').value = 500000;
+  $('scOut').classList.add('hidden');
+  updatePremiumOptUI();
+  $('subCalcModal').classList.remove('hidden'); $('subCalcModal').classList.add('flex');
+  document.body.style.overflow = 'hidden';
+}
+function closeSubCalc() { $('subCalcModal').classList.add('hidden'); $('subCalcModal').classList.remove('flex'); document.body.style.overflow = ''; }
+function updatePremiumOptUI() {
+  const single = $('scPremOpt').value === 'single';
+  $('scFreq').closest('div').classList.toggle('hidden', single);
+  $('scPremiumLabel').textContent = single ? 'Single Premium Amount (₹, min ₹1,000)' : 'Premium (₹, min ₹1,000)';
+}
+$('scPremOpt').addEventListener('change', updatePremiumOptUI);
+$('scPremium').addEventListener('change', () => { if (parseFloat($('scPremium').value) < 1000) $('scPremium').value = 1000; });
+
+$('scCalc').addEventListener('click', () => {
+  if (!scPlan) return;
+  const premOpt = $('scPremOpt').value;
+  const freq = premOpt === 'single' ? 'yearly' : $('scFreq').value;
+  const amt = Math.max(1000, parseFloat($('scPremium').value) || 1000);
+  const age = Math.max(1, parseInt($('scAge').value, 10) || 30);
+  const sa = Math.max(0, parseFloat($('scSA').value) || 0);
+  const annual = premOpt === 'single' ? amt : amt * FREQ_MULT[freq];
+
+  if (premOpt === 'single') {
+    $('scFreqGrid').classList.add('hidden');
+    $('scPerDayLabel').textContent = 'That single premium works out to roughly';
+    $('scPerDay').textContent = inr(amt / (scPlan.type === 'ulip' ? 365 * 5 : 365)) + ' per day if spread over ' + (scPlan.type === 'ulip' ? '5' : '1') + ' yr(s)';
+  } else {
+    $('scFreqGrid').classList.remove('hidden');
+    $('scMonthly').textContent = inr(annual / 12);
+    $('scQuarterly').textContent = inr(annual / 4);
+    $('scHalf').textContent = inr(annual / 2);
+    $('scYearly').textContent = inr(annual);
+    $('scPerDayLabel').textContent = "Roughly, that's a saving of";
+    $('scPerDay').textContent = inr(annual / 365) + ' per day';
+  }
+
+  const term = premOpt === 'single' ? (scPlan.type === 'ulip' ? scPlan.term : 1) : scPlan.term;
+  const ppt = premOpt === 'single' ? 1 : (premOpt === 'limited' ? Math.max(5, Math.round(scPlan.ppt * 0.7)) : scPlan.term);
+  $('scTerm').textContent = term;
+  $('scPPT').textContent = ppt;
+
+  let outVal;
+  if (scPlan.type === 'term') {
+    outVal = Math.max(sa, annual * 200);
+    $('scOutLabel').textContent = 'Life cover on natural / accidental death (illustrative)';
+  } else if (scPlan.type === 'pension') {
+    outVal = amt * 0.07;
+    $('scOutLabel').textContent = 'Illustrative annual pension (approx.)';
+  } else {
+    const totalPaid = premOpt === 'single' ? amt : annual * ppt;
+    outVal = Math.max(sa, totalPaid * scPlan.growth);
+    $('scOutLabel').textContent = scPlan.type === 'ulip' ? 'Illustrative maturity value (market-linked, not guaranteed)' : 'Estimated maturity value (principal + illustrative bonus)';
+  }
+  $('scOutVal').textContent = inr(outVal);
+
+  let guidance = 'Steady, uninterrupted premiums usually beat occasional top-ups, since bonuses/returns compound on regular payments.';
+  if (age > 45 && scPlan.type === 'term') guidance = 'At this age, term premiums rise noticeably each year you wait — locking in cover sooner keeps the premium lower for the same cover.';
+  if (scPlan.type === 'pension') guidance = 'A slightly larger one-time premium usually buys a meaningfully higher monthly pension — worth comparing a couple of premium levels before deciding.';
+  if (scPlan.type === 'ulip') guidance = 'ULIPs reward patience — staying invested through market ups and downs over the full term tends to smooth out returns compared to withdrawing early.';
+  if (premOpt === 'limited') guidance += ' Limited Premium yahan chunne se aap sirf ' + ppt + ' saal premium bharte ho, lekin cover poore ' + term + ' saal chalta hai.';
+  $('scGuidance').textContent = guidance;
+
+  // Year-by-year table — single premium / ULIP shows lump sum only in Year 1.
+  const rows = []; let cum = 0;
+  $('scColPrem').textContent = premOpt === 'single' ? 'Premium (Yr 1 only)' : 'Premium';
+  $('scColCum').textContent = 'Cum. Paid';
+  for (let y = 1; y <= term; y++) {
+    let yearPrem = 0;
+    if (premOpt === 'single') { if (y === 1) yearPrem = amt; }
+    else if (y <= ppt) { yearPrem = annual; }
+    cum += yearPrem;
+    const growthFactor = scPlan.growth ? (1 + (scPlan.growth - 1) * (y / term)) : 1;
+    const cover = scPlan.type === 'term' ? outVal : Math.max(sa, cum * (scPlan.growth || 1));
+    const indValue = scPlan.type === 'term' ? '—' : inr(cum * growthFactor);
+    const loan = scPlan.type !== 'term' && (premOpt === 'single' ? y >= 1 : y >= 3) ? 'Yes' : 'No';
+    rows.push('<tr><td>' + y + '</td><td>' + (yearPrem ? inr(yearPrem) : '—') + '</td><td>' + inr(cum) + '</td><td>' + inr(cover) + '</td><td>' + indValue + '</td><td>' + loan + '</td></tr>');
+  }
+  $('scTableBody').innerHTML = rows.join('');
+  $('scOut').classList.remove('hidden');
+});
+
+/* ---------- Auth (Mobile / Email, password + confirm + forgot via demo OTP) ---------- */
+const USERS = 'sathi_users', SESSION = 'sathi_session', LEADS = 'sathi_leads';
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+};
+let mode = 'login', method = 'phone';
+async function hash(pw, salt) {
+  const data = new TextEncoder().encode(salt + ':' + pw);
+  if (window.crypto && crypto.subtle) { const buf = await crypto.subtle.digest('SHA-256', data); return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join(''); }
+  let h = 5381; for (const b of data) h = ((h << 5) + h + b) >>> 0; return 'f' + h.toString(16);
+}
+function randSalt() { const a = new Uint8Array(8); if (window.crypto) crypto.getRandomValues(a); else a.forEach((_, i) => a[i] = Math.random() * 256); return Array.from(a).map(b => b.toString(16).padStart(2, '0')).join(''); }
+function showErr(msg) { const e = $('authErr'); e.textContent = msg; e.classList.toggle('hidden', !msg); }
+function googleNotice() { $('googleMsg').classList.remove('hidden'); }
+function setMethod(m) {
+  method = m;
+  $('methodPhone').className = 'flex-1 py-1.5 rounded-lg transition ' + (m === 'phone' ? 'tab-on' : 'text-slate-300');
+  $('methodEmail').className = 'flex-1 py-1.5 rounded-lg transition ' + (m === 'email' ? 'tab-on' : 'text-slate-300');
+  $('phoneWrap').classList.toggle('hidden', m !== 'phone');
+  $('emailWrap').classList.toggle('hidden', m !== 'email');
+}
+function setTab(m) {
+  mode = m; showErr('');
+  $('tabLogin').className = 'flex-1 py-2 rounded-lg transition ' + (m === 'login' ? 'tab-on' : 'text-slate-300');
+  $('tabSignup').className = 'flex-1 py-2 rounded-lg transition ' + (m === 'signup' ? 'tab-on' : 'text-slate-300');
+  $('nameWrap').classList.toggle('hidden', m === 'login');
+  $('confirmWrap').classList.toggle('hidden', m === 'login');
+  $('forgotLink').classList.toggle('hidden', m === 'signup');
+  $('authSubmit').textContent = m === 'login' ? 'Login' : 'Create Account';
+  $('fPass').autocomplete = m === 'login' ? 'current-password' : 'new-password';
+}
+function currentUser() { const s = store.get(SESSION), u = (store.get(USERS) || {})[s]; return u ? { handle: s, ...u } : null; }
+function isAdmin(u) { return u && u.handle === ADMIN_PHONE; }
+function refreshBtn() { const u = currentUser(); $('authBtn').textContent = u ? 'Dashboard (' + u.name.split(' ')[0] + ')' : 'Partner Login'; return u; }
+function leadsFor(handle) { const all = store.get(LEADS) || {}; return all[handle] || []; }
+function fmtDate(ts) { return new Date(ts).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }); }
+const LEAD_STATUSES = ['Under Process', 'Policy Completed', 'No Response', 'Lead Rejected'];
+function statusColor(s) { return s === 'Policy Completed' ? 'text-emerald-400' : s === 'Lead Rejected' ? 'text-red-400' : s === 'No Response' ? 'text-amber-400' : 'text-slate-300'; }
+
+function renderDashboard() {
+  const u = currentUser(); if (!u) return;
+  $('dName').textContent = u.name; $('dHandle').textContent = u.handle;
+  const leads = leadsFor(u.handle);
+  const conv = leads.filter(l => l.status === 'Policy Completed').length;
+  $('stLeads').textContent = leads.length;
+  $('stConv').textContent = conv;
+  $('stEarn').textContent = inr(conv * 500);
+  $('stBal').textContent = inr(conv * 500);
+  const listWrap = $('leadListWrap'), list = $('leadList');
+  list.innerHTML = '';
+  if (leads.length) {
+    listWrap.classList.remove('hidden');
+    leads.slice().reverse().forEach(l => {
+      const row = document.createElement('div');
+      row.className = 'bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs flex justify-between items-center';
+      row.innerHTML = '<span>' + l.name + ' <span class="text-slate-600">(' + l.interest + ')</span></span><span class="font-semibold ' + statusColor(l.status) + '">' + l.status + '</span>';
+      list.appendChild(row);
+    });
+  } else listWrap.classList.add('hidden');
+  Object.keys(CATEGORY_PLANS).forEach(cat => { if (![...$('ldInterest').options].some(o => o.value === cat)) $('ldInterest').add(new Option(cat, cat)); });
+
+  const admin = isAdmin(u);
+  $('dashTabAdmin').classList.toggle('hidden', !admin);
+  $('dashTabUsers').classList.toggle('hidden', !admin);
+  if (admin) { renderAdminLeadTable(); renderAdminUserTable(); }
+}
+
+function renderAdminLeadTable() {
+  const all = store.get(LEADS) || {}, users = store.get(USERS) || {};
+  const body = $('adminLeadTable'); body.innerHTML = '';
+  let any = false;
+  Object.keys(all).forEach(handle => {
+    const pu = users[handle];
+    const pname = (pu && pu.name) || '—';
+    const pphone = (pu && pu.phone) || (handle.includes('@') ? '—' : handle);
+    const pemail = (pu && pu.email) || (handle.includes('@') ? handle : '—');
+    all[handle].forEach((l, idx) => {
+      any = true;
+      const tr = document.createElement('tr');
+      const selectId = 'stSel_' + handle.replace(/[^a-zA-Z0-9]/g, '') + '_' + idx;
+      const options = LEAD_STATUSES.map(s => '<option value="' + s + '"' + (s === l.status ? ' selected' : '') + '>' + s + '</option>').join('');
+      tr.innerHTML = '<td>' + fmtDate(l.ts) + '</td><td>' + pname + '</td><td>' + pphone + '</td><td>' + pemail + '</td><td>' + l.name + '</td><td>' + l.phone + '</td><td>' + l.interest + '</td>' +
+        '<td><select id="' + selectId + '" class="bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-[10px] ' + statusColor(l.status) + '">' + options + '</select></td>';
+      tr.querySelector('select').addEventListener('change', e => { adminUpdateLeadStatus(handle, idx, e.target.value); });
+      body.appendChild(tr);
+    });
+  });
+  if (!any) body.innerHTML = '<tr><td colspan="8" class="text-slate-500">No leads yet.</td></tr>';
+}
+function adminUpdateLeadStatus(handle, idx, status) {
+  const all = store.get(LEADS) || {};
+  if (!all[handle] || !all[handle][idx]) return;
+  all[handle][idx].status = status;
+  store.set(LEADS, all);
+  renderAdminLeadTable();
+}
+
+function renderAdminUserTable() {
+  const users = store.get(USERS) || {};
+  const body = $('adminUserTable'); body.innerHTML = '';
+  const handles = Object.keys(users);
+  if (!handles.length) { body.innerHTML = '<tr><td colspan="6" class="text-slate-500">No registered users yet.</td></tr>'; return; }
+  handles.forEach(handle => {
+    const u = users[handle];
+    const isEmailHandle = handle.includes('@') || u.method === 'email';
+    const emailVal = u.email || (isEmailHandle ? handle : '—');
+    const phoneVal = u.phone || (!isEmailHandle ? handle : '—');
+    const tr = document.createElement('tr');
+    const status = u.blocked ? '<span class="text-red-400">Blocked</span>' : '<span class="text-emerald-400">Active</span>';
+    tr.innerHTML = '<td>' + u.name + '</td><td>' + emailVal + '</td><td>' + phoneVal + '</td><td class="text-slate-500">🔒 hashed (not visible)</td><td>' + status + '</td>' +
+      '<td class="space-x-1"><button data-act="edit" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded">Edit</button>' +
+      '<button data-act="block" class="text-[10px] bg-amber-600/70 hover:bg-amber-600 px-2 py-1 rounded">' + (u.blocked ? 'Unblock' : 'Block') + '</button>' +
+      '<button data-act="delete" class="text-[10px] bg-red-600/70 hover:bg-red-600 px-2 py-1 rounded">Delete</button></td>';
+    tr.querySelector('[data-act="edit"]').addEventListener('click', () => adminEditUser(handle));
+    tr.querySelector('[data-act="block"]').addEventListener('click', () => adminToggleBlock(handle));
+    tr.querySelector('[data-act="delete"]').addEventListener('click', () => adminDeleteUser(handle));
+    body.appendChild(tr);
+  });
+}
+function adminEditUser(handle) {
+  const users = store.get(USERS) || {};
+  const u = users[handle]; if (!u) return;
+  const newName = prompt('Edit name for ' + handle + ':', u.name);
+  if (newName === null) return;
+  if (newName.trim()) u.name = newName.trim();
+  const isEmailHandle = handle.includes('@') || u.method === 'email';
+  if (isEmailHandle) {
+    const newPhone = prompt('Add/update a phone number on file for ' + handle + ' (optional, login stays via email):', u.phone || '');
+    if (newPhone !== null) u.phone = newPhone.trim().replace(/\D/g, '') || null;
+  } else {
+    const newEmail = prompt('Add/update an email on file for ' + handle + ' (optional, login stays via mobile):', u.email || '');
+    if (newEmail !== null) u.email = newEmail.trim().toLowerCase() || null;
+  }
+  store.set(USERS, users);
+  renderAdminUserTable();
+}
+function adminToggleBlock(handle) {
+  const users = store.get(USERS) || {};
+  if (!users[handle]) return;
+  users[handle].blocked = !users[handle].blocked;
+  store.set(USERS, users);
+  renderAdminUserTable();
+}
+function adminDeleteUser(handle) {
+  if (!confirm('Delete account ' + handle + '? This also removes their submitted leads. This cannot be undone.')) return;
+  const users = store.get(USERS) || {}; delete users[handle]; store.set(USERS, users);
+  const leads = store.get(LEADS) || {}; delete leads[handle]; store.set(LEADS, leads);
+  renderAdminUserTable(); renderAdminLeadTable();
+}
+
+function setDashTab(t) {
+  const admin = isAdmin(currentUser());
+  $('dashTabStats').className = 'flex-1 py-2 rounded-lg transition ' + (t === 'stats' ? 'tab-on' : 'text-slate-300');
+  $('dashTabLead').className = 'flex-1 py-2 rounded-lg transition ' + (t === 'lead' ? 'tab-on' : 'text-slate-300');
+  $('dashTabAdmin').className = (admin ? '' : 'hidden ') + 'flex-1 py-2 rounded-lg transition ' + (t === 'admin' ? 'tab-on' : 'text-slate-300');
+  $('dashTabUsers').className = (admin ? '' : 'hidden ') + 'flex-1 py-2 rounded-lg transition ' + (t === 'users' ? 'tab-on' : 'text-slate-300');
+  $('dashStats').classList.toggle('hidden', t !== 'stats');
+  $('leadForm').classList.toggle('hidden', t !== 'lead');
+  $('dashAdmin').classList.toggle('hidden', t !== 'admin');
+  $('dashUsers').classList.toggle('hidden', t !== 'users');
+}
+function openModal(tab) {
+  const u = refreshBtn();
+  $('forgotView').classList.add('hidden');
+  $('otpView').classList.add('hidden');
+  $('authView').classList.toggle('hidden', !!u);
+  $('dashView').classList.toggle('hidden', !u);
+  if (u) { renderDashboard(); setDashTab('stats'); }
+  else { setTab(tab || 'login'); setMethod('phone'); $('googleMsg').classList.add('hidden'); }
+  $('modal').classList.remove('hidden'); $('modal').classList.add('flex');
+}
+function closeModal() { $('modal').classList.add('hidden'); $('modal').classList.remove('flex'); }
+function logout() { store.del(SESSION); $('authForm').reset(); refreshBtn(); closeModal(); }
+$('fPhone').addEventListener('input', e => e.target.value = e.target.value.replace(/\D/g, ''));
+
+let pendingLoginHandle = null, loginOtpVal = null;
+$('authForm').addEventListener('submit', async e => {
+  e.preventDefault(); showErr('');
+  const name = $('fName').value.trim(), pw = $('fPass').value, pw2 = $('fPass2').value;
+  let handle;
+  if (method === 'phone') {
+    handle = $('fPhone').value.trim();
+    if (!/^[6-9]\d{9}$/.test(handle)) return showErr('Enter a valid 10-digit Indian mobile number.');
+  } else {
+    handle = $('fEmail').value.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(handle)) return showErr('Enter a valid email address.');
+  }
+  if (mode === 'signup' && name.length < 2) return showErr('Please enter your full name.');
+  if (pw.length < 6) return showErr('Password must be at least 6 characters.');
+  if (mode === 'signup' && pw !== pw2) return showErr('Passwords do not match.');
+  const users = store.get(USERS) || {};
+  if (mode === 'signup') {
+    if (users[handle]) return showErr('This account already exists. Please log in.');
+    const salt = randSalt();
+    users[handle] = { name, salt, hash: await hash(pw, salt), created: Date.now(), method, blocked: false, email: method === 'email' ? handle : null, phone: method === 'phone' ? handle : null };
+    if (!store.set(USERS, users)) return showErr('Could not save your account. Check that browser storage is enabled.');
+    store.set(SESSION, handle);
+    $('authForm').reset();
+    openModal();
+    return;
+  }
+  const u = users[handle];
+  if (!u) return showErr('No account found. Please sign up first.');
+  if (u.blocked) return showErr('Your account has been blocked by the admin. Please contact SathiCare support.');
+  if (u.hash !== await hash(pw, u.salt)) return showErr('Incorrect password.');
+  // Password correct — require OTP before granting access.
+  pendingLoginHandle = handle;
+  loginOtpVal = String(Math.floor(100000 + Math.random() * 900000));
+  $('otpHandleShown').textContent = handle;
+  $('otpShown').textContent = loginOtpVal;
+  $('otpInput').value = ''; $('otpErr').classList.add('hidden');
+  $('authView').classList.add('hidden'); $('otpView').classList.remove('hidden');
+});
+function verifyLoginOtp() {
+  if ($('otpInput').value.trim() !== loginOtpVal) { $('otpErr').textContent = 'Incorrect OTP. Please try again.'; $('otpErr').classList.remove('hidden'); return; }
+  store.set(SESSION, pendingLoginHandle);
+  $('authForm').reset();
+  pendingLoginHandle = null; loginOtpVal = null;
+  $('otpView').classList.add('hidden');
+  openModal();
+}
+function cancelOtp() { pendingLoginHandle = null; loginOtpVal = null; $('otpView').classList.add('hidden'); $('authView').classList.remove('hidden'); }
+
+/* ---------- Forgot password (simulated recovery — no backend to send real OTP) ---------- */
+let fgHandleVal = null;
+function openForgot() { $('authView').classList.add('hidden'); $('forgotView').classList.remove('hidden'); $('forgotStep1').classList.remove('hidden'); $('forgotStep2').classList.add('hidden'); $('fgErr1').classList.add('hidden'); $('fgErr2').classList.add('hidden'); $('fgHandle').value = ''; }
+function closeForgot() { $('forgotView').classList.add('hidden'); $('authView').classList.remove('hidden'); }
+function findForgotAccount() {
+  const raw = $('fgHandle').value.trim();
+  const handle = raw.includes('@') ? raw.toLowerCase() : raw.replace(/\D/g, '');
+  const users = store.get(USERS) || {};
+  if (!users[handle]) { $('fgErr1').textContent = 'No account found for that mobile/email.'; $('fgErr1').classList.remove('hidden'); return; }
+  fgHandleVal = handle;
+  $('fgAccountShown').textContent = handle;
+  $('forgotStep1').classList.add('hidden'); $('forgotStep2').classList.remove('hidden');
+}
+async function confirmReset() {
+  $('fgErr2').classList.add('hidden');
+  const newPw = $('fgNewPass').value;
+  if (newPw.length < 6) { $('fgErr2').textContent = 'Password must be at least 6 characters.'; $('fgErr2').classList.remove('hidden'); return; }
+  const users = store.get(USERS) || {};
+  const salt = randSalt();
+  users[fgHandleVal].salt = salt;
+  users[fgHandleVal].hash = await hash(newPw, salt);
+  store.set(USERS, users);
+  closeForgot();
+  showErr(''); $('fPass').value = ''; $('fPass2').value = '';
+  setTab('login');
+}
+
+/* ---------- Lead submission: save only (no WhatsApp auto-redirect) ---------- */
+$('ldPhone').addEventListener('input', e => e.target.value = e.target.value.replace(/\D/g, ''));
+$('leadForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const u = currentUser(); if (!u) return;
+  const leadName = $('ldName').value.trim(), leadPhone = $('ldPhone').value.trim(), interest = $('ldInterest').value;
+  const all = store.get(LEADS) || {};
+  all[u.handle] = all[u.handle] || [];
+  all[u.handle].push({ name: leadName, phone: leadPhone, interest, status: 'Under Process', ts: Date.now() });
+  store.set(LEADS, all);
+  $('leadForm').reset();
+  $('leadMsg').classList.remove('hidden');
+  renderDashboard();
+  setTimeout(() => { $('leadMsg').classList.add('hidden'); setDashTab('stats'); }, 1500);
+});
+refreshBtn();
+</script>
+</body>
+</html>
