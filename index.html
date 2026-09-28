@@ -27,6 +27,11 @@ input[type=range]{accent-color:#10b981}
 .sc-table thead th{color:#6ee7b7;font-weight:700;font-size:10px;text-transform:uppercase;border-bottom:1px solid #1e293b}
 .sc-table tbody tr:nth-child(even){background:#0f172a}
 .sc-table td{font-size:11px;color:#cbd5e1}
+.tree-children{margin-left:14px;padding-left:18px;border-left:2px solid rgba(16,185,129,.35)}
+.tree-node{position:relative;margin-top:8px}
+.tree-node::before{content:'';position:absolute;left:-18px;top:22px;width:16px;border-top:2px solid rgba(16,185,129,.35)}
+.tree-root>.tree-node::before{display:none}
+.tree-leaf::before{border-top-color:rgba(148,163,184,.35)}
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 antialiased selection:bg-emerald-500 selection:text-white">
@@ -311,7 +316,7 @@ input[type=range]{accent-color:#10b981}
       </button>
     </div>
   </div>
-  <p class="text-center mt-4"><a href="https://www.youtube.com/watch?v=y-ReJ-M3cQA" target="_blank" rel="noopener" class="text-sm text-emerald-400 hover:text-emerald-300 underline underline-offset-4">▶ Watch directly on YouTube</a></p>
+  <p class="text-center mt-4"><a href="https://www.youtube.com/watch?v=y-ReJ-M3cQA" target="_blank" rel="noopener" class="inline-block bg-slate-800 hover:bg-slate-700 border border-slate-700 text-emerald-400 text-sm font-semibold px-5 py-2.5 rounded-xl transition">▶ Watch on YouTube</a></p>
 </section>
 
 <section id="vision" class="border-t border-slate-800/80 bg-slate-900/40 py-20">
@@ -491,6 +496,7 @@ input[type=range]{accent-color:#10b981}
 
     <!-- DASHBOARD -->
     <div id="dashView" class="hidden">
+      <div class="flex justify-start mb-2"><button type="button" onclick="logout()" class="text-[11px] border border-slate-700 hover:border-red-400 hover:text-red-300 text-slate-300 px-3 py-1.5 rounded-lg font-semibold transition">⎋ Logout</button></div>
       <div class="text-center mb-4">
         <div class="w-14 h-14 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-2">✅</div>
         <h3 class="text-lg font-bold">Welcome, <span id="dName"></span>!</h3>
@@ -560,13 +566,23 @@ input[type=range]{accent-color:#10b981}
         <p class="text-[11px] text-slate-400 mb-2">All leads across all partners (live from Google Sheet)</p>
         <div class="overflow-x-auto rounded-xl border border-slate-800">
           <table class="sc-table">
-            <thead><tr><th>Date</th><th>Client Name</th><th>Client Phone</th><th>Service</th><th>Submitted By (Name · Phone)</th><th>Status</th><th>Bonus</th></tr></thead>
+            <thead><tr><th>Date</th><th>Client Name</th><th>Client Phone</th><th>Service</th><th>Submitted By (Name · Phone)</th><th>Lead Status</th><th>Admin Actions</th></tr></thead>
             <tbody id="adminLeadTable"></tbody>
           </table>
         </div>
       </div>
 
       <div id="dashUsers" class="hidden">
+        <div class="bg-slate-950 border border-sky-500/30 rounded-xl p-3 mb-4">
+          <p class="text-xs font-bold text-sky-300 mb-1">📡 Live Auth &amp; Session Monitor</p>
+          <p class="text-[10px] text-slate-400 mb-2">Every sign-up and login across all devices (refreshes with the 15-second sync). Latest 100 shown.</p>
+          <div class="overflow-x-auto rounded-lg border border-slate-800 max-h-56 overflow-y-auto">
+            <table class="sc-table">
+              <thead><tr><th>User Name</th><th>Phone</th><th>Activity</th><th>Referral Used</th><th>Timestamp</th></tr></thead>
+              <tbody id="activityTable"></tbody>
+            </table>
+          </div>
+        </div>
         <div class="bg-slate-950 border border-amber-500/30 rounded-xl p-3 mb-4">
           <p class="text-xs font-bold text-amber-300 mb-1">🛡️ Database Safety &amp; Backup</p>
           <p class="text-[10px] text-slate-400 mb-3">Export a full snapshot (all users, leads &amp; referral data) anytime, or restore from a previous backup in an emergency.</p>
@@ -598,6 +614,22 @@ input[type=range]{accent-color:#10b981}
         <button onclick="closeModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-medium py-3 rounded-xl text-sm transition">Close</button>
         <button onclick="logout()" class="flex-1 border border-slate-700 hover:border-red-400 hover:text-red-300 text-slate-300 font-medium py-3 rounded-xl text-sm transition">Log out</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN: EDIT LEAD MODAL -->
+<div id="editLeadModal" class="fixed inset-0 z-[75] hidden items-center justify-center p-4 bg-slate-950/85 backdrop-blur-sm" onclick="if(event.target===this)closeEditLead()">
+  <div class="pop-anim bg-slate-900 border border-emerald-500/30 w-full max-w-sm rounded-3xl p-6 relative shadow-2xl">
+    <button onclick="closeEditLead()" aria-label="Close" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">✕</button>
+    <h3 class="text-lg font-bold mb-3">✏️ Edit Lead</h3>
+    <div class="space-y-3">
+      <div><label for="elName" class="block text-xs text-slate-400 mb-1">Client Name</label><input id="elName" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500"></div>
+      <div><label for="elPhone" class="block text-xs text-slate-400 mb-1">Client Mobile</label><input id="elPhone" inputmode="numeric" maxlength="10" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500"></div>
+      <div><label for="elService" class="block text-xs text-slate-400 mb-1">Service / Plan</label><input id="elService" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500"></div>
+      <div><label for="elNotes" class="block text-xs text-slate-400 mb-1">Notes</label><textarea id="elNotes" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500"></textarea></div>
+      <p id="elErr" class="hidden text-xs text-red-400"></p>
+      <button type="button" onclick="saveEditLead()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition">Save Changes</button>
     </div>
   </div>
 </div>
@@ -646,12 +678,12 @@ function ctConnectWhatsapp() {
 
 /* ---------- Welcome / Tutorial Popup (frequency-capped) + on-page video ---------- */
 const POPUP_KEY = 'sathi_popup_views', WATCHED_KEY = 'sathi_tutorial_watched', MAX_POPUPS = 6;
-const YT_EMBED = 'https://www.youtube-nocookie.com/embed/y-ReJ-M3cQA?rel=0&modestbranding=1&playsinline=1&autoplay=1';
+const YT_EMBED = 'https://www.youtube-nocookie.com/embed/y-ReJ-M3cQA?rel=0&playsinline=1&t=1'; // t=1 = cache-buster for refreshed channel branding
 function getViews() { return parseInt(localStorage.getItem(POPUP_KEY) || '0', 10); }
 function openWelcome() { $('welcomePopup').classList.remove('hidden'); $('welcomePopup').classList.add('flex'); document.body.style.overflow = 'hidden'; }
 function closeWelcome() { $('welcomePopup').classList.add('hidden'); $('welcomePopup').classList.remove('flex'); document.body.style.overflow = ''; }
 function ytIframe(autoplay) {
-  return '<iframe class="w-full h-full" src="' + (autoplay ? YT_EMBED : YT_EMBED.replace('&autoplay=1', '')) + '" title="SathiCare Tutorial" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+  return '<iframe class="w-full h-full" src="' + YT_EMBED + (autoplay ? '&autoplay=1' : '') + '" title="SathiCare Tutorial" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
 }
 function openVideoModal() {
   $('videoModalFrameWrap').innerHTML = ytIframe(true);
@@ -1051,7 +1083,7 @@ function cloudPullAndSubscribe() {
     if (Object.keys(leads).length) { master.leads = leads; writeMaster(master); safeRerender(); }
   }, e => console.warn('[SathiCare] leads listener error', e));
 }
-function safeRerender() { try { if (currentUser()) renderDashboard(); if (typeof isAdmin === 'function' && isAdmin(currentUser())) { renderAdminLeadTable(); renderAdminUserTable(); renderReferralTree(); } } catch (e) {} }
+function safeRerender() { try { if (currentUser()) renderDashboard(); if (typeof isAdmin === 'function' && isAdmin(currentUser())) { renderAdminLeadTable(); renderAdminUserTable(); renderReferralTree(); renderActivityTable(); } } catch (e) {} }
 
 /* ---- 3b. GOOGLE SHEETS LIVE DATABASE (Apps Script Web App) ------------------------------ */
 // Writes: fire-and-forget POST (text/plain body avoids the CORS preflight Apps Script can't answer).
@@ -1071,7 +1103,7 @@ async function sendToGoogleSheet(payload) {
 }
 const sheetPost = sendToGoogleSheet; // (existing call sites use this name)
 const SHEET_KEYMAP = { name:'name', phone:'phone', mobile:'phone', email:'email', refcode:'refCode', referralcode:'refCode', referredby:'referredBy', timestamp:'timestamp', date:'timestamp', passwordhash:'passwordHash', hash:'passwordHash', salt:'salt',
-  clientname:'clientName', clientphone:'clientPhone', service:'service', submittedby:'submittedBy', submittedbyname:'submittedByName', submittedbyphone:'submittedByPhone', password:'passwordHash', bonusstatus:'bonusStatus', status:'status', type:'type', rowtype:'type', recordtype:'type', kind:'type' };
+  clientname:'clientName', clientphone:'clientPhone', service:'service', submittedby:'submittedBy', submittedbyname:'submittedByName', submittedbyphone:'submittedByPhone', password:'passwordHash', event:'event', activitytype:'event', activity:'event', referralused:'referralUsed', notes:'notes', note:'notes', bonusstatus:'bonusStatus', status:'status', type:'type', rowtype:'type', recordtype:'type', kind:'type' };
 function sheetRowObj(r) {
   if (Array.isArray(r)) {
     // Positional fallback: USER,name,phone,refCode,referredBy,ts,hash,salt | LEAD,clientName,clientPhone,service,submittedBy,bonusStatus,ts,status
@@ -1090,8 +1122,35 @@ function sheetExtractRows(payload) {
   if (Array.isArray(payload.users) || Array.isArray(payload.leads)) {
     return (payload.users || []).map(x => Object.assign({}, x, { type: 'USER' })).concat((payload.leads || []).map(x => Object.assign({}, x, { type: 'LEAD' })));
   }
-  return payload.rows || payload.data || payload.records || [];
+  const base = payload.rows || payload.data || payload.records || [];
+  const acts = (payload.activity || payload.activities || payload.logs || []);
+  return Array.isArray(acts) && acts.length ? base.concat(acts.map(x => Object.assign({ type: 'ACTIVITY' }, x))) : base;
 }
+/* ---- status / bonus / tombstone helpers ---- */
+const TOMBSTONE_TTL = 10 * 60 * 1000; // deleted rows are hidden for 10 min while the Sheet catches up
+function leadTombKey(by, phone, svc) { return 'L|' + by + '|' + String(phone || '').replace(/\D/g, '').slice(-10) + '|' + String(svc || '').trim().toLowerCase(); }
+function addTombstone(key) { master.tombstones = master.tombstones || {}; master.tombstones[key] = Date.now(); writeMaster(master); }
+function isTombstoned(key) { const t = master.tombstones && master.tombstones[key]; return !!t && Date.now() - t < TOMBSTONE_TTL; }
+function toSheetStatus(s) { return s === 'Policy Completed' ? 'Completed' : s === 'Lead Rejected' ? 'Rejected' : s; }
+function fromSheetStatus(s) {
+  const v = String(s == null ? '' : s).trim();
+  if (!v || /under|pending/i.test(v)) return 'Under Process';
+  if (/^completed$|policy completed/i.test(v)) return 'Policy Completed';
+  if (/^rejected$|lead rejected/i.test(v)) return 'Lead Rejected';
+  return v;
+}
+function bonusFromSheet(b) { const v = String(b == null ? '' : b).trim(); if (/^paid/i.test(v)) return 'Paid'; if (/not/i.test(v)) return 'Not Paid'; return 'Under Process'; }
+function bonusOf(l) { return l.bonusStatus || (l.bonusPaid ? 'Paid' : 'Under Process'); }
+function setBonus(l, v) { l.bonusStatus = v; l.bonusPaid = (v === 'Paid'); }
+function addActivity(a) {
+  master.activity = master.activity || [];
+  const k = a.phone + '|' + a.event + '|' + Math.floor(a.ts / 60000);
+  if (master.activity.some(x => x.phone + '|' + x.event + '|' + Math.floor(x.ts / 60000) === k)) return false;
+  master.activity.push(a);
+  if (master.activity.length > 500) master.activity = master.activity.slice(-500);
+  return true;
+}
+
 function mergeSheetRows(payload) {
   const rows = sheetExtractRows(payload).filter(r => r && typeof r === 'object');
   let changed = false;
@@ -1101,7 +1160,7 @@ function mergeSheetRows(payload) {
   const tsOf = v => Date.parse(v) || Number(v) || Date.now();
   rows.filter(r => sheetRowType(r) === 'USER').map(sheetRowObj).forEach(o => {
     const handle = digits(o.phone) || norm(o.email).toLowerCase();
-    if (!handle) return;
+    if (!handle || isTombstoned('U|' + handle)) return;
     if (!users[handle]) {
       users[handle] = { name: norm(o.name) || handle, salt: norm(o.salt), hash: norm(o.passwordHash), created: tsOf(o.timestamp), method: 'phone', blocked: false, email: null, phone: digits(o.phone) || null, referredBy: null, refCode: norm(o.refCode) || null, _refCodeOfParent: norm(o.referredBy) || null, fromSheet: true };
       changed = true;
@@ -1121,11 +1180,11 @@ function mergeSheetRows(payload) {
     }
   });
   const matched = new Set();
-  const parseBonusPaid = b => /^\s*paid/i.test(norm(b));
   rows.filter(r => sheetRowType(r) === 'LEAD').map(sheetRowObj).forEach(o => {
     const by = digits(o.submittedByPhone) || digits(o.submittedBy) || norm(o.submittedBy).toLowerCase();
     if (!by) return;
     const cp = digits(o.clientPhone), svc = norm(o.service).toLowerCase();
+    if (isTombstoned(leadTombKey(by, cp, svc))) return;
     const list = leads[by] = leads[by] || [];
     const idx = list.findIndex((l, i) => !matched.has(by + '#' + i) && digits(l.phone) === cp && norm(l.interest).toLowerCase() === svc);
     const subName = norm(o.submittedByName) || (users[by] && users[by].name) || '';
@@ -1134,15 +1193,27 @@ function mergeSheetRows(payload) {
       const l = list[idx];
       // Sheet is the live source of truth — except for edits made here in the last 90s (write may still be in flight).
       if (!l.localEditTs || Date.now() - l.localEditTs > 90000) {
-        if (o.status && l.status !== norm(o.status)) { l.status = norm(o.status); changed = true; }
-        if (o.bonusStatus) { const bp = parseBonusPaid(o.bonusStatus); if (bp !== !!l.bonusPaid) { l.bonusPaid = bp; changed = true; } }
+        if (o.status) { const ns = fromSheetStatus(o.status); if (l.status !== ns) { l.status = ns; changed = true; } }
+        if (o.bonusStatus) { const nb = bonusFromSheet(o.bonusStatus); if (nb !== bonusOf(l)) { setBonus(l, nb); changed = true; } }
       }
       if (subName && !l.submittedByName) { l.submittedByName = subName; changed = true; }
+      if (o.notes && !l.notes) { l.notes = norm(o.notes); changed = true; }
     } else {
-      list.push({ name: norm(o.clientName), phone: norm(o.clientPhone), interest: norm(o.service), status: norm(o.status) || 'Under Process', bonusPaid: parseBonusPaid(o.bonusStatus), ts: tsOf(o.timestamp), submittedByName: subName, submittedByPhone: by, fromSheet: true });
+      const nl = { name: norm(o.clientName), phone: norm(o.clientPhone), interest: norm(o.service), status: fromSheetStatus(o.status), ts: tsOf(o.timestamp), submittedByName: subName, submittedByPhone: by, notes: norm(o.notes), fromSheet: true };
+      setBonus(nl, bonusFromSheet(o.bonusStatus));
+      list.push(nl);
       matched.add(by + '#' + (list.length - 1));
       changed = true;
     }
+  });
+  // Activity (LOGIN / SIGNUP events) logged by the Apps Script.
+  const ACT = ['ACTIVITY', 'LOG', 'ACTIVITYLOG', 'LOGIN', 'SIGNUP', 'SESSION', 'AUTH'];
+  rows.filter(r => { const t = sheetRowType(r); return t !== 'USER' && t !== 'LEAD' && (ACT.includes(t) || sheetRowObj(r).event); }).forEach(r => {
+    const o = sheetRowObj(r);
+    const ph = digits(o.phone) || norm(o.email).toLowerCase(); if (!ph) return;
+    const t = sheetRowType(r);
+    const ev = String(o.event || (t === 'ACTIVITY' || t === 'LOG' || t === 'ACTIVITYLOG' ? 'LOGIN' : t)).toUpperCase();
+    if (addActivity({ phone: ph, name: norm(o.name), event: ev, ts: tsOf(o.timestamp), ref: norm(o.referralUsed) })) changed = true;
   });
   if (changed) { master.users = users; master.leads = leads; writeMaster(master); }
   return changed;
@@ -1306,7 +1377,7 @@ function renderDashboard() {
   $('dName').textContent = u.name; $('dHandle').textContent = u.handle;
   const leads = leadsFor(u.handle);
   const conv = leads.filter(l => l.status === 'Policy Completed').length;
-  const paidCount = leads.filter(l => l.status === 'Policy Completed' && l.bonusPaid).length;
+  const paidCount = leads.filter(l => l.status === 'Policy Completed' && bonusOf(l) === 'Paid').length;
   const pendingBonusCount = conv - paidCount;
   $('stLeads').textContent = leads.length;
   $('stConv').textContent = conv;
@@ -1319,7 +1390,7 @@ function renderDashboard() {
     leads.slice().reverse().forEach(l => {
       const row = document.createElement('div');
       row.className = 'bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs flex justify-between items-center';
-      const bonusTag = l.status === 'Policy Completed' ? ('<span class="ml-2 text-[9px] px-1.5 py-0.5 rounded ' + (l.bonusPaid ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400') + '">' + (l.bonusPaid ? 'Paid ₹500' : 'Bonus Pending') + '</span>') : '';
+      const bonusTag = l.status === 'Policy Completed' ? ('<span class="ml-2 text-[9px] px-1.5 py-0.5 rounded ' + (bonusOf(l) === 'Paid' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400') + '">' + (bonusOf(l) === 'Paid' ? 'Paid ₹500' : bonusOf(l) === 'Not Paid' ? 'Not Paid' : 'Bonus Pending') + '</span>') : '';
       row.innerHTML = '<span>' + esc(l.name) + ' <span class="text-slate-600">(' + esc(l.interest) + ')</span></span><span><span class="font-semibold ' + statusColor(l.status) + '">' + l.status + '</span>' + bonusTag + '</span>';
       list.appendChild(row);
     });
@@ -1343,7 +1414,7 @@ function renderDashboard() {
   $('dashTabTree').classList.toggle('hidden', !admin);
   $('adminSearch').classList.toggle('hidden', !admin); $('adminSyncBar').classList.toggle('hidden', !admin); $('adminSyncBar').classList.toggle('flex', admin);
   if (admin) {
-    renderAdminLeadTable(); renderAdminUserTable(); renderReferralTree();
+    renderAdminLeadTable(); renderAdminUserTable(); renderReferralTree(); renderActivityTable();
     const csm = $('cloudStatusMsg');
     if (csm) csm.innerHTML = cloudReady ? '<span class="text-emerald-400">☁️ Cloud sync active — Firestore is the live source of truth.</span>' : '<span class="text-slate-500">☁️ Cloud sync inactive — running on local device storage only. Paste your Firebase config near the top of the script to enable it.</span>';
   }
@@ -1376,6 +1447,23 @@ function shareRefLinkWa() {
 }
 
 function adminQuery() { const el = $('adminSearch'); return el ? el.value.trim().toLowerCase() : ''; }
+function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function adminSearchChanged() { renderAdminLeadTable(); renderAdminUserTable(); renderReferralTree(); renderActivityTable(); }
+function fmtDateTime(ts) { return new Date(ts).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }); }
+const BONUS_OPTIONS = [['Under Process', 'Bonus: Under Process'], ['Paid', 'Bonus: Paid (₹500)'], ['Not Paid', 'Bonus: Not Paid']];
+const STATUS_OPTIONS = [['Under Process', 'Under Process'], ['Policy Completed', 'Completed'], ['Lead Rejected', 'Rejected']];
+function statusLabel(s) { return s === 'Policy Completed' ? 'Completed' : s === 'Lead Rejected' ? 'Rejected' : s; }
+function statusBadge(s) {
+  const cls = s === 'Policy Completed' ? 'bg-emerald-500/20 text-emerald-400' : s === 'Lead Rejected' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400';
+  return '<span class="text-[9px] px-1.5 py-0.5 rounded font-semibold ' + cls + '">' + esc(statusLabel(s)) + '</span>';
+}
+function statusOptionsHtml(cur) {
+  const opts = STATUS_OPTIONS.slice(); if (!opts.some(o => o[0] === cur)) opts.push([cur, cur]);
+  return opts.map(o => '<option value="' + esc(o[0]) + '"' + (o[0] === cur ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('');
+}
+function bonusOptionsHtml(cur) { return BONUS_OPTIONS.map(o => '<option value="' + o[0] + '"' + (o[0] === cur ? ' selected' : '') + '>' + o[1] + '</option>').join(''); }
+const SEL_CLS = 'bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-[10px] ';
+
 function renderAdminLeadTable() {
   const all = store.get(LEADS) || {}, users = store.get(USERS) || {};
   const q = adminQuery();
@@ -1387,102 +1475,180 @@ function renderAdminLeadTable() {
       total++;
       const sName = l.submittedByName || (pu && pu.name) || '—';
       const sPhone = l.submittedByPhone || (pu && pu.phone) || (handle.includes('@') ? '—' : handle);
-      const hay = [l.name, l.phone, l.interest, sName, sPhone, l.status, pu && pu.refCode].join(' ').toLowerCase();
+      const hay = [l.name, l.phone, l.interest, sName, sPhone, statusLabel(l.status), pu && pu.refCode, l.notes].join(' ').toLowerCase();
       if (q && !hay.includes(q)) return;
       any = true;
       const tr = document.createElement('tr');
-      const options = LEAD_STATUSES.map(s => '<option value="' + s + '"' + (s === l.status ? ' selected' : '') + '>' + s + '</option>').join('');
-      const bonusCell = l.status === 'Policy Completed'
-        ? '<button data-bonus class="text-[10px] px-2 py-1 rounded font-semibold ' + (l.bonusPaid ? 'bg-emerald-600/70 hover:bg-emerald-600' : 'bg-amber-600/70 hover:bg-amber-600') + '">' + (l.bonusPaid ? 'Paid ✓' : 'Mark Paid') + '</button>'
-        : '<span class="text-slate-600">—</span>';
-      tr.innerHTML = '<td>' + fmtDate(l.ts) + '</td><td>' + esc(l.name) + '</td><td>' + esc(l.phone) + '</td><td>' + esc(l.interest) + '</td>' +
+      tr.innerHTML = '<td>' + fmtDate(l.ts) + '</td><td>' + esc(l.name) + (l.notes ? ' <span title="' + esc(l.notes) + '">📝</span>' : '') + '</td><td>' + esc(l.phone) + '</td><td>' + esc(l.interest) + '</td>' +
         '<td>' + esc(sName) + ' <span class="text-slate-500">· ' + esc(sPhone) + '</span></td>' +
-        '<td><select class="bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-[10px] ' + statusColor(l.status) + '">' + options + '</select></td>' +
-        '<td>' + bonusCell + '</td>';
-      tr.querySelector('select').addEventListener('change', e => { adminUpdateLeadStatus(handle, idx, e.target.value); });
-      const bonusBtn = tr.querySelector('[data-bonus]');
-      if (bonusBtn) bonusBtn.addEventListener('click', () => adminToggleBonus(handle, idx));
+        '<td><select data-st class="' + SEL_CLS + statusColor(l.status) + '">' + statusOptionsHtml(l.status) + '</select></td>' +
+        '<td class="space-x-1"><select data-bn class="' + SEL_CLS + '">' + bonusOptionsHtml(bonusOf(l)) + '</select>' +
+        '<button data-edit title="Edit lead" class="text-[11px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded">✏️</button>' +
+        '<button data-del title="Delete lead" class="text-[11px] bg-red-600/70 hover:bg-red-600 px-2 py-1 rounded">🗑️</button></td>';
+      tr.querySelector('[data-st]').addEventListener('change', e => adminUpdateLeadStatus(handle, idx, e.target.value));
+      tr.querySelector('[data-bn]').addEventListener('change', e => adminSetBonus(handle, idx, e.target.value));
+      tr.querySelector('[data-edit]').addEventListener('click', () => openEditLead(handle, idx));
+      tr.querySelector('[data-del]').addEventListener('click', () => adminDeleteLead(handle, idx));
       body.appendChild(tr);
     });
   });
   if (!any) body.innerHTML = '<tr><td colspan="7" class="text-slate-500">' + (total ? 'No leads match your search.' : 'No leads yet.') + '</td></tr>';
 }
-function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
-function adminSearchChanged() { renderAdminLeadTable(); renderAdminUserTable(); renderReferralTree(); }
+function afterLeadChange() { renderAdminLeadTable(); renderReferralTree(); try { renderDashboard(); } catch (e) {} }
 function adminUpdateLeadStatus(handle, idx, status) {
-  const all = store.get(LEADS) || {};
-  if (!all[handle] || !all[handle][idx]) return;
-  all[handle][idx].status = status; all[handle][idx].localEditTs = Date.now();
-  store.set(LEADS, all);
-  { const l = all[handle][idx]; sheetPost({ action: 'updateLead', submittedByPhone: handle, submittedBy: handle, clientPhone: l.phone, service: l.interest, status, bonusStatus: l.bonusPaid ? 'Paid' : 'Pending' }); }
-  renderAdminLeadTable();
+  const all = store.get(LEADS) || {}; const l = all[handle] && all[handle][idx]; if (!l) return;
+  l.status = status; l.localEditTs = Date.now(); store.set(LEADS, all);
+  sheetPost({ action: 'updateLeadStatus', clientPhone: l.phone, newStatus: toSheetStatus(status), submittedByPhone: handle, submittedBy: handle, service: l.interest, bonusStatus: bonusOf(l) });
+  afterLeadChange();
+}
+function adminSetBonus(handle, idx, val) {
+  const all = store.get(LEADS) || {}; const l = all[handle] && all[handle][idx]; if (!l) return;
+  setBonus(l, val); l.localEditTs = Date.now(); store.set(LEADS, all);
+  sheetPost({ action: 'updateLead', submittedByPhone: handle, submittedBy: handle, clientPhone: l.phone, service: l.interest, status: toSheetStatus(l.status), bonusStatus: val });
+  cloudLogReferralPayout(handle, handle, idx, 500, val);
+  afterLeadChange();
 }
 function adminToggleBonus(handle, idx) {
-  const all = store.get(LEADS) || {};
-  if (!all[handle] || !all[handle][idx]) return;
-  all[handle][idx].bonusPaid = !all[handle][idx].bonusPaid; all[handle][idx].localEditTs = Date.now();
-  store.set(LEADS, all);
-  { const l = all[handle][idx]; sheetPost({ action: 'updateLead', submittedByPhone: handle, submittedBy: handle, clientPhone: l.phone, service: l.interest, status: l.status, bonusStatus: l.bonusPaid ? 'Paid' : 'Pending' }); }
-  cloudLogReferralPayout(handle, handle, idx, 500, all[handle][idx].bonusPaid ? 'Paid' : 'Pending');
-  renderAdminLeadTable();
-  renderReferralTree();
+  const l = ((store.get(LEADS) || {})[handle] || [])[idx]; if (!l) return;
+  adminSetBonus(handle, idx, bonusOf(l) === 'Paid' ? 'Under Process' : 'Paid');
+}
+function adminDeleteLead(handle, idx) {
+  const all = store.get(LEADS) || {}; const l = all[handle] && all[handle][idx]; if (!l) return;
+  if (!confirm('Delete lead "' + l.name + '" (' + l.phone + ')? It will be removed from the app and the Google Sheet.')) return;
+  sheetPost({ action: 'deleteRow', identifier: l.phone, type: 'LEAD', submittedByPhone: handle, service: l.interest, clientName: l.name });
+  addTombstone(leadTombKey(handle, l.phone, l.interest));
+  all[handle].splice(idx, 1); store.set(LEADS, all);
+  afterLeadChange();
+  setTimeout(() => sheetRefresh(), 1500);
 }
 
-/* ---------- Admin: Referral chain mindmap tree (with search + inline payout controls) ---------- */
+/* ---- Edit lead modal ---- */
+let editLeadCtx = null;
+function openEditLead(handle, idx) {
+  const l = ((store.get(LEADS) || {})[handle] || [])[idx]; if (!l) return;
+  editLeadCtx = { handle, idx };
+  $('elName').value = l.name || ''; $('elPhone').value = l.phone || ''; $('elService').value = l.interest || ''; $('elNotes').value = l.notes || '';
+  $('elErr').classList.add('hidden');
+  $('editLeadModal').classList.remove('hidden'); $('editLeadModal').classList.add('flex');
+}
+function closeEditLead() { $('editLeadModal').classList.add('hidden'); $('editLeadModal').classList.remove('flex'); editLeadCtx = null; }
+$('elPhone').addEventListener('input', e => e.target.value = e.target.value.replace(/\D/g, ''));
+function saveEditLead() {
+  if (!editLeadCtx) return;
+  const { handle, idx } = editLeadCtx;
+  const all = store.get(LEADS) || {}; const l = all[handle] && all[handle][idx]; if (!l) return closeEditLead();
+  const name = $('elName').value.trim(), phone = $('elPhone').value.trim(), service = $('elService').value.trim(), notes = $('elNotes').value.trim();
+  const err = m => { $('elErr').textContent = m; $('elErr').classList.remove('hidden'); };
+  if (name.length < 2) return err('Enter the client name.');
+  if (!/^\d{10}$/.test(phone)) return err('Enter a valid 10-digit mobile number.');
+  if (!service) return err('Enter the service / plan.');
+  const oldPhone = l.phone, oldService = l.interest;
+  if (leadTombKey(handle, oldPhone, oldService) !== leadTombKey(handle, phone, service)) addTombstone(leadTombKey(handle, oldPhone, oldService));
+  l.name = name; l.phone = phone; l.interest = service; l.notes = notes; l.localEditTs = Date.now();
+  store.set(LEADS, all);
+  sheetPost({ action: 'updateLead', submittedByPhone: handle, submittedBy: handle, oldClientPhone: oldPhone, oldService, clientName: name, clientPhone: phone, service, notes, status: toSheetStatus(l.status), bonusStatus: bonusOf(l) });
+  closeEditLead(); afterLeadChange();
+}
+
+/* ---- Live Auth & Session Monitor ---- */
+function logActivity(event, u) {
+  const ts = Date.now(), phone = u.phone || u.handle;
+  addActivity({ phone, name: u.name, event, ts, ref: '' }); writeMaster(master);
+  sheetPost({ action: 'logActivity', phone, name: u.name, event, timestamp: new Date(ts).toISOString() });
+  try { if (isAdmin(currentUser())) renderActivityTable(); } catch (e) {}
+}
+function referralUsedFor(users, h, fallback) {
+  const u = users[h]; if (!u) return fallback || 'DIRECT';
+  if (u.referredBy && users[u.referredBy] && users[u.referredBy].refCode) return users[u.referredBy].refCode;
+  return (u._refCodeOfParent || fallback || 'DIRECT');
+}
+function renderActivityTable() {
+  const body = $('activityTable'); if (!body) return;
+  const users = store.get(USERS) || {}, map = {}, q = adminQuery();
+  (master.activity || []).forEach(a => { map[a.phone + '|' + a.event + '|' + Math.floor(a.ts / 60000)] = a; });
+  Object.keys(users).forEach(h => { const u = users[h]; if (!u.created) return; const k = h + '|SIGNUP|' + Math.floor(u.created / 60000); if (!map[k]) map[k] = { phone: h, name: u.name, event: 'SIGNUP', ts: u.created }; });
+  let list = Object.values(map).sort((x, y) => y.ts - x.ts);
+  list = list.map(a => ({ a, name: a.name || (users[a.phone] && users[a.phone].name) || '—', ref: referralUsedFor(users, a.phone, a.ref) }));
+  if (q) list = list.filter(r => [r.name, r.a.phone, r.a.event, r.ref].join(' ').toLowerCase().includes(q));
+  list = list.slice(0, 100);
+  if (!list.length) { body.innerHTML = '<tr><td colspan="5" class="text-slate-500">No activity yet.</td></tr>'; return; }
+  body.innerHTML = list.map(r => '<tr><td>' + esc(r.name) + '</td><td>' + esc(r.a.phone) + '</td><td><span class="text-[9px] px-1.5 py-0.5 rounded font-semibold ' + (r.a.event === 'SIGNUP' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-sky-500/20 text-sky-300') + '">' + esc(r.a.event) + '</span></td><td>' + esc(r.ref) + '</td><td>' + fmtDateTime(r.a.ts) + '</td></tr>').join('');
+}
+
+/* ---------- Admin: recursive referral mindmap (Admin → Partner → Referred Partner → Leads) ---------- */
+function computeTreeParents(users) {
+  const handles = Object.keys(users), code2h = {}, parent = {}, children = {};
+  handles.forEach(h => { const c = users[h].refCode; if (c) code2h[String(c).trim().toUpperCase()] = h; });
+  handles.forEach(h => {
+    const u = users[h]; let p = null; const rb = u.referredBy;
+    if (rb && users[rb]) p = rb;
+    else if (rb && code2h[String(rb).trim().toUpperCase()]) p = code2h[String(rb).trim().toUpperCase()];
+    else { const c = String(u._refCodeOfParent || '').trim().toUpperCase(); if (c && c !== 'DIRECT' && code2h[c]) p = code2h[c]; }
+    parent[h] = (p === h) ? null : p;
+  });
+  handles.forEach(h => { const seen = new Set([h]); let c = parent[h]; while (c) { if (seen.has(c)) { parent[h] = null; break; } seen.add(c); c = parent[c]; } });
+  handles.forEach(h => { if (parent[h]) (children[parent[h]] = children[parent[h]] || []).push(h); });
+  return { parent, children };
+}
 function renderReferralTree() {
   const users = store.get(USERS) || {}, allLeads = store.get(LEADS) || {};
   const wrap = $('treeWrap'); wrap.innerHTML = '';
   const handles = Object.keys(users);
   if (!handles.length) { wrap.innerHTML = '<p class="text-xs text-slate-500">No partners yet.</p>'; return; }
   const q = adminQuery();
-  const childrenOf = {};
-  handles.forEach(h => { const ref = users[h].referredBy; if (ref) { (childrenOf[ref] = childrenOf[ref] || []).push(h); } });
-  const roots = handles.filter(h => !users[h].referredBy);
+  const { parent, children } = computeTreeParents(users);
+  const isAdm = h => isAdmin({ handle: h, phone: users[h].phone });
+  const roots = handles.filter(h => !parent[h]).sort((x, y) => (isAdm(y) ? 1 : 0) - (isAdm(x) ? 1 : 0));
+  const selfMatch = h => { if (!q) return true; const u = users[h]; return [h, u.name, u.phone, u.email, u.refCode].join(' ').toLowerCase().includes(q) || (allLeads[h] || []).some(l => [l.name, l.phone, l.interest].join(' ').toLowerCase().includes(q)); };
+  const branchMatch = h => selfMatch(h) || (children[h] || []).some(branchMatch);
 
-  function matches(handle) {
-    if (!q) return true;
-    const u = users[handle];
-    return handle.toLowerCase().includes(q) || (u.name || '').toLowerCase().includes(q) ||
-      (u.phone || '').includes(q) || (u.email || '').toLowerCase().includes(q) || (u.refCode || '').toLowerCase().includes(q);
-  }
-  // A branch is shown if the node itself matches OR any descendant matches (keeps chain context).
-  function branchMatches(handle) {
-    if (matches(handle)) return true;
-    return (childrenOf[handle] || []).some(branchMatches);
+  function nodeEl(h) {
+    const u = users[h], leads = allLeads[h] || [], kids = children[h] || [];
+    const conv = leads.filter(l => l.status === 'Policy Completed').length;
+    const paidAmt = leads.filter(l => bonusOf(l) === 'Paid').length * 500;
+    const pendAmt = leads.filter(l => l.status === 'Policy Completed' && bonusOf(l) === 'Under Process').length * 500;
+    const node = document.createElement('div'); node.className = 'tree-node';
+    const card = document.createElement('div');
+    card.className = 'bg-slate-950 border ' + (isAdm(h) ? 'border-amber-500/40' : 'border-slate-800') + ' rounded-xl p-3';
+    card.innerHTML = '<p class="text-xs font-bold text-emerald-300">' + (isAdm(h) ? '👑 ' : '👤 ') + esc(u.name) + ' <span class="text-slate-400 font-normal">· ' + esc(u.phone || h) + '</span></p>' +
+      '<p class="text-[10px] text-slate-400 mt-1">Ref Code: <span class="text-emerald-400 font-semibold">' + esc(u.refCode || '—') + '</span> · Direct referrals: <b class="text-slate-200">' + kids.length + '</b> · Leads: <b class="text-slate-200">' + leads.length + '</b> · Converted: <b class="text-slate-200">' + conv + '</b></p>' +
+      '<div class="mt-1.5"><span class="text-[10px] px-2 py-0.5 rounded bg-slate-900 border border-slate-800 font-semibold"><span class="text-emerald-400">Paid: ₹' + paidAmt + '</span> | <span class="text-amber-400">Pending: ₹' + pendAmt + '</span></span></div>' +
+      '<div class="mt-2 flex flex-wrap gap-1.5">' +
+      '<button data-act="edit" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded font-semibold">Edit Partner</button>' +
+      (pendAmt > 0 ? '<button data-act="pay" class="text-[10px] bg-amber-600/70 hover:bg-amber-600 px-2 py-1 rounded font-semibold">Mark Bonus Paid</button>' : '') +
+      (isAdm(h) ? '' : '<button data-act="del" class="text-[10px] bg-red-600/70 hover:bg-red-600 px-2 py-1 rounded font-semibold">Delete Partner</button>') + '</div>';
+    card.querySelector('[data-act="edit"]').addEventListener('click', () => adminEditUser(h));
+    const payBtn = card.querySelector('[data-act="pay"]');
+    if (payBtn) payBtn.addEventListener('click', () => { const i = leads.findIndex(l => l.status === 'Policy Completed' && bonusOf(l) === 'Under Process'); if (i > -1) adminSetBonus(h, i, 'Paid'); });
+    const delBtn = card.querySelector('[data-act="del"]');
+    if (delBtn) delBtn.addEventListener('click', () => adminDeleteUser(h));
+    node.appendChild(card);
+    const shownKids = kids.filter(branchMatch);
+    if (leads.length || shownKids.length) {
+      const box = document.createElement('div'); box.className = 'tree-children';
+      leads.forEach((l, idx) => {
+        const leaf = document.createElement('div'); leaf.className = 'tree-node tree-leaf';
+        leaf.innerHTML = '<div class="bg-slate-900/60 border border-slate-800 rounded-lg px-2.5 py-2 flex flex-wrap items-center gap-2 text-[10px]">' +
+          '<span class="text-slate-200 font-semibold">📋 ' + esc(l.name) + '</span><span class="text-slate-500">' + esc(l.phone) + ' · ' + esc(l.interest) + '</span>' + statusBadge(l.status) +
+          '<select class="' + SEL_CLS + 'ml-auto">' + bonusOptionsHtml(bonusOf(l)) + '</select></div>';
+        leaf.querySelector('select').addEventListener('change', e => adminSetBonus(h, idx, e.target.value));
+        box.appendChild(leaf);
+      });
+      shownKids.forEach(k => box.appendChild(nodeEl(k)));
+      node.appendChild(box);
+    }
+    return node;
   }
 
-  let any = false;
-  function nodeCard(handle, depth) {
-    if (!branchMatches(handle)) return;
-    any = true;
-    const u = users[handle];
-    const leads = allLeads[handle] || [];
-    const conv = leads.filter(l => l.status === 'Policy Completed');
-    const paid = conv.filter(l => l.bonusPaid).length;
-    const pendingBonus = conv.length - paid;
-    const div = document.createElement('div');
-    div.style.marginLeft = (depth * 18) + 'px';
-    div.className = 'border-l-2 border-emerald-500/30 pl-3 mb-2';
-    const statusTags = leads.slice(0, 6).map(l => '<span class="text-[9px] px-1.5 py-0.5 rounded ' + statusColor(l.status) + ' bg-slate-900 border border-slate-800 mr-1 mb-1 inline-block">' + (l.status === 'Policy Completed' ? 'Completed' : l.status === 'Under Process' ? 'Under Process' : l.status) + '</span>').join('');
-    const payoutBadge = conv.length === 0 ? '<span class="text-[10px] text-slate-600">No conversions yet</span>' :
-      pendingBonus > 0 ? '<span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-semibold">Payout Pending — ' + pendingBonus + ' × up to ₹500</span>' :
-      '<span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-semibold">All Paid (Up to ₹500 each)</span>';
-    div.innerHTML = '<div class="bg-slate-950 border border-slate-800 rounded-xl p-3">' +
-      '<p class="text-xs font-bold text-emerald-300">' + esc(u.name) + ' <span class="text-slate-500 font-normal">(' + esc(handle) + ')</span>' + (u.refCode ? ' <span class="text-[9px] text-slate-600">' + esc(u.refCode) + '</span>' : '') + '</p>' +
-      '<p class="text-[10px] text-slate-400 mt-1">Joined ' + (u.created ? fmtDate(u.created) : '—') + ' · Direct referrals: ' + (childrenOf[handle] || []).length + ' · Total leads: ' + leads.length + ' · Converted: ' + conv.length + '</p>' +
-      '<div class="mt-1.5">' + (statusTags || '<span class="text-[10px] text-slate-600">No leads yet</span>') + '</div>' +
-      '<div class="mt-2 flex items-center justify-between flex-wrap gap-2"><span>' + payoutBadge + '</span>' +
-      (pendingBonus > 0 ? '<button data-treepay class="text-[10px] bg-amber-600/70 hover:bg-amber-600 px-2 py-1 rounded font-semibold">Mark Next Bonus Paid</button>' : '') + '</div></div>';
-    const payBtn = div.querySelector('[data-treepay]');
-    if (payBtn) payBtn.addEventListener('click', () => {
-      const idx = leads.findIndex(l => l.status === 'Policy Completed' && !l.bonusPaid);
-      if (idx > -1) adminToggleBonus(handle, idx);
-    });
-    wrap.appendChild(div);
-    (childrenOf[handle] || []).forEach(child => nodeCard(child, depth + 1));
-  }
-  roots.forEach(h => nodeCard(h, 0));
-  if (!any) wrap.innerHTML = '<p class="text-xs text-slate-500">No partners match that search.</p>';
+  const head = document.createElement('div');
+  head.className = 'bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 text-xs font-bold text-emerald-300';
+  head.innerHTML = '👑 Admin (Master) <span class="text-slate-400 font-normal">· ' + esc(ADMIN_PHONE) + ' · ' + handles.length + ' partners in network</span>';
+  wrap.appendChild(head);
+  const shownRoots = roots.filter(branchMatch);
+  if (!shownRoots.length) { const m = document.createElement('p'); m.className = 'text-xs text-slate-500 mt-2'; m.textContent = 'No partners match that search.'; wrap.appendChild(m); return; }
+  const rootBox = document.createElement('div'); rootBox.className = 'tree-children';
+  shownRoots.forEach(h => rootBox.appendChild(nodeEl(h)));
+  wrap.appendChild(rootBox);
 }
 
 function renderAdminUserTable() {
@@ -1531,7 +1697,8 @@ async function adminEditUser(handle) {
     alert('Password not changed — it must be at least 6 characters.');
   }
   store.set(USERS, users);
-  renderAdminUserTable();
+  sheetPost({ action: 'updateUser', phone: u.phone || handle, name: u.name, email: u.email || '', password: u.hash, passwordHash: u.hash, salt: u.salt });
+  renderAdminUserTable(); renderReferralTree(); renderActivityTable();
 }
 function adminToggleBlock(handle) {
   const users = store.get(USERS) || {};
@@ -1541,10 +1708,14 @@ function adminToggleBlock(handle) {
   renderAdminUserTable();
 }
 function adminDeleteUser(handle) {
-  if (!confirm('Delete account ' + handle + '? This also removes their submitted leads. This cannot be undone.')) return;
-  const users = store.get(USERS) || {}; delete users[handle]; store.set(USERS, users);
-  const leads = store.get(LEADS) || {}; delete leads[handle]; store.set(LEADS, leads);
-  renderAdminUserTable(); renderAdminLeadTable();
+  const users = store.get(USERS) || {}; const u = users[handle]; if (!u) return;
+  if (isAdmin({ handle, phone: u.phone })) { alert('Master admin accounts cannot be deleted.'); return; }
+  if (!confirm('Delete partner ' + u.name + ' (' + handle + ')? The account is removed from the app and the Google Sheet. Leads they submitted are kept as records. This cannot be undone.')) return;
+  sheetPost({ action: 'deleteRow', identifier: u.phone || handle, type: 'USER', name: u.name });
+  addTombstone('U|' + handle);
+  delete users[handle]; store.set(USERS, users);
+  renderAdminUserTable(); renderAdminLeadTable(); renderReferralTree(); renderActivityTable();
+  setTimeout(() => sheetRefresh(), 1500);
 }
 
 function setDashTab(t) {
@@ -1648,6 +1819,7 @@ $('authForm').addEventListener('submit', async e => {
 function verifyLoginOtp() {
   if ($('otpInput').value.trim() !== loginOtpVal) { $('otpErr').textContent = 'Incorrect OTP. Please try again.'; $('otpErr').classList.remove('hidden'); return; }
   store.set(SESSION, pendingLoginHandle); endGuestOverride();
+  { const lu = (store.get(USERS) || {})[pendingLoginHandle]; if (lu) logActivity('LOGIN', Object.assign({ handle: pendingLoginHandle }, lu)); }
   $('authForm').reset();
   pendingLoginHandle = null; loginOtpVal = null;
   $('otpView').classList.add('hidden');
