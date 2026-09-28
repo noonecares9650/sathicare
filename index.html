@@ -77,7 +77,8 @@ input[type=range]{accent-color:#10b981}
       <a href="#vision" class="text-sm text-slate-300 hover:text-white transition hidden md:block">Vision &amp; Mission</a>
       <a href="#faq" class="text-sm text-slate-300 hover:text-white transition hidden md:block">Trust &amp; Safety</a>
       <a href="#contact" class="text-sm text-slate-300 hover:text-white transition hidden md:block">Contact</a>
-      <button onclick="openModal()" id="authBtn" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-5 py-2.5 rounded-xl font-semibold text-sm transition shadow-lg shadow-emerald-500/10">Partner Login</button>
+      <button onclick="openModal()" id="authBtn" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-5 py-2.5 rounded-xl font-semibold text-sm transition shadow-lg shadow-emerald-500/10">Login / Partner Register</button>
+      <button onclick="logout()" id="logoutBtn" class="hidden border border-slate-700 hover:border-red-400 hover:text-red-300 text-slate-300 px-4 py-2.5 rounded-xl font-semibold text-sm transition">Logout</button>
     </div>
   </div>
 </header>
@@ -499,12 +500,13 @@ input[type=range]{accent-color:#10b981}
       <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-xs text-emerald-300 mb-4">🦊 Sathi Guide: Agar tutorial abhi tak nahi dekha, toh <button onclick="watchTutorial()" class="underline font-semibold">yahan dekho</button> — samajhna zaroori hai kaam kaise karta hai, tabhi genuine leads milenge!</div>
 
       <div id="adminSyncBar" class="hidden items-center justify-between bg-slate-950 border border-emerald-500/20 rounded-xl px-3 py-2 mb-3">
-        <span class="text-[10px] text-slate-400">☁️ Google Sheet live DB · <span id="syncStatus">Not synced yet</span></span>
+        <span class="text-[10px] text-slate-400">☁️ Google Sheet live DB · <span id="syncStatus">Connecting…</span></span>
         <button type="button" onclick="sheetRefresh(true)" class="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[11px] font-bold px-3 py-1.5 rounded-lg transition">
           <svg id="syncIcon" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>
           Instant Refresh
         </button>
       </div>
+      <input id="adminSearch" type="search" placeholder="🔍 Search by Client Name, Phone, Submitter, or Ref Code..." oninput="adminSearchChanged()" class="hidden w-full bg-slate-950 border border-emerald-500/40 rounded-xl px-4 py-2.5 text-sm text-slate-200 mb-3 focus:outline-none focus:border-emerald-500">
       <div class="flex bg-slate-950 rounded-xl p-1 mb-4 text-xs font-semibold flex-wrap" id="dashTabs">
         <button id="dashTabStats" onclick="setDashTab('stats')" class="flex-1 py-2 rounded-lg transition">Overview</button>
         <button id="dashTabLead" onclick="setDashTab('lead')" class="flex-1 py-2 rounded-lg transition">Submit New Lead</button>
@@ -555,10 +557,10 @@ input[type=range]{accent-color:#10b981}
       </form>
 
       <div id="dashAdmin" class="hidden">
-        <p class="text-[11px] text-slate-400 mb-2">All leads across all partners (this browser only — see note below)</p>
+        <p class="text-[11px] text-slate-400 mb-2">All leads across all partners (live from Google Sheet)</p>
         <div class="overflow-x-auto rounded-xl border border-slate-800">
           <table class="sc-table">
-            <thead><tr><th>Date</th><th>Partner</th><th>Partner Phone</th><th>Partner Email</th><th>Lead Name</th><th>Lead Mobile</th><th>Plan</th><th>Status</th><th>Bonus</th></tr></thead>
+            <thead><tr><th>Date</th><th>Client Name</th><th>Client Phone</th><th>Service</th><th>Submitted By (Name · Phone)</th><th>Status</th><th>Bonus</th></tr></thead>
             <tbody id="adminLeadTable"></tbody>
           </table>
         </div>
@@ -578,7 +580,7 @@ input[type=range]{accent-color:#10b981}
           <p class="text-[10px] text-amber-400/80 mt-2">⚠️ Restoring replaces all current data with the backup file's contents.</p>
           <p id="cloudStatusMsg" class="text-[10px] mt-2"></p>
         </div>
-        <p class="text-[11px] text-slate-400 mb-2">All registered partner accounts (this browser only — see note below)</p>
+        <p class="text-[11px] text-slate-400 mb-2">All registered partner accounts (live from Google Sheet)</p>
         <div class="overflow-x-auto rounded-xl border border-slate-800">
           <table class="sc-table">
             <thead><tr><th>Name</th><th>Email</th><th>Mobile</th><th>Password</th><th>Status</th><th>Actions</th></tr></thead>
@@ -589,7 +591,6 @@ input[type=range]{accent-color:#10b981}
 
       <div id="dashTree" class="hidden">
         <p class="text-[11px] text-slate-400 mb-2">Referral chain — who referred whom, their leads, and bonus status. Root partners (no referrer) shown first.</p>
-        <input id="treeSearch" type="text" placeholder="🔍 Search by name, mobile, email or referral code…" oninput="renderReferralTree()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 mb-3 focus:outline-none focus:border-emerald-500">
         <div id="treeWrap" class="space-y-2"></div>
       </div>
 
@@ -604,7 +605,8 @@ input[type=range]{accent-color:#10b981}
 <script>
 const $ = id => document.getElementById(id);
 const inr = n => '₹ ' + Math.round(n).toLocaleString('en-IN');
-const ADMIN_PHONE = '9650264613';
+const ADMIN_PHONES = ['9750264613', '9650264613']; // master admin accounts (full access to all branches)
+const ADMIN_PHONE = ADMIN_PHONES[1];
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwTbF40VjEM-xDz_bVkVKiYJe7SP5URq6zQ7yA8_ahEmGt3CNZ2tjiA6UvhzgkjIldE/exec';
 const _urlRef = new URLSearchParams(window.location.search).get('ref');
 if (_urlRef) { try { sessionStorage.setItem('SATHICARE_PENDING_REF', _urlRef); } catch (e) {} }
@@ -987,7 +989,7 @@ const store = {
     if (k === SESSION) {
       try {
         let s = localStorage.getItem(SESSION_KEY);
-        if (!s) { s = JSON.parse(localStorage.getItem('sathicare_session') || 'null'); if (s) localStorage.setItem(SESSION_KEY, s); }
+        if (!s) { s = JSON.parse(localStorage.getItem('sathicare_session') || 'null'); if (s) localStorage.setItem(SESSION_KEY, s); localStorage.removeItem('sathicare_session'); }
         return s || null;
       } catch (e) { return null; }
     }
@@ -1001,7 +1003,7 @@ const store = {
     return ok;
   },
   del(k) {
-    if (k === SESSION) { try { localStorage.removeItem(SESSION_KEY); } catch (e) {} return; }
+    if (k === SESSION) { try { ['SATHICARE_ACTIVE_SESSION', 'sathicare_session', 'sathi_session', 'currentUser', 'activeAdminSession'].forEach(x => localStorage.removeItem(x)); } catch (e) {} return; }
     delete master[k]; writeMaster(master);
   }
 };
@@ -1069,7 +1071,7 @@ async function sendToGoogleSheet(payload) {
 }
 const sheetPost = sendToGoogleSheet; // (existing call sites use this name)
 const SHEET_KEYMAP = { name:'name', phone:'phone', mobile:'phone', email:'email', refcode:'refCode', referralcode:'refCode', referredby:'referredBy', timestamp:'timestamp', date:'timestamp', passwordhash:'passwordHash', hash:'passwordHash', salt:'salt',
-  clientname:'clientName', clientphone:'clientPhone', service:'service', submittedby:'submittedBy', bonusstatus:'bonusStatus', status:'status', type:'type', rowtype:'type', recordtype:'type', kind:'type' };
+  clientname:'clientName', clientphone:'clientPhone', service:'service', submittedby:'submittedBy', submittedbyname:'submittedByName', submittedbyphone:'submittedByPhone', password:'passwordHash', bonusstatus:'bonusStatus', status:'status', type:'type', rowtype:'type', recordtype:'type', kind:'type' };
 function sheetRowObj(r) {
   if (Array.isArray(r)) {
     // Positional fallback: USER,name,phone,refCode,referredBy,ts,hash,salt | LEAD,clientName,clientPhone,service,submittedBy,bonusStatus,ts,status
@@ -1094,34 +1096,51 @@ function mergeSheetRows(payload) {
   const rows = sheetExtractRows(payload).filter(r => r && typeof r === 'object');
   let changed = false;
   const users = master.users || {}, leads = master.leads || {};
+  const norm = v => String(v == null ? '' : v).trim();
+  const digits = v => norm(v).replace(/\D/g, '').slice(-10);
+  const tsOf = v => Date.parse(v) || Number(v) || Date.now();
   rows.filter(r => sheetRowType(r) === 'USER').map(sheetRowObj).forEach(o => {
-    const phone = String(o.phone || '').replace(/\D/g, '') || String(o.email || '').toLowerCase();
-    if (!phone) return;
-    const ts = Date.parse(o.timestamp) || Number(o.timestamp) || Date.now();
-    if (!users[phone]) {
-      users[phone] = { name: o.name || phone, salt: o.salt || '', hash: o.passwordHash || o.hash || '', created: ts, method: 'phone', blocked: false, email: null, phone, referredBy: null, refCode: o.refCode || null, _refCodeOfParent: o.referredBy || null, fromSheet: true };
+    const handle = digits(o.phone) || norm(o.email).toLowerCase();
+    if (!handle) return;
+    if (!users[handle]) {
+      users[handle] = { name: norm(o.name) || handle, salt: norm(o.salt), hash: norm(o.passwordHash), created: tsOf(o.timestamp), method: 'phone', blocked: false, email: null, phone: digits(o.phone) || null, referredBy: null, refCode: norm(o.refCode) || null, _refCodeOfParent: norm(o.referredBy) || null, fromSheet: true };
       changed = true;
     } else {
-      if (!users[phone].refCode && o.refCode) { users[phone].refCode = o.refCode; changed = true; }
-      if (o.referredBy && !users[phone]._refCodeOfParent) { users[phone]._refCodeOfParent = o.referredBy; changed = true; }
+      const u = users[handle];
+      if (!u.refCode && o.refCode) { u.refCode = norm(o.refCode); changed = true; }
+      if (o.referredBy && !u._refCodeOfParent) { u._refCodeOfParent = norm(o.referredBy); changed = true; }
+      if (!u.hash && o.passwordHash && o.salt) { u.hash = norm(o.passwordHash); u.salt = norm(o.salt); changed = true; }
     }
   });
   // Link referredBy (a referral CODE) to the parent's handle — builds the mindmap branches dynamically.
   Object.keys(users).forEach(h => {
     const u = users[h], pc = u._refCodeOfParent;
-    if (!u.referredBy && pc && String(pc).toUpperCase() !== 'DIRECT') {
-      const parent = Object.keys(users).find(x => users[x].refCode && users[x].refCode.toUpperCase() === String(pc).toUpperCase());
+    if (!u.referredBy && pc && pc.toUpperCase() !== 'DIRECT') {
+      const parent = Object.keys(users).find(x => users[x].refCode && users[x].refCode.toUpperCase() === pc.toUpperCase());
       if (parent && parent !== h) { u.referredBy = parent; changed = true; }
     }
   });
+  const matched = new Set();
+  const parseBonusPaid = b => /^\s*paid/i.test(norm(b));
   rows.filter(r => sheetRowType(r) === 'LEAD').map(sheetRowObj).forEach(o => {
-    const by = String(o.submittedBy || '').replace(/\D/g, '') || String(o.submittedBy || '').toLowerCase();
+    const by = digits(o.submittedByPhone) || digits(o.submittedBy) || norm(o.submittedBy).toLowerCase();
     if (!by) return;
-    const ts = Date.parse(o.timestamp) || Number(o.timestamp) || Date.now();
+    const cp = digits(o.clientPhone), svc = norm(o.service).toLowerCase();
     const list = leads[by] = leads[by] || [];
-    const dup = list.some(l => String(l.phone) === String(o.clientPhone) && (l.interest || '') === (o.service || '') && Math.abs((l.ts || 0) - ts) < 120000 || (l.sheetKey && l.sheetKey === o.clientPhone + '|' + o.service + '|' + o.timestamp));
-    if (!dup) {
-      list.push({ name: o.clientName, phone: String(o.clientPhone), interest: o.service, status: o.status || 'Under Process', bonusPaid: /paid/i.test(o.bonusStatus || '') && !/pending|unpaid/i.test(o.bonusStatus || ''), ts, fromSheet: true, sheetKey: o.clientPhone + '|' + o.service + '|' + o.timestamp });
+    const idx = list.findIndex((l, i) => !matched.has(by + '#' + i) && digits(l.phone) === cp && norm(l.interest).toLowerCase() === svc);
+    const subName = norm(o.submittedByName) || (users[by] && users[by].name) || '';
+    if (idx > -1) {
+      matched.add(by + '#' + idx);
+      const l = list[idx];
+      // Sheet is the live source of truth — except for edits made here in the last 90s (write may still be in flight).
+      if (!l.localEditTs || Date.now() - l.localEditTs > 90000) {
+        if (o.status && l.status !== norm(o.status)) { l.status = norm(o.status); changed = true; }
+        if (o.bonusStatus) { const bp = parseBonusPaid(o.bonusStatus); if (bp !== !!l.bonusPaid) { l.bonusPaid = bp; changed = true; } }
+      }
+      if (subName && !l.submittedByName) { l.submittedByName = subName; changed = true; }
+    } else {
+      list.push({ name: norm(o.clientName), phone: norm(o.clientPhone), interest: norm(o.service), status: norm(o.status) || 'Under Process', bonusPaid: parseBonusPaid(o.bonusStatus), ts: tsOf(o.timestamp), submittedByName: subName, submittedByPhone: by, fromSheet: true });
+      matched.add(by + '#' + (list.length - 1));
       changed = true;
     }
   });
@@ -1130,7 +1149,7 @@ function mergeSheetRows(payload) {
 }
 let sheetSyncing = false;
 async function sheetRefresh(manual) {
-  if (sheetSyncing) return;
+  if (sheetSyncing) return false;
   sheetSyncing = true;
   const icon = $('syncIcon'); if (icon) icon.classList.add('animate-spin');
   const status = $('syncStatus');
@@ -1148,12 +1167,14 @@ async function sheetRefresh(manual) {
     stage = 'merge';
     const n = sheetExtractRows(payload).length;
     mergeSheetRows(payload);
-    if (status) status.textContent = 'Synced ' + new Date().toLocaleTimeString('en-IN') + ' · ' + n + ' rows';
+    if (status) status.innerHTML = '<span class="text-emerald-400">🟢 Google Sheet live DB • Connected &amp; Synced</span> <span class="text-slate-500">(' + new Date().toLocaleTimeString('en-IN') + ' · ' + n + ' rows)</span>';
     safeRerender();
+    return true;
   } catch (e) {
     console.warn('[SathiCare] sheet sync failed at stage "' + stage + '":', e);
     const hint = stage === 'network' ? 'network/CORS — deploy must be "Anyone" access & doGet must return JSON' : stage === 'parse' ? 'response was not JSON (check deployment access = Anyone)' : stage;
-    if (status) status.textContent = 'Sync failed (' + hint + ') — showing local data';
+    if (status) status.innerHTML = '<span class="text-red-400">🔴 Sync failed (' + hint + ') — showing local data</span>';
+    return false;
   } finally {
     sheetSyncing = false;
     if (icon) setTimeout(() => icon.classList.remove('animate-spin'), 400);
@@ -1162,7 +1183,7 @@ async function sheetRefresh(manual) {
 // Admin-only: fetch on load, and auto-poll every 20s while the admin dashboard is open.
 function adminViewOpen() { return !document.hidden && !$('modal').classList.contains('hidden') && !$('dashView').classList.contains('hidden') && isAdmin(currentUser()); }
 window.addEventListener('DOMContentLoaded', () => { if (isAdmin(currentUser())) sheetRefresh(); });
-setInterval(() => { if (adminViewOpen()) sheetRefresh(); }, 20000);
+setInterval(() => { if (adminViewOpen()) sheetRefresh(); }, 15000);
 
 cloudPullAndSubscribe();
 
@@ -1246,10 +1267,11 @@ function currentUser() {
   if (!u || u.blocked) { store.del(SESSION); return null; }
   return { handle: s, ...u };
 }
-function isAdmin(u) { return u && u.handle === ADMIN_PHONE; }
+function isAdmin(u) { return !!u && (ADMIN_PHONES.includes(String(u.handle)) || ADMIN_PHONES.includes(String(u.phone || ''))); }
 function refreshBtn() {
   const u = currentUser();
-  $('authBtn').textContent = u ? 'Dashboard (' + u.name.split(' ')[0] + ')' : 'Partner Login';
+  $('authBtn').textContent = u ? 'Dashboard (' + u.name.split(' ')[0] + ')' : 'Login / Partner Register';
+  $('logoutBtn').classList.toggle('hidden', !u);
   updatePublicRefBox(u);
   return u;
 }
@@ -1298,7 +1320,7 @@ function renderDashboard() {
       const row = document.createElement('div');
       row.className = 'bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs flex justify-between items-center';
       const bonusTag = l.status === 'Policy Completed' ? ('<span class="ml-2 text-[9px] px-1.5 py-0.5 rounded ' + (l.bonusPaid ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400') + '">' + (l.bonusPaid ? 'Paid ₹500' : 'Bonus Pending') + '</span>') : '';
-      row.innerHTML = '<span>' + l.name + ' <span class="text-slate-600">(' + l.interest + ')</span></span><span><span class="font-semibold ' + statusColor(l.status) + '">' + l.status + '</span>' + bonusTag + '</span>';
+      row.innerHTML = '<span>' + esc(l.name) + ' <span class="text-slate-600">(' + esc(l.interest) + ')</span></span><span><span class="font-semibold ' + statusColor(l.status) + '">' + l.status + '</span>' + bonusTag + '</span>';
       list.appendChild(row);
     });
   } else listWrap.classList.add('hidden');
@@ -1319,7 +1341,7 @@ function renderDashboard() {
   $('dashTabAdmin').classList.toggle('hidden', !admin);
   $('dashTabUsers').classList.toggle('hidden', !admin);
   $('dashTabTree').classList.toggle('hidden', !admin);
-  $('adminSyncBar').classList.toggle('hidden', !admin); $('adminSyncBar').classList.toggle('flex', admin);
+  $('adminSearch').classList.toggle('hidden', !admin); $('adminSyncBar').classList.toggle('hidden', !admin); $('adminSyncBar').classList.toggle('flex', admin);
   if (admin) {
     renderAdminLeadTable(); renderAdminUserTable(); renderReferralTree();
     const csm = $('cloudStatusMsg');
@@ -1353,25 +1375,29 @@ function shareRefLinkWa() {
   window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
 }
 
+function adminQuery() { const el = $('adminSearch'); return el ? el.value.trim().toLowerCase() : ''; }
 function renderAdminLeadTable() {
   const all = store.get(LEADS) || {}, users = store.get(USERS) || {};
+  const q = adminQuery();
   const body = $('adminLeadTable'); body.innerHTML = '';
-  let any = false;
+  let any = false, total = 0;
   Object.keys(all).forEach(handle => {
     const pu = users[handle];
-    const pname = (pu && pu.name) || '—';
-    const pphone = (pu && pu.phone) || (handle.includes('@') ? '—' : handle);
-    const pemail = (pu && pu.email) || (handle.includes('@') ? handle : '—');
     all[handle].forEach((l, idx) => {
+      total++;
+      const sName = l.submittedByName || (pu && pu.name) || '—';
+      const sPhone = l.submittedByPhone || (pu && pu.phone) || (handle.includes('@') ? '—' : handle);
+      const hay = [l.name, l.phone, l.interest, sName, sPhone, l.status, pu && pu.refCode].join(' ').toLowerCase();
+      if (q && !hay.includes(q)) return;
       any = true;
       const tr = document.createElement('tr');
-      const selectId = 'stSel_' + handle.replace(/[^a-zA-Z0-9]/g, '') + '_' + idx;
       const options = LEAD_STATUSES.map(s => '<option value="' + s + '"' + (s === l.status ? ' selected' : '') + '>' + s + '</option>').join('');
       const bonusCell = l.status === 'Policy Completed'
         ? '<button data-bonus class="text-[10px] px-2 py-1 rounded font-semibold ' + (l.bonusPaid ? 'bg-emerald-600/70 hover:bg-emerald-600' : 'bg-amber-600/70 hover:bg-amber-600') + '">' + (l.bonusPaid ? 'Paid ✓' : 'Mark Paid') + '</button>'
         : '<span class="text-slate-600">—</span>';
-      tr.innerHTML = '<td>' + fmtDate(l.ts) + '</td><td>' + pname + '</td><td>' + pphone + '</td><td>' + pemail + '</td><td>' + l.name + '</td><td>' + l.phone + '</td><td>' + l.interest + '</td>' +
-        '<td><select id="' + selectId + '" class="bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-[10px] ' + statusColor(l.status) + '">' + options + '</select></td>' +
+      tr.innerHTML = '<td>' + fmtDate(l.ts) + '</td><td>' + esc(l.name) + '</td><td>' + esc(l.phone) + '</td><td>' + esc(l.interest) + '</td>' +
+        '<td>' + esc(sName) + ' <span class="text-slate-500">· ' + esc(sPhone) + '</span></td>' +
+        '<td><select class="bg-slate-900 border border-slate-700 rounded px-1.5 py-1 text-[10px] ' + statusColor(l.status) + '">' + options + '</select></td>' +
         '<td>' + bonusCell + '</td>';
       tr.querySelector('select').addEventListener('change', e => { adminUpdateLeadStatus(handle, idx, e.target.value); });
       const bonusBtn = tr.querySelector('[data-bonus]');
@@ -1379,22 +1405,24 @@ function renderAdminLeadTable() {
       body.appendChild(tr);
     });
   });
-  if (!any) body.innerHTML = '<tr><td colspan="9" class="text-slate-500">No leads yet.</td></tr>';
+  if (!any) body.innerHTML = '<tr><td colspan="7" class="text-slate-500">' + (total ? 'No leads match your search.' : 'No leads yet.') + '</td></tr>';
 }
+function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function adminSearchChanged() { renderAdminLeadTable(); renderAdminUserTable(); renderReferralTree(); }
 function adminUpdateLeadStatus(handle, idx, status) {
   const all = store.get(LEADS) || {};
   if (!all[handle] || !all[handle][idx]) return;
-  all[handle][idx].status = status;
+  all[handle][idx].status = status; all[handle][idx].localEditTs = Date.now();
   store.set(LEADS, all);
-  { const l = all[handle][idx]; sheetPost({ action: 'updateLead', submittedBy: handle, clientPhone: l.phone, service: l.interest, status, bonusStatus: l.bonusPaid ? 'Paid' : 'Pending' }); }
+  { const l = all[handle][idx]; sheetPost({ action: 'updateLead', submittedByPhone: handle, submittedBy: handle, clientPhone: l.phone, service: l.interest, status, bonusStatus: l.bonusPaid ? 'Paid' : 'Pending' }); }
   renderAdminLeadTable();
 }
 function adminToggleBonus(handle, idx) {
   const all = store.get(LEADS) || {};
   if (!all[handle] || !all[handle][idx]) return;
-  all[handle][idx].bonusPaid = !all[handle][idx].bonusPaid;
+  all[handle][idx].bonusPaid = !all[handle][idx].bonusPaid; all[handle][idx].localEditTs = Date.now();
   store.set(LEADS, all);
-  { const l = all[handle][idx]; sheetPost({ action: 'updateLead', submittedBy: handle, clientPhone: l.phone, service: l.interest, status: l.status, bonusStatus: l.bonusPaid ? 'Paid' : 'Pending' }); }
+  { const l = all[handle][idx]; sheetPost({ action: 'updateLead', submittedByPhone: handle, submittedBy: handle, clientPhone: l.phone, service: l.interest, status: l.status, bonusStatus: l.bonusPaid ? 'Paid' : 'Pending' }); }
   cloudLogReferralPayout(handle, handle, idx, 500, all[handle][idx].bonusPaid ? 'Paid' : 'Pending');
   renderAdminLeadTable();
   renderReferralTree();
@@ -1406,8 +1434,7 @@ function renderReferralTree() {
   const wrap = $('treeWrap'); wrap.innerHTML = '';
   const handles = Object.keys(users);
   if (!handles.length) { wrap.innerHTML = '<p class="text-xs text-slate-500">No partners yet.</p>'; return; }
-  const searchEl = $('treeSearch');
-  const q = (searchEl ? searchEl.value : '').trim().toLowerCase();
+  const q = adminQuery();
   const childrenOf = {};
   handles.forEach(h => { const ref = users[h].referredBy; if (ref) { (childrenOf[ref] = childrenOf[ref] || []).push(h); } });
   const roots = handles.filter(h => !users[h].referredBy);
@@ -1441,7 +1468,7 @@ function renderReferralTree() {
       pendingBonus > 0 ? '<span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-semibold">Payout Pending — ' + pendingBonus + ' × up to ₹500</span>' :
       '<span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-semibold">All Paid (Up to ₹500 each)</span>';
     div.innerHTML = '<div class="bg-slate-950 border border-slate-800 rounded-xl p-3">' +
-      '<p class="text-xs font-bold text-emerald-300">' + u.name + ' <span class="text-slate-500 font-normal">(' + handle + ')</span>' + (u.refCode ? ' <span class="text-[9px] text-slate-600">' + u.refCode + '</span>' : '') + '</p>' +
+      '<p class="text-xs font-bold text-emerald-300">' + esc(u.name) + ' <span class="text-slate-500 font-normal">(' + esc(handle) + ')</span>' + (u.refCode ? ' <span class="text-[9px] text-slate-600">' + esc(u.refCode) + '</span>' : '') + '</p>' +
       '<p class="text-[10px] text-slate-400 mt-1">Joined ' + (u.created ? fmtDate(u.created) : '—') + ' · Direct referrals: ' + (childrenOf[handle] || []).length + ' · Total leads: ' + leads.length + ' · Converted: ' + conv.length + '</p>' +
       '<div class="mt-1.5">' + (statusTags || '<span class="text-[10px] text-slate-600">No leads yet</span>') + '</div>' +
       '<div class="mt-2 flex items-center justify-between flex-wrap gap-2"><span>' + payoutBadge + '</span>' +
@@ -1463,14 +1490,16 @@ function renderAdminUserTable() {
   const body = $('adminUserTable'); body.innerHTML = '';
   const handles = Object.keys(users);
   if (!handles.length) { body.innerHTML = '<tr><td colspan="6" class="text-slate-500">No registered users yet.</td></tr>'; return; }
+  const uq = adminQuery();
   handles.forEach(handle => {
     const u = users[handle];
+    if (uq && ![u.name, handle, u.phone, u.email, u.refCode].join(' ').toLowerCase().includes(uq)) return;
     const isEmailHandle = handle.includes('@') || u.method === 'email';
     const emailVal = u.email || (isEmailHandle ? handle : '—');
     const phoneVal = u.phone || (!isEmailHandle ? handle : '—');
     const tr = document.createElement('tr');
     const status = u.blocked ? '<span class="text-red-400">Blocked</span>' : '<span class="text-emerald-400">Active</span>';
-    tr.innerHTML = '<td>' + u.name + '</td><td>' + emailVal + '</td><td>' + phoneVal + '</td><td class="text-slate-500">🔒 hashed (not visible)</td><td>' + status + '</td>' +
+    tr.innerHTML = '<td>' + esc(u.name) + '</td><td>' + esc(emailVal) + '</td><td>' + esc(phoneVal) + '</td><td class="text-slate-500">🔒 hashed (not visible)</td><td>' + status + '</td>' +
       '<td class="space-x-1"><button data-act="edit" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded">Edit</button>' +
       '<button data-act="block" class="text-[10px] bg-amber-600/70 hover:bg-amber-600 px-2 py-1 rounded">' + (u.blocked ? 'Unblock' : 'Block') + '</button>' +
       '<button data-act="delete" class="text-[10px] bg-red-600/70 hover:bg-red-600 px-2 py-1 rounded">Delete</button></td>';
@@ -1555,7 +1584,14 @@ window.addEventListener('DOMContentLoaded', () => {
   if (pendingReferralCode && !currentUser()) { setTimeout(() => openModal('signup'), 400); }
 });
 function closeModal() { $('modal').classList.add('hidden'); $('modal').classList.remove('flex'); }
-function logout() { store.del(SESSION); $('authForm').reset(); refreshBtn(); closeModal(); }
+function logout() {
+  store.del(SESSION);
+  try { sessionStorage.removeItem('SATHICARE_REF_AUTHED'); sessionStorage.removeItem('SATHICARE_PENDING_REF'); } catch (e) {}
+  guestOverride = false; pendingLoginHandle = null; loginOtpVal = null;
+  try { $('authForm').reset(); } catch (e) {}
+  refreshBtn(); closeModal();
+  window.location.replace(window.location.pathname); // clean homepage, no ?ref= / stale state
+}
 $('fPhone').addEventListener('input', e => e.target.value = e.target.value.replace(/\D/g, ''));
 
 let pendingLoginHandle = null, loginOtpVal = null;
@@ -1573,12 +1609,17 @@ $('authForm').addEventListener('submit', async e => {
   if (mode === 'signup' && name.length < 2) return showErr('Please enter your full name.');
   if (pw.length < 6) return showErr('Password must be at least 6 characters.');
   if (mode === 'signup' && pw !== pw2) return showErr('Passwords do not match.');
+  // Pull the live sheet first so the duplicate check (and cross-device login) sees accounts made on other devices.
+  const submitBtn = $('authSubmit'); const btnLabel = submitBtn.textContent; submitBtn.disabled = true; submitBtn.textContent = 'Please wait…';
+  try {
+    if (mode === 'signup' || !(store.get(USERS) || {})[handle]) await Promise.race([sheetRefresh(), new Promise(r => setTimeout(r, 6000))]);
+  } catch (e) {} finally { submitBtn.disabled = false; submitBtn.textContent = btnLabel; }
   const users = store.get(USERS) || {};
   if (mode === 'signup') {
     if (users[handle]) {
-      alert('An account with this phone number already exists. Please Log In with your existing password.');
-      showErr('This account already exists — please log in instead.');
+      alert('This mobile number is already registered! Please Login instead.');
       setTab('login');
+      showErr('This mobile number is already registered! Please Login instead.');
       return;
     }
     const salt = randSalt();
@@ -1587,7 +1628,7 @@ $('authForm').addEventListener('submit', async e => {
     if (!store.set(USERS, users)) return showErr('Could not save your account. Check that browser storage is enabled.');
     store.set(SESSION, handle); endGuestOverride();
     { const nu = users[handle];
-      sheetPost({ action: 'addUser', name, phone: method === 'phone' ? handle : '', email: method === 'email' ? handle : '', passwordHash: nu.hash, salt: nu.salt, refCode: nu.refCode, referredBy: referrerHandle ? users[referrerHandle].refCode : (pendingReferralCode ? String(pendingReferralCode).toUpperCase() : 'DIRECT'), timestamp: new Date(nu.created).toISOString() }); }
+      sheetPost({ action: 'addUser', name, phone: method === 'phone' ? handle : '', email: method === 'email' ? handle : '', password: nu.hash /* salted SHA-256 hash, never plaintext */, passwordHash: nu.hash, salt: nu.salt, refCode: nu.refCode, referredBy: referrerHandle ? users[referrerHandle].refCode : (pendingReferralCode ? String(pendingReferralCode).toUpperCase() : 'DIRECT'), timestamp: new Date(nu.created).toISOString() }); }
     $('authForm').reset();
     openModal();
     return;
@@ -1649,9 +1690,9 @@ $('leadForm').addEventListener('submit', e => {
   const leadName = $('ldName').value.trim(), leadPhone = $('ldPhone').value.trim(), interest = $('ldInterest').value;
   const all = store.get(LEADS) || {};
   all[u.handle] = all[u.handle] || [];
-  all[u.handle].push({ name: leadName, phone: leadPhone, interest, status: 'Under Process', bonusPaid: false, ts: Date.now() });
+  all[u.handle].push({ name: leadName, phone: leadPhone, interest, status: 'Under Process', bonusPaid: false, ts: Date.now(), submittedByName: u.name, submittedByPhone: u.phone || u.handle });
   store.set(LEADS, all);
-  sheetPost({ action: 'addLead', clientName: leadName, clientPhone: leadPhone, service: interest, submittedBy: u.phone || u.handle, submittedByName: u.name, bonusStatus: 'Pending', status: 'Under Process', timestamp: new Date().toISOString() });
+  sheetPost({ action: 'addLead', clientName: leadName, clientPhone: leadPhone, service: interest, submittedByName: u.name, submittedByPhone: u.phone || u.handle, submittedBy: u.phone || u.handle, bonusStatus: 'Pending', status: 'Under Process', timestamp: new Date().toISOString() });
   $('leadForm').reset();
   $('leadMsg').classList.remove('hidden');
   renderDashboard();
