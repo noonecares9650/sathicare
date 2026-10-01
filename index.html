@@ -17,6 +17,8 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:#020617}
 .mascot-animate{animation:slideIn .8s ease-out forwards}
 @keyframes popIn{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
 .pop-anim{animation:popIn .3s ease-out forwards}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.45)}50%{box-shadow:0 0 0 9px rgba(16,185,129,0)}}
+.animate-pulse-glow{animation:pulseGlow 2.2s ease-out infinite}
 .tab-on{background:#10b981;color:#020617}
 input[type=range]{accent-color:#10b981}
 .plan-card{transition:transform .15s ease,border-color .15s ease}
@@ -36,22 +38,37 @@ input[type=range]{accent-color:#10b981}
 </head>
 <body class="bg-slate-950 text-slate-100 antialiased selection:bg-emerald-500 selection:text-white">
 
-<!-- WELCOME / TUTORIAL POPUP -->
-<div id="welcomePopup" class="fixed inset-0 z-[60] hidden items-center justify-center p-4 bg-slate-950/85 backdrop-blur-sm" onclick="if(event.target===this)closeWelcome()">
-  <div class="pop-anim bg-gradient-to-b from-slate-900 to-slate-950 border border-emerald-500/30 w-full max-w-md rounded-3xl p-6 md:p-7 relative shadow-2xl overflow-hidden">
-    <div class="absolute -top-16 -left-16 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-    <button onclick="closeWelcome()" aria-label="Close" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg z-10">✕</button>
-    <div class="relative text-center">
-      <div class="w-20 h-20 mx-auto rounded-2xl bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-4xl shadow-inner">🦊</div>
-      <span class="inline-block mt-3 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-semibold px-3 py-1 rounded-full">Sathi Guide</span>
-      <h3 class="text-xl md:text-2xl font-bold mt-4 leading-snug">Ruko zara! 👋 Pehle 2-min tutorial dekh lo</h3>
-      <p class="text-slate-400 text-sm mt-2 leading-relaxed">Taaki aapko exactly pata ho kaise kaam karta hai aur genuine lead refer karke kaise <span class="text-emerald-400 font-semibold">₹500 tak</span> kamaya jaata hai. Yeh dekhna mandatory hai taaki koi confusion na rahe.</p>
-      <button onclick="watchTutorial()" class="mt-5 w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3.5 rounded-xl text-sm transition shadow-xl shadow-emerald-500/20">▶ Watch Tutorial Now</button>
-      <button onclick="closeWelcome()" class="mt-3 text-xs text-slate-500 hover:text-slate-300 transition underline underline-offset-2">Skip for now, let me explore the site</button>
-      <p id="welcomeCount" class="mt-3 text-[10px] text-slate-600"></p>
+<!-- WELCOME / TUTORIAL GUIDE POPUP (auto-opens once per session, video embedded directly) -->
+<div id="welcomePopup" class="fixed inset-0 z-[60] hidden items-center justify-center p-3 bg-black/80 backdrop-blur-md" onclick="if(event.target===this)closeWelcome()" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+  <div class="pop-anim bg-gradient-to-b from-slate-900 to-slate-950 border border-emerald-500/30 w-full max-w-md max-h-[96vh] overflow-y-auto rounded-2xl p-4 relative shadow-2xl">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="relative w-11 h-11 shrink-0">
+          <div class="w-11 h-11 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-2xl">🦊</div>
+          <span class="absolute bottom-0 right-0 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-slate-900"></span></span>
+        </div>
+        <div class="leading-tight"><p id="guideTitle" class="text-sm font-bold text-slate-100">SathiCare Guide</p><p class="text-[10px] text-emerald-400">● Online</p></div>
+      </div>
+      <button onclick="closeWelcome()" aria-label="Close tutorial" class="w-8 h-8 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center">✕</button>
     </div>
+    <div class="mt-3 space-y-2.5 text-left">
+      <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-3.5">
+        <p class="text-[13px] font-bold text-emerald-300">1. Direct Lead Generation (Flat ₹500 Per Lead)</p>
+        <p class="text-[11px] text-slate-300 mt-1 leading-relaxed">Apne network me jise bhi safe savings ya LIC policy ki zaroorat ho, unka basic details submit karein. Hamari expert team unhe guide karegi, aur jaise hi policy successfully complete hoti hai, aapko per lead ₹500 ka direct payout milega.</p>
+      </div>
+      <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-3.5">
+        <p class="text-[13px] font-bold text-emerald-300">2. Refer &amp; Earn (Lifetime Passive Income)</p>
+        <p class="text-[11px] text-slate-300 mt-1 leading-relaxed">Apna branded referral link dosto aur freelancers ke sath share karein. Jab bhi aapke network ka koi member lead submit karega, aapko bina kisi extra mehnat ke regular referral bonus milta rahega.</p>
+      </div>
+    </div>
+    <button onclick="dismissGuideToTutorial()" class="mt-3.5 w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition shadow-xl shadow-emerald-500/20">🎬 Watch Tutorial First (2 Min)</button>
+    <button onclick="dismissGuide()" class="mt-2 w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-2.5 rounded-xl text-sm transition">Start Earning</button>
   </div>
 </div>
+
+<!-- FLOATING "WATCH TUTORIAL" BUTTON (hidden while the guide popup is open) -->
+<!-- FLOATING "WATCH TUTORIAL AGAIN" BUTTON -->
+<button id="guideFloat" type="button" onclick="floatGoToTutorial()" class="hidden fixed bottom-6 left-6 z-40 bg-slate-900/95 hover:bg-slate-800 border border-emerald-500/40 text-emerald-300 text-xs font-semibold px-4 py-2.5 rounded-full shadow-xl backdrop-blur transition animate-pulse-glow">🎬 Watch Tutorial (Better Understanding)</button>
 
 <!-- ON-PAGE VIDEO MODAL -->
 <div id="videoModal" class="fixed inset-0 z-[80] hidden items-center justify-center p-4 bg-black/90" onclick="if(event.target===this)closeVideoModal()">
@@ -677,11 +694,27 @@ function ctConnectWhatsapp() {
 }
 
 /* ---------- Welcome / Tutorial Popup (frequency-capped) + on-page video ---------- */
-const POPUP_KEY = 'sathi_popup_views', WATCHED_KEY = 'sathi_tutorial_watched', MAX_POPUPS = 6;
+const GUIDE_KEY = 'sathi_guide_dismissed', WATCHED_KEY = 'sathi_tutorial_watched', GUIDE_DELAY_MS = 1500;
+const YT_EMBED_POPUP = 'https://www.youtube.com/embed/y-ReJ-M3cQA?rel=0&playsinline=1&modestbranding=1';
 const YT_EMBED = 'https://www.youtube-nocookie.com/embed/y-ReJ-M3cQA?rel=0&playsinline=1&t=1'; // t=1 = cache-buster for refreshed channel branding
-function getViews() { return parseInt(localStorage.getItem(POPUP_KEY) || '0', 10); }
-function openWelcome() { $('welcomePopup').classList.remove('hidden'); $('welcomePopup').classList.add('flex'); document.body.style.overflow = 'hidden'; }
-function closeWelcome() { $('welcomePopup').classList.add('hidden'); $('welcomePopup').classList.remove('flex'); document.body.style.overflow = ''; }
+function openWelcome() {
+  const pop = $('welcomePopup');
+  if (!pop.classList.contains('hidden')) return;
+  pop.classList.remove('hidden'); pop.classList.add('flex'); document.body.style.overflow = 'hidden';
+  $('guideFloat').classList.add('hidden'); // MUST be hidden while the popup is open
+  try { localStorage.setItem(WATCHED_KEY, '1'); } catch (e) {}
+}
+function closeWelcome() {
+  const pop = $('welcomePopup');
+  if (pop.classList.contains('hidden')) return;       // (Esc key calls this even when closed)
+  pop.classList.add('hidden'); pop.classList.remove('flex'); document.body.style.overflow = '';
+  try { sessionStorage.setItem(GUIDE_KEY, 'true'); } catch (e) {} // don't nag again this session
+  $('guideFloat').classList.remove('hidden'); // show the floating button again now that the popup is closed
+}
+function scrollToTutorial() { const el = $('tutorial'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }
+function dismissGuideToTutorial() { closeWelcome(); setTimeout(scrollToTutorial, 150); }
+function floatGoToTutorial() { scrollToTutorial(); }
+function dismissGuide() { closeWelcome(); }
 function ytIframe(autoplay) {
   return '<iframe class="w-full h-full" src="' + YT_EMBED + (autoplay ? '&autoplay=1' : '') + '" title="SathiCare Tutorial" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
 }
@@ -698,18 +731,22 @@ function closeVideoModal() {
 }
 function loadTutorialInline() { $('tutorialFrameWrap').innerHTML = ytIframe(true); try { localStorage.setItem(WATCHED_KEY, '1'); } catch (e) {} }
 function watchTutorial() {
-  closeWelcome(); closeModal();
+  guidePendingAfterAuth = false; closeWelcome(); closeModal();
   openVideoModal();
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeWelcome(); closeModal(); closeSubCalc(); closeDirectory(); closeVideoModal(); } });
-(function () {
-  let watched = false, views = 0;
-  try { watched = localStorage.getItem(WATCHED_KEY) === '1'; views = getViews(); } catch (e) {}
-  if (watched || views >= MAX_POPUPS) return;
-  views += 1;
-  try { localStorage.setItem(POPUP_KEY, String(views)); } catch (e) {}
-  window.addEventListener('DOMContentLoaded', () => { $('welcomeCount').textContent = 'Shown ' + views + ' of ' + MAX_POPUPS + ' times'; openWelcome(); });
-})();
+// AUTO-TRIGGER: once per browser session (until dismissed), 1.5s after load.
+// Referral-flow safe: if the ?ref= sign-up modal is already open, wait until it is closed instead of covering it.
+let guidePendingAfterAuth = false;
+function guideDismissed() { try { return sessionStorage.getItem(GUIDE_KEY) === 'true'; } catch (e) { return false; } }
+window.addEventListener('DOMContentLoaded', () => {
+  if (guideDismissed()) { $('guideFloat').classList.remove('hidden'); return; }
+  setTimeout(() => {
+    if (guideDismissed()) { $('guideFloat').classList.remove('hidden'); return; }
+    if (!$('modal').classList.contains('hidden')) { guidePendingAfterAuth = true; return; }
+    openWelcome();
+  }, GUIDE_DELAY_MS);
+});
 
 /* ---------- LIC Plan Library (verified plan numbers where confirmed against licindia.in) ---------- */
 const CATEGORY_PLANS = {
@@ -1754,7 +1791,10 @@ function openModal(tab) {
 window.addEventListener('DOMContentLoaded', () => {
   if (pendingReferralCode && !currentUser()) { setTimeout(() => openModal('signup'), 400); }
 });
-function closeModal() { $('modal').classList.add('hidden'); $('modal').classList.remove('flex'); }
+function closeModal() {
+  $('modal').classList.add('hidden'); $('modal').classList.remove('flex');
+  if (guidePendingAfterAuth && !guideDismissed()) { guidePendingAfterAuth = false; setTimeout(openWelcome, 500); }
+}
 function logout() {
   store.del(SESSION);
   try { sessionStorage.removeItem('SATHICARE_REF_AUTHED'); sessionStorage.removeItem('SATHICARE_PENDING_REF'); } catch (e) {}
