@@ -1,0 +1,2603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SathiCare - Secure Futures, Together</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- FIREBASE (optional cloud database — see firebaseConfig near the bottom of this file to activate) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:#050912}
+@keyframes slideIn{0%{transform:translateX(-100px);opacity:0}100%{transform:translateX(0);opacity:1}}
+.mascot-animate{animation:slideIn .8s ease-out forwards}
+@keyframes popIn{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
+.hero-container{background:linear-gradient(180deg, rgba(5,9,18,0.85) 0%, rgba(5,9,18,0.94) 100%), url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat}
+.pop-anim{animation:popIn .3s ease-out forwards}
+/* ===== Monochrome luxury palette ===== */
+.text-mint{color:#34d399;text-shadow:0 2px 12px rgba(52,211,153,.25)}
+.text-sub{color:#cbd5e1}
+/* ===== Global dynamic button states: dark/glass default -> solid cyan-emerald on hover ===== */
+button.bg-emerald-500,button.bg-emerald-400{background:rgba(25,227,192,.08)!important;border:1px solid rgba(25,227,192,.45)!important;color:#e6fffa!important}
+button,nav a,#waFloat,a[class*="rounded"][class*="px-"]{transition:all .25s ease}
+button:not(.fx-off):not(:disabled):hover,nav a:hover,#waFloat:hover,a[class*="rounded"][class*="px-"]:hover{background:#19e3c0!important;background-image:none!important;color:#020617!important;font-weight:800!important;border-color:#19e3c0!important;transform:translateY(-2px) scale(1.02)!important;box-shadow:0 8px 26px rgba(25,227,192,.5)!important}
+button:not(.fx-off):not(:disabled):hover *,nav a:hover *,a[class*="rounded"][class*="px-"]:hover *{color:inherit!important}
+button:not(.fx-off):not(:disabled):active,nav a:active,#waFloat:active,a[class*="rounded"][class*="px-"]:active{transform:scale(.95)!important}
+/* ===== Budget gate ===== */
+@keyframes gateShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.gate-shake{animation:gateShake .45s ease}
+@keyframes caretBlink{50%{opacity:0}}
+.otp-caret::after{content:'\258C';margin-left:2px;animation:caretBlink 1s steps(1) infinite}
+.otp-glow{box-shadow:0 0 18px rgba(52,211,153,.30)}
+.gate-err{border-color:#fbbf24!important;box-shadow:0 0 0 3px rgba(248,113,113,.3),0 0 16px rgba(251,191,36,.45)!important}
+@keyframes expandIn{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
+.reveal-expand{animation:expandIn .5s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){.gate-shake,.reveal-expand{animation:none}}
+
+.glass{background:rgba(255,255,255,.04);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 32px rgba(0,0,0,.37)}
+.glass-admin{background:rgba(0,0,0,.35);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.10)}
+.glass-table{background:rgba(0,0,0,.30);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.10)}
+.glass-modal{background:rgba(2,6,23,.75);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.15);box-shadow:0 20px 50px rgba(0,0,0,.8)}
+.glass-input{background:rgba(255,255,255,.05)!important;border-color:rgba(255,255,255,.10)!important;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#fff}
+.glass-input::placeholder{color:#94a3b8}
+.glass-input:focus{border-color:rgba(52,211,153,.5)!important;background:rgba(255,255,255,.08)!important;outline:none}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.45)}50%{box-shadow:0 0 0 9px rgba(16,185,129,0)}}
+.animate-pulse-glow{animation:pulseGlow 2.2s ease-out infinite}
+.tab-on{background:#10b981;color:#020617}
+input[type=range]{accent-color:#10b981}
+.plan-card{transition:transform .15s ease,border-color .15s ease}
+.plan-card:hover{transform:translateY(-2px);border-color:rgba(16,185,129,.5)}
+.sc-table{border-collapse:collapse;width:100%}
+.sc-table th,.sc-table td{padding:6px 8px;text-align:right;white-space:nowrap}
+.sc-table th:first-child,.sc-table td:first-child{text-align:left}
+.sc-table thead th{color:#6ee7b7;font-weight:700;font-size:10px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.12)}
+.sc-table tbody tr:nth-child(even){background:rgba(255,255,255,.03)}
+.sc-table tbody tr{transition:background .15s ease}
+.sc-table tbody tr:hover{background:rgba(255,255,255,.06)}
+.sc-table td{font-size:11px;color:#cbd5e1}
+.tree-children{margin-left:14px;padding-left:18px;border-left:2px solid rgba(16,185,129,.35)}
+.tree-node{position:relative;margin-top:8px}
+.tree-node::before{content:'';position:absolute;left:-18px;top:22px;width:16px;border-top:2px solid rgba(16,185,129,.35)}
+.tree-root>.tree-node::before{display:none}
+.tree-leaf::before{border-top-color:rgba(148,163,184,.35)}
+</style>
+</head>
+<body id="top" class="text-slate-100 antialiased selection:bg-emerald-500 selection:text-white">
+
+<!-- WELCOME / TUTORIAL GUIDE POPUP (auto-opens once per session, video embedded directly) -->
+<div id="welcomePopup" class="fixed inset-0 z-[60] hidden items-center justify-center p-3 bg-black/65 backdrop-blur-sm" onclick="if(event.target===this)closeWelcome()" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+  <div class="pop-anim bg-slate-950/92 backdrop-blur-sm border border-slate-800 shadow-2xl w-full max-w-md max-h-[96vh] overflow-y-auto rounded-2xl p-4 relative">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="relative w-11 h-11 shrink-0">
+          <div class="w-11 h-11 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-2xl">🦊</div>
+          <span class="absolute bottom-0 right-0 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-slate-900"></span></span>
+        </div>
+        <div class="leading-tight"><p id="guideTitle" class="text-sm font-bold text-slate-100">SathiCare Guide</p><p class="text-[10px] text-emerald-400">● Online</p></div>
+      </div>
+      <button onclick="closeWelcome()" aria-label="Close tutorial" class="w-8 h-8 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center">✕</button>
+    </div>
+    <div class="mt-3 space-y-2.5 text-left">
+      <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-3.5">
+        <p class="text-[13px] font-bold text-emerald-300">1. Direct Lead Generation (Flat ₹500 Per Lead)</p>
+        <p class="text-[11px] text-slate-300 mt-1 leading-relaxed">Apne network me jise bhi safe savings ya LIC policy ki zaroorat ho, unka basic details submit karein. Hamari expert team unhe guide karegi, aur jaise hi policy successfully complete hoti hai, aapko per lead ₹500 ka direct payout milega.</p>
+      </div>
+      <div class="bg-slate-900/70 border border-white/10 rounded-2xl p-3.5">
+        <p class="text-[13px] font-bold text-emerald-300">2. Refer &amp; Earn (Lifetime Passive Income)</p>
+        <p class="text-[11px] text-slate-300 mt-1 leading-relaxed">Apna branded referral link dosto aur freelancers ke sath share karein. Jab bhi aapke network ka koi member lead submit karega, aapko bina kisi extra mehnat ke regular referral bonus milta rahega.</p>
+      </div>
+    </div>
+    <button onclick="dismissGuideToTutorial()" class="mt-3.5 w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition shadow-xl shadow-emerald-500/20">🎬 Watch Tutorial First (2 Min)</button>
+    <button onclick="dismissGuide()" class="mt-2 w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-2.5 rounded-xl text-sm transition">Start Earning</button>
+  </div>
+</div>
+
+<!-- FLOATING "WATCH TUTORIAL" BUTTON (hidden while the guide popup is open) -->
+<!-- FLOATING "WATCH TUTORIAL AGAIN" BUTTON -->
+<button id="guideFloat" type="button" onclick="floatGoToTutorial()" class="hidden fixed bottom-6 left-6 z-40 bg-slate-900/95 hover:bg-slate-800 border border-emerald-500/40 text-emerald-300 text-xs font-semibold px-4 py-2.5 rounded-full shadow-xl backdrop-blur transition animate-pulse-glow">🎬 Watch Tutorial (Better Understanding)</button>
+
+<!-- ON-PAGE VIDEO MODAL -->
+<div id="videoModal" class="fixed inset-0 z-[80] hidden items-center justify-center p-4 bg-black/90" onclick="if(event.target===this)closeVideoModal()">
+  <div class="pop-anim w-full max-w-3xl relative">
+    <button onclick="closeVideoModal()" aria-label="Close" class="absolute -top-10 right-0 text-slate-300 hover:text-white text-2xl">✕</button>
+    <div class="aspect-video rounded-2xl overflow-hidden glass shadow-2xl" id="videoModalFrameWrap"></div>
+  </div>
+</div>
+
+
+<!-- FLOATING WHATSAPP -->
+<a id="waFloat" href="#" target="_blank" rel="noopener" class="fixed bottom-5 right-5 z-50 bg-emerald-500 hover:bg-emerald-400 text-slate-950 w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-2xl shadow-emerald-500/30 transition" aria-label="Chat on WhatsApp">💬</a>
+
+<div class="bg-emerald-600/20 border-b border-emerald-500/30 text-emerald-400 text-xs py-2.5 px-4 text-center font-bold tracking-wide">
+  🔥 EARN UPTO ₹500 CASH PER GENUINE LEAD • Trusted LIC Framework
+</div>
+
+<header class="sticky z-50" style="top:calc(env(safe-area-inset-top,0px) + 16px)">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 shadow-2xl flex items-center justify-between px-4 sm:px-6 py-3 gap-3">
+      <div class="flex items-center space-x-2.5 shrink-0">
+        <div class="w-9 h-9 rounded-xl bg-[#19e3c0] flex items-center justify-center font-black text-lg text-slate-950 shadow-lg shadow-cyan-400/25">S</div>
+        <div>
+          <span class="font-black tracking-wider uppercase text-lg text-mint">SathiCare</span>
+          <span class="flex items-center gap-1 text-[9px] text-slate-400 tracking-wide font-semibold -mt-0.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_2px_rgba(52,211,153,0.6)] inline-block"></span>Verified Partner Ecosystem</span>
+        </div>
+      </div>
+      <nav class="hidden md:flex items-center gap-1">
+        <a href="#top" class="text-slate-200 hover:text-white hover:bg-white/10 px-4 py-2 rounded-xl text-sm font-medium transition">Home</a>
+        <a href="#" onclick="openDirectory();return false;" class="text-slate-200 hover:text-white hover:bg-white/10 px-4 py-2 rounded-xl text-sm font-medium transition">All Plans</a>
+        <a href="#calculator" class="text-slate-200 hover:text-white hover:bg-white/10 px-4 py-2 rounded-xl text-sm font-medium transition">Calculator</a>
+        <a href="#" onclick="openModal();return false;" class="text-slate-200 hover:text-white hover:bg-white/10 px-4 py-2 rounded-xl text-sm font-medium transition">Submit Lead</a>
+      </nav>
+      <div class="flex items-center gap-2.5 shrink-0">
+        <span class="hidden sm:inline-flex items-center gap-1.5 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold px-3 py-2 rounded-xl">⚡ Earn ₹500/Lead</span>
+        <button onclick="openModal()" id="authBtn" class="bg-white/5 border border-cyan-300/50 text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold text-sm transition">Login / Partner Register</button>
+        <button onclick="logout()" id="logoutBtn" class="hidden border border-white/15 hover:border-red-400 hover:text-red-300 text-slate-300 px-4 py-2.5 rounded-xl font-semibold text-sm transition">Logout</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="hero-container relative overflow-hidden flex items-center min-h-[640px] md:min-h-[720px]">
+  <canvas id="kidMascotCanvas" class="absolute inset-0 w-full h-full z-0 pointer-events-none" aria-hidden="true"></canvas>
+  <div class="absolute inset-x-0 bottom-0 h-1/2 z-[1] pointer-events-none" style="background:linear-gradient(180deg, rgba(5,9,18,0) 0%, #050912 100%)"></div>
+  <div class="relative z-10 w-full max-w-5xl mx-auto px-6 pt-16 pb-24 md:pt-20 md:pb-28 text-center">
+    <span class="inline-block bg-black/30 border border-cyan-300/30 text-mint text-[11px] font-semibold px-4 py-1.5 rounded-full mb-6 tracking-wide" style="text-shadow:none">⭐ FREELANCE PARTNER PROGRAM • FLAT ₹500 PER LEAD • ZERO INVESTMENT</span>
+    <h1 class="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.05] mb-6" style="text-shadow:0 2px 28px rgba(3,7,18,.8)"><span class="text-slate-100 font-extrabold">Turn Financial Trust Into</span><br><span class="text-emerald-400 drop-shadow-[0_2px_16px_rgba(52,211,153,0.35)]" style="-webkit-text-stroke:.6px rgba(226,232,240,.35);paint-order:stroke fill">Daily Passive Income.</span></h1>
+    <p class="text-slate-300 font-normal text-base md:text-lg leading-relaxed mb-9 max-w-2xl mx-auto" style="text-shadow:0 1px 16px rgba(3,7,18,.9)">Recommend verified LIC policies &amp; savings solutions to your circle. Earn instant payouts while building lifetime referral networks.</p>
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+      <button onclick="openModal('signup')" class="bg-white/5 border border-cyan-300/50 text-white px-8 py-4 rounded-xl font-bold text-center transition shadow-2xl shadow-cyan-400/10">▶ Start Earning Now</button>
+      <button onclick="openWelcome()" class="bg-black/30 border border-white/20 text-white px-8 py-4 rounded-xl font-bold text-center transition">+ Watch Tutorial</button>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES — horizontal glass tiles -->
+<section class="max-w-7xl mx-auto px-6 -mt-10 md:-mt-14 relative z-10">
+  <div class="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&amp;::-webkit-scrollbar]:hidden">
+    <button onclick="openDirectoryCategory('Endowment Plans')" class="snap-start shrink-0 text-left bg-slate-900/60 backdrop-blur-md border border-white/10 hover:border-emerald-500/50 hover:scale-[1.02] transition rounded-2xl p-5 w-44">
+      <span class="text-2xl">💼</span><p class="text-sm font-bold text-slate-100 mt-2">Endowment Plans</p>
+    </button>
+    <button onclick="openDirectoryCategory('Mahila Plans')" class="snap-start shrink-0 text-left bg-slate-900/60 backdrop-blur-md border border-white/10 hover:border-emerald-500/50 hover:scale-[1.02] transition rounded-2xl p-5 w-44">
+      <span class="text-2xl">👩</span><p class="text-sm font-bold text-slate-100 mt-2">Mahila Plans</p>
+    </button>
+    <button onclick="openDirectoryCategory('Term Plans')" class="snap-start shrink-0 text-left bg-slate-900/60 backdrop-blur-md border border-white/10 hover:border-emerald-500/50 hover:scale-[1.02] transition rounded-2xl p-5 w-44">
+      <span class="text-2xl">🛡️</span><p class="text-sm font-bold text-slate-100 mt-2">Term Plans</p>
+    </button>
+    <button onclick="openDirectoryCategory('Pension Plans')" class="snap-start shrink-0 text-left bg-slate-900/60 backdrop-blur-md border border-white/10 hover:border-emerald-500/50 hover:scale-[1.02] transition rounded-2xl p-5 w-44">
+      <span class="text-2xl">🧓</span><p class="text-sm font-bold text-slate-100 mt-2">Pension Plans</p>
+    </button>
+    <button onclick="openDirectoryCategory('Ulip Plans')" class="snap-start shrink-0 text-left bg-slate-900/60 backdrop-blur-md border border-white/10 hover:border-emerald-500/50 hover:scale-[1.02] transition rounded-2xl p-5 w-44">
+      <span class="text-2xl">📈</span><p class="text-sm font-bold text-slate-100 mt-2">Ulip Plans</p>
+    </button>
+  </div>
+</section>
+
+<section class="max-w-7xl mx-auto px-6 pt-8">
+  <div class="mascot-animate glass border border-emerald-500/30 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 relative overflow-hidden">
+    <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="flex-shrink-0 relative">
+      <div class="w-24 h-24 rounded-2xl bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-4xl">🦊</div>
+      <span class="absolute -bottom-2 -right-2 bg-emerald-500 text-slate-950 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Guide</span>
+    </div>
+    <div class="flex-grow text-center md:text-left">
+      <h3 class="text-emerald-400 font-semibold text-xs tracking-wider uppercase mb-1">Sathi Guide says:</h3>
+      <p class="text-lg md:text-xl font-medium text-slate-200 leading-snug">"Paisa bachana koi rocket science nahi hai, bas sahi jagah chuna hua kadam hai. Apno ka kal secure karo aur sath me extra savings banao—bina kisi pressure ke!"</p>
+      <p class="text-xs text-emerald-400 mt-2 font-semibold">💡 Refer genuine clients and get up to ₹500 reward per conversion.</p>
+    </div>
+  </div>
+</section>
+
+<section class="max-w-7xl mx-auto px-6 py-16 md:py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+  <div>
+    <span class="inline-block bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold px-3 py-1 rounded-full mb-5">📖 Explore Plans</span>
+    <h2 class="text-2xl md:text-3xl font-bold tracking-tight leading-tight mb-3">Know what you're recommending</h2>
+    <p class="text-slate-400 text-sm md:text-base leading-relaxed mb-6">Browse every LIC plan by category, or jump straight to a market-linked pick below.</p>
+    <div class="flex flex-col sm:flex-row flex-wrap gap-3 mb-2">
+      <button onclick="openDirectory()" class="bg-slate-800 hover:bg-slate-700 border border-white/10 text-slate-100 px-6 py-4 rounded-xl font-bold text-center transition">📖 Know All Plans</button>
+      <a href="#vision" class="border-2 border-emerald-500 hover:bg-emerald-500 hover:text-slate-950 text-emerald-400 px-6 py-4 rounded-xl font-bold text-center transition">Learn How It Works</a>
+    </div>
+
+    <!-- ULIP / NIVESH PLUS PROMO -->
+    <div class="mt-10 bg-gradient-to-br from-emerald-900/30 to-slate-900 border border-emerald-500/30 rounded-3xl p-6">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-xs bg-emerald-500 text-slate-950 font-bold px-2.5 py-1 rounded-lg">ULIP SPOTLIGHT</span>
+        <span class="text-sm font-bold text-emerald-300">LIC Nivesh Plus (Plan 849)</span>
+      </div>
+      <p class="text-xs text-slate-400 leading-relaxed mb-4">Ek single lump-sum invest karo aur professionally-managed market-linked funds mein wealth-building growth ka fayda uthao — sath mein life cover bhi milta hai. Aap apne risk-appetite ke hisaab se fund choose kar sakte ho (equity-heavy growth se leke balanced/secured funds tak), aur fund switch bhi kar sakte ho. Long-term (20-25 saal) market-linked plans mein compounding se corpus kaafi bada ban sakta hai.</p>
+      <div class="grid grid-cols-3 gap-2 text-center" id="ulipTiers"></div>
+      <p class="text-[10px] text-slate-500 mt-3">Ranges above are illustrative only (assumed 8%–10%/year growth) — actual returns depend on market performance and are not guaranteed by LIC. Please read the ULIP sales brochure and risk factors before investing.</p>
+    </div>
+  </div>
+
+  <!-- ADVANCED LIC PLAN RECOMMENDER -->
+  <div id="calculator" class="glass border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl scroll-mt-28">
+    <h3 class="text-lg font-semibold mb-1 text-emerald-400">LIC Plan Recommendation Calculator</h3>
+    <p class="text-xs text-slate-500 mb-5">Fill in your details, get a focused shortlist of matching LIC plans to explore.</p>
+    <div class="space-y-4">
+      <div>
+        <label for="lrAge" class="block text-xs text-slate-400 mb-1">Age (years)</label>
+        <input type="number" id="lrAge" placeholder="e.g. 32" min="1" max="100" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+      </div>
+      <div>
+        <label for="lrIncome" class="block text-xs text-slate-400 mb-1">Monthly Income (₹)</label>
+        <input type="number" id="lrIncome" placeholder="e.g. 35000" min="0" step="1000" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+      </div>
+      <div>
+        <label for="lrInvest" class="block text-xs text-slate-400 mb-1">Monthly Investment in Policy (₹, min ₹1,000)</label>
+        <input type="number" id="lrInvest" placeholder="e.g. 5000" min="1000" step="100" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        <p id="lrInvestErr" class="hidden text-[11px] text-red-400 mt-1">Minimum monthly investment is ₹1,000.</p>
+      </div>
+      <div>
+        <label for="lrRate" class="block text-xs text-slate-400 mb-1">Return Expectation</label>
+        <select id="lrRate" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+          <option value="6">Conservative (~6%/yr — endowment/bonus style)</option>
+          <option value="8" selected>Moderate (~8%/yr)</option>
+          <option value="10">Growth-focused (~10%/yr — ULIP style, market-linked)</option>
+        </select>
+      </div>
+      <button id="lrSubmit" type="button" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3.5 rounded-xl text-sm transition shadow-lg shadow-emerald-500/20">Find Best LIC Plans</button>
+      <p id="lrGateMsg" class="hidden text-[12px] text-red-300 bg-red-500/10 border border-red-500/30 rounded-lg p-2.5 leading-snug" role="alert">⚠️ Please enter your budget/income amount first to view personalized policy returns.</p>
+
+      <div id="lrResult" class="hidden space-y-3">
+        <div class="flex items-center justify-between pt-1">
+          <span class="text-[11px] uppercase tracking-wide text-emerald-400 font-bold">Curated Plan Shortlist</span>
+          <span class="text-[11px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-lg">Illustration only</span>
+        </div>
+        <div id="lrCards" class="space-y-3"></div>
+        <p class="text-[11px] text-slate-500 leading-relaxed pt-1">Illustrative figures based on your inputs and chosen return rate, not an official LIC quotation. Please confirm exact eligibility and figures with a licensed LIC advisor.</p>
+        <button type="button" onclick="closeLrResult()" class="w-full border border-white/10 hover:border-slate-500 text-slate-300 hover:text-white text-xs font-semibold py-2.5 rounded-xl transition">⬅ Back / Reset Search</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REFER & EARN (PUBLIC) -->
+<section class="max-w-4xl mx-auto px-6 pb-16">
+  <div class="bg-gradient-to-br from-emerald-900/30 to-slate-900 border border-emerald-500/30 rounded-3xl p-6 md:p-8">
+    <div class="text-center mb-8">
+      <span class="inline-block bg-emerald-500 text-slate-950 text-xs font-bold px-3 py-1 rounded-full mb-3">🎁 REFER &amp; EARN</span>
+      <h3 class="text-2xl md:text-3xl font-bold mb-2 leading-snug">Refer &amp; Earn Upto ₹500 Per Lead – <br class="hidden md:block">Bina Kisi Mehnat Ke Passive Income!</h3>
+      <p class="text-slate-400 text-sm max-w-xl mx-auto">Apna link share karo, dosto ko SathiCare se judne do, aur har successful lead par seedha bonus kamao — koi target, koi pressure nahi.</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+      <div class="bg-slate-950/60 border border-white/10 rounded-2xl p-4">
+        <span class="inline-flex w-7 h-7 items-center justify-center rounded-full bg-emerald-500 text-slate-950 text-xs font-bold mb-2">1</span>
+        <p class="text-sm font-bold text-emerald-300 mb-1">Apna Unique Referral Link Share Karein</p>
+        <p class="text-[11px] text-slate-400 leading-relaxed">Dosto aur family ko apna link bhejein.</p>
+      </div>
+      <div class="bg-slate-950/60 border border-white/10 rounded-2xl p-4">
+        <span class="inline-flex w-7 h-7 items-center justify-center rounded-full bg-emerald-500 text-slate-950 text-xs font-bold mb-2">2</span>
+        <p class="text-sm font-bold text-emerald-300 mb-1">Naya Member Jude</p>
+        <p class="text-[11px] text-slate-400 leading-relaxed">Jaise hi koi aapke link se SathiCare par judega aur account banayega.</p>
+      </div>
+      <div class="bg-slate-950/60 border border-white/10 rounded-2xl p-4">
+        <span class="inline-flex w-7 h-7 items-center justify-center rounded-full bg-emerald-500 text-slate-950 text-xs font-bold mb-2">3</span>
+        <p class="text-sm font-bold text-emerald-300 mb-1">Lead Submit &amp; Approval</p>
+        <p class="text-[11px] text-slate-400 leading-relaxed">Jab unki submit ki gayi lead (policy/care request) verify hokar successful complete hogi.</p>
+      </div>
+      <div class="bg-slate-950/60 border border-white/10 rounded-2xl p-4">
+        <span class="inline-flex w-7 h-7 items-center justify-center rounded-full bg-emerald-500 text-slate-950 text-xs font-bold mb-2">4</span>
+        <p class="text-sm font-bold text-emerald-300 mb-1">Direct ₹500 Bonus</p>
+        <p class="text-[11px] text-slate-400 leading-relaxed">Har successful lead conversion par aapko bina kisi jhanjhat ke upto ₹500 ka referral bonus credit hoga.</p>
+      </div>
+    </div>
+
+    <div id="publicRefBox" class="hidden glass border border-emerald-500/30 rounded-2xl p-5 max-w-xl mx-auto">
+      <p class="text-xs font-bold text-emerald-300 mb-2">🎁 Aapka Referral Link</p>
+      <div class="flex items-center gap-2 mb-3">
+        <input id="publicRefLinkInput" readonly class="flex-grow glass-input border border-white/10 rounded-lg px-3 py-2.5 text-xs text-slate-300">
+        <button type="button" onclick="copyPublicRefLink()" class="text-[11px] bg-slate-800 hover:bg-slate-700 px-3 py-2.5 rounded-lg font-semibold whitespace-nowrap">📋 Copy Link</button>
+      </div>
+      <button type="button" onclick="sharePublicRefLinkWa()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold py-3 rounded-lg transition">💬 Share on WhatsApp</button>
+      <p id="publicRefCopiedMsg" class="hidden text-[11px] text-emerald-400 mt-2 text-center">✅ Link copied to clipboard!</p>
+    </div>
+    <div id="publicRefCta" class="text-center">
+      <button onclick="openModal('signup')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-6 py-3 rounded-xl font-bold text-sm transition">Get My Referral Link</button>
+    </div>
+  </div>
+</section>
+
+<!-- KNOW ALL PLANS DIRECTORY -->
+<div id="directoryModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-[65] hidden items-center justify-center p-4" onclick="if(event.target===this)closeDirectory()">
+  <div class="pop-anim glass-modal border border-white/10 w-full max-w-2xl rounded-3xl p-6 md:p-7 relative shadow-2xl max-h-[85vh] overflow-y-auto">
+    <button onclick="closeDirectory()" aria-label="Close" class="absolute top-5 right-5 text-slate-400 hover:text-white text-lg">✕</button>
+    <h3 class="text-xl font-bold mb-1">📖 Know All Plans</h3>
+    <p class="text-xs text-slate-500 mb-5">Tap any plan to open its calculator. Please confirm exact plan numbers and current availability with licindia.in or your LIC advisor before sharing with a client.</p>
+    <div id="directoryList" class="space-y-5"></div>
+  </div>
+</div>
+
+<!-- PLAN EXPLORER / DEEP-DIVE MODAL -->
+<div id="subCalcModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-[70] hidden items-center justify-center p-4" onclick="if(event.target===this)closeSubCalc()">
+  <div class="pop-anim glass-modal border border-emerald-500/30 w-full max-w-xl rounded-3xl p-6 md:p-7 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+    <button onclick="closeSubCalc()" aria-label="Close" class="absolute top-5 right-5 text-slate-400 hover:text-white text-lg">✕</button>
+    <span class="text-[11px] uppercase tracking-wide text-emerald-400 font-bold">Plan Explorer</span>
+    <h3 id="scName" class="text-xl font-bold mt-1 mb-1"></h3>
+    <p id="scDesc" class="text-xs text-slate-400 leading-relaxed mb-4"></p>
+
+    <div id="scBenefits" class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-xs text-emerald-300 leading-relaxed mb-4 space-y-1"></div>
+
+    <div id="scInputsWrap">
+    <div class="glass border border-white/10 rounded-xl p-3 mb-3">
+      <p class="text-[11px] text-slate-400 mb-2 font-semibold">Proposer Details</p>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label for="scName2" class="block text-xs text-slate-400 mb-1">Proposer Name</label>
+          <input type="text" id="scName2" placeholder="Your name" class="w-full glass-input border border-white/10 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label for="scAge" class="block text-xs text-slate-400 mb-1">Age</label>
+          <input type="number" id="scAge" placeholder="e.g. 30" min="1" max="80" class="w-full glass-input border border-white/10 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <div>
+        <label for="scSA" class="block text-xs text-slate-400 mb-1">Sum Assured (₹)</label>
+        <input type="number" id="scSA" value="500000" min="0" step="50000" class="w-full glass-input border border-white/10 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+      </div>
+      <div>
+        <label for="scPremOpt" class="block text-xs text-slate-400 mb-1">Premium Option</label>
+        <select id="scPremOpt" class="w-full glass-input border border-white/10 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+          <option value="regular">Regular Premium</option>
+          <option value="limited">Limited Premium (PPT)</option>
+          <option value="single">Single Premium</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <div>
+        <label for="scFreq" class="block text-xs text-slate-400 mb-1">Frequency</label>
+        <select id="scFreq" class="w-full glass-input border border-white/10 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+          <option value="monthly">Monthly</option>
+          <option value="quarterly">Quarterly</option>
+          <option value="halfyearly">Half-Yearly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+      </div>
+      <div>
+        <label for="scPremium" class="block text-xs text-slate-400 mb-1"><span id="scPremiumLabel">Premium (₹, min ₹1,000)</span></label>
+        <input type="number" id="scPremium" placeholder="e.g. 1000" min="1000" step="100" class="w-full glass-input border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+      </div>
+    </div>
+    <button id="scCalc" type="button" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition shadow-lg shadow-emerald-500/20 mb-2">Show Breakdown</button>
+    <p id="scGateMsg" class="hidden text-[12px] text-red-300 bg-red-500/10 border border-red-500/30 rounded-lg p-2.5 leading-snug mb-4" role="alert">⚠️ Please enter your budget/income amount first to view personalized policy returns.</p>
+    </div><!-- /scInputsWrap -->
+
+    <!-- ===================== PORTFOLIO DASHBOARD (shown after Show Breakdown) ===================== -->
+    <div id="scOut" class="hidden space-y-4">
+
+      <div class="flex items-center justify-between">
+        <button type="button" onclick="backToExplorerInputs()" class="text-xs font-semibold text-slate-300 hover:text-white border border-white/10 hover:border-slate-500 rounded-lg px-3 py-2 transition">⬅ Back to Calculator / Re-calculate</button>
+        <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-1 rounded-lg">Illustration only</span>
+      </div>
+
+      <!-- A. Headline metrics strip -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+        <div class="bg-slate-900/90 border border-emerald-500/20 backdrop-blur-md rounded-2xl p-3.5 shadow-lg shadow-emerald-500/5">
+          <p class="text-[10px] text-slate-400 mb-1">🛡️ Sum Assured / Life Cover</p>
+          <p id="pfCover" class="text-base font-bold text-white">-</p>
+        </div>
+        <div class="bg-slate-900/90 border border-emerald-500/20 backdrop-blur-md rounded-2xl p-3.5 shadow-lg shadow-emerald-500/5">
+          <p class="text-[10px] text-slate-400 mb-1" id="pfMaturityLabel">💎 Est. Total Maturity Payout</p>
+          <p id="pfMaturity" class="text-base font-bold text-emerald-300">-</p>
+        </div>
+        <div class="bg-slate-900/90 border border-emerald-500/20 backdrop-blur-md rounded-2xl p-3.5 shadow-lg shadow-emerald-500/5">
+          <p class="text-[10px] text-slate-400 mb-1">💳 Premium Breakdown</p>
+          <p id="pfPremium" class="text-base font-bold text-white">-</p>
+        </div>
+        <div class="bg-slate-900/90 border border-emerald-500/20 backdrop-blur-md rounded-2xl p-3.5 shadow-lg shadow-emerald-500/5">
+          <p class="text-[10px] text-slate-400 mb-1">📈 Wealth Multiplier</p>
+          <p id="pfMultiplier" class="text-base font-bold text-[#34d399]">-</p>
+        </div>
+      </div>
+
+      <!-- B. Yearly payout timeline chart -->
+      <div class="bg-slate-900/90 border border-white/10 backdrop-blur-md rounded-2xl p-4 shadow-2xl">
+        <p class="text-xs font-bold text-slate-200 mb-1">📊 Yearly Payout &amp; Cover Timeline</p>
+        <p class="text-[10px] text-slate-500 mb-2">Hover any point for that year's breakdown</p>
+        <div class="overflow-x-auto"><div id="pfChartWrap" class="min-w-[480px]"></div></div>
+      </div>
+
+      <!-- C. Two-column ledger + dial -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="bg-slate-900/90 border border-white/10 backdrop-blur-md rounded-2xl p-4 shadow-2xl space-y-2">
+          <p class="text-xs font-bold text-slate-200 mb-1">📒 Policy Benefit Highlights</p>
+          <div id="pfLedger" class="space-y-2 text-[11px]"></div>
+        </div>
+        <div class="bg-slate-900/90 border border-white/10 backdrop-blur-md rounded-2xl p-4 shadow-2xl flex flex-col items-center justify-center text-center">
+          <p class="text-xs font-bold text-slate-200 mb-2 self-start">🔒 Risk vs Security Allocation</p>
+          <div id="pfDial"></div>
+          <p id="pfDialCaption" class="text-[10px] text-slate-500 mt-2 leading-relaxed"></p>
+        </div>
+      </div>
+
+      <!-- Original computed fields kept in the DOM (hidden) so the existing math/population code
+           keeps working untouched; the dashboard above is populated from the same JS variables. -->
+      <div class="hidden" aria-hidden="true">
+        <div id="scFreqGrid">
+          <p id="scMonthly"></p><p id="scQuarterly"></p><p id="scHalf"></p><p id="scYearly"></p>
+        </div>
+        <p id="scPerDayLabel"></p><p id="scPerDay"></p>
+        <p id="scOutLabel"></p><p id="scOutVal"></p>
+        <span id="scTerm"></span><span id="scPPT"></span>
+      </div>
+
+      <div id="scGuidance" class="bg-slate-900/90 border border-white/10 backdrop-blur-md rounded-2xl p-3.5 text-xs text-slate-300 leading-relaxed shadow-2xl"></div>
+
+      <!-- D. Collapsible year-by-year schedule -->
+      <div class="bg-slate-900/90 border border-white/10 backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden">
+        <button type="button" onclick="toggleScTable()" class="w-full flex items-center justify-between px-4 py-3 text-xs font-bold text-slate-200">
+          <span>🗓️ Year-by-Year Payout Schedule</span>
+          <span id="scTableChevron" class="text-slate-400 transition-transform">▾</span>
+        </button>
+        <div id="scTableBodyWrap" class="hidden px-4 pb-4">
+          <div class="overflow-x-auto rounded-xl border border-white/10 glass-table">
+            <table class="sc-table">
+              <thead><tr><th>Year</th><th id="scColPrem">Premium</th><th id="scColCum">Cum. Paid</th><th>Cover</th><th>Ind. Value</th><th>Loan?</th></tr></thead>
+              <tbody id="scTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <p class="text-[11px] text-slate-500 leading-relaxed">Illustrative estimate only, not an official LIC benefit illustration. Loan eligibility generally opens up after the policy acquires a surrender value (commonly after 2–3 years of premiums / immediately for single premium), subject to LIC's actual terms. Final premium and benefits depend on medical and underwriting outcome.</p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+        <button type="button" onclick="backToExplorerInputs()" class="w-full border border-white/10 hover:border-slate-500 text-slate-300 hover:text-white text-xs font-semibold py-3 rounded-xl transition">⬅ Back to Calculator</button>
+        <button type="button" onclick="applyLeadForPlan()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold py-3 rounded-xl transition shadow-lg shadow-emerald-500/20">🚀 Submit Lead for this Plan (₹500 Payout)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section id="tutorial" class="max-w-5xl mx-auto px-6 py-16 scroll-mt-24">
+  <div class="text-center mb-8">
+    <h2 class="text-xs uppercase tracking-widest text-emerald-400 font-bold mb-3">Watch &amp; Learn</h2>
+    <h3 class="text-3xl font-bold tracking-tight">How SathiCare Works</h3>
+    <p class="text-slate-400 text-sm mt-3">2-minute tutorial — samjho kaise refer karo aur ₹500 tak kamao har genuine lead par.</p>
+  </div>
+  <div class="glass border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+    <div class="aspect-video glass" id="tutorialFrameWrap">
+      <button type="button" onclick="loadTutorialInline()" class="w-full h-full flex items-center justify-center group">
+        <span class="w-16 h-16 rounded-full bg-emerald-500/20 group-hover:bg-emerald-500/30 text-emerald-400 flex items-center justify-center text-2xl transition">▶</span>
+      </button>
+    </div>
+  </div>
+  <p class="text-center mt-4"><a href="https://www.youtube.com/watch?v=y-ReJ-M3cQA" target="_blank" rel="noopener" class="inline-block bg-slate-800 hover:bg-slate-700 border border-white/10 text-emerald-400 text-sm font-semibold px-5 py-2.5 rounded-xl transition">▶ Watch on YouTube</a></p>
+</section>
+
+<section id="vision" class="border-t border-white/10/80 bg-slate-900/40 py-20">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center max-w-2xl mx-auto mb-16">
+      <h2 class="text-xs uppercase tracking-widest text-emerald-400 font-bold mb-3">Our Core Philosophy</h2>
+      <h3 class="text-3xl font-bold tracking-tight">Vision &amp; Mission</h3>
+      <p class="text-slate-400 text-sm mt-3">Our ultimate goal is not just selling insurance, but building long-term financial security and trust in every household.</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="glass border border-white/10 p-8 rounded-3xl">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-xl mb-6">🎯</div>
+        <h4 class="text-xl font-bold mb-3">Our Vision</h4>
+        <p class="text-slate-400 text-sm leading-relaxed">To empower youth across every town and city in India with a reliable platform to generate steady pocket income, while extending a robust financial safety shield to every family.</p>
+      </div>
+      <div class="glass border border-white/10 p-8 rounded-3xl">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-xl mb-6">🚀</div>
+        <h4 class="text-xl font-bold mb-3">Our Mission</h4>
+        <p class="text-slate-400 text-sm leading-relaxed">To operate with absolute transparency and trust. We meticulously verify every lead, ensure timely payouts to our partners, and eliminate apprehensions by promoting trusted LIC policies with total confidence.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="max-w-4xl mx-auto px-6 py-20">
+  <div class="text-center mb-16">
+    <h2 class="text-xs uppercase tracking-widest text-emerald-400 font-bold mb-3">Clear &amp; Transparent</h2>
+    <h3 class="text-3xl font-bold tracking-tight">Frequently Answered Doubts (LIC Trust)</h3>
+  </div>
+  <div class="space-y-4" id="faqList">
+    <div class="faq-item glass border border-white/10 p-6 rounded-2xl">
+      <h4 class="font-semibold text-base mb-2 text-slate-200">Q: Kya LIC me paisa doobne ka koi risk hai?</h4>
+      <p class="text-sm text-slate-400 leading-relaxed">Ans: Bilkul nahi! LIC Government of India ki statutory corporation hai jise 100% Sovereign Guarantee milti hai. Iska matlab hai ki aapka ek-ek paisa sarkar ki guarantee ke sath secure hai.</p>
+    </div>
+    <div class="faq-item glass border border-white/10 p-6 rounded-2xl">
+      <h4 class="font-semibold text-base mb-2 text-slate-200">Q: Partner ko commission ya payout kaise milta hai?</h4>
+      <p class="text-sm text-slate-400 leading-relaxed">Ans: Jaise hi aapka refer kiya hua customer genuine policy process complete kar leta hai, aapka payout direct aapke UPI (Google Pay / PhonePe) par ₹500 tak transfer kar diya jata hai.</p>
+    </div>
+    <div class="faq-item glass border border-white/10 p-6 rounded-2xl">
+      <h4 class="font-semibold text-base mb-2 text-slate-200">Q: Lead submit karne ke baad kitna time lagta hai payout aane mein?</h4>
+      <p class="text-sm text-slate-400 leading-relaxed">Ans: Policy verify aur complete hone ke baad, typically kuch working days ke andar payout process ho jata hai. Aap apne dashboard mein har lead ka live status (Under Process / Policy Completed / No Response / Rejected) dekh sakte ho.</p>
+    </div>
+    <div class="faq-item-extra hidden glass border border-white/10 p-6 rounded-2xl">
+      <h4 class="font-semibold text-base mb-2 text-slate-200">Q: Agar mera lead "No Response" ya "Rejected" show ho raha hai toh?</h4>
+      <p class="text-sm text-slate-400 leading-relaxed">Ans: Iska matlab customer contact nahi ho paya ya policy process aage nahi badha. Aap chaho toh naya updated number ke sath dobara same lead resubmit kar sakte ho, ya support se WhatsApp par baat kar sakte ho.</p>
+    </div>
+    <div class="faq-item-extra hidden glass border border-white/10 p-6 rounded-2xl">
+      <h4 class="font-semibold text-base mb-2 text-slate-200">Q: Kya main ek se zyada lead submit kar sakta hoon?</h4>
+      <p class="text-sm text-slate-400 leading-relaxed">Ans: Haan, jitne genuine leads chaho utne submit kar sakte ho — har converted lead par alag se payout milta hai. Sirf duplicate ya fake entries avoid karo.</p>
+    </div>
+    <div class="faq-item-extra hidden glass border border-white/10 p-6 rounded-2xl">
+      <h4 class="font-semibold text-base mb-2 text-slate-200">Q: Website use karne ke liye koi charge lagta hai?</h4>
+      <p class="text-sm text-slate-400 leading-relaxed">Ans: Nahi, SathiCare partner banna aur leads refer karna bilkul free hai — koi registration fee ya hidden charge nahi hai.</p>
+    </div>
+    <div class="faq-item-extra hidden glass border border-white/10 p-6 rounded-2xl">
+      <h4 class="font-semibold text-base mb-2 text-slate-200">Q: Support se contact kaise karein?</h4>
+      <p class="text-sm text-slate-400 leading-relaxed">Ans: Neeche diye gaye Contact section se seedha WhatsApp par apna sawaal likh kar bhej sakte ho, ya floating WhatsApp button use kar sakte ho.</p>
+    </div>
+  </div>
+  <div class="text-center mt-6">
+    <button id="faqToggle" onclick="toggleFaq()" class="text-sm font-semibold text-emerald-400 hover:text-emerald-300 underline underline-offset-4">See More Questions ▾</button>
+  </div>
+</section>
+
+<!-- CONTACT SECTION -->
+<section id="contact" class="max-w-4xl mx-auto px-6 py-16 scroll-mt-24">
+  <div class="text-center mb-10">
+    <h2 class="text-xs uppercase tracking-widest text-emerald-400 font-bold mb-3">We're Here to Help</h2>
+    <h3 class="text-3xl font-bold tracking-tight">Contact SathiCare</h3>
+    <p class="text-slate-400 text-sm mt-3">💚 Har sawaal ka jawab hai — bina kisi jhijhak ke apni baat rakho, ya ek free guide session le lo.</p>
+  </div>
+  <div class="glass border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div>
+        <label for="ctEmail" class="block text-xs text-slate-400 mb-1">Your Email Address <span class="text-slate-600">(optional)</span></label>
+        <input type="email" id="ctEmail" placeholder="you@example.com" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+      </div>
+      <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-xs text-emerald-300 flex items-center">🚀 Genuine partners ko har mahine ₹500/lead tak ka reward + free guidance milta hai.</div>
+    </div>
+    <label for="ctIssue" class="block text-xs text-slate-400 mb-1">Describe your problem or issue, or take a guide session for free...</label>
+    <textarea id="ctIssue" rows="3" placeholder="Describe your problem or issue, or take a guide session for free..." class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 resize-none mb-2"></textarea>
+    <p class="text-[11px] text-slate-500 mb-4">"Ek sawaal poochne se kuch nahi jaata, aur na poochne se sab kuch reh jaata hai." — Sathi Guide 🦊</p>
+    <button id="ctWaBtn" disabled onclick="ctConnectWhatsapp()" class="w-full flex items-center justify-center gap-2 bg-slate-800 text-slate-500 cursor-not-allowed font-bold py-3.5 rounded-xl text-sm transition">💬 Connect to WhatsApp</button>
+  </div>
+</section>
+
+<footer class="border-t border-white/10 glass py-12">
+  <div class="max-w-7xl mx-auto px-6 text-center">
+    <p class="text-sm font-bold text-slate-200 mb-2">SathiCare Partner Network</p>
+    <p class="text-xs text-slate-500 max-w-xl mx-auto mb-6">Disclaimer: Insurance is the subject matter of solicitation. All policies are officially issued through authorised LIC framework under strict regulatory compliance.</p>
+    <p class="text-xs text-slate-600">© 2026 SathiCare. All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- AUTH / DASHBOARD MODAL -->
+<div id="modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4" onclick="if(event.target===this)closeModal()">
+  <div class="glass-modal border border-white/10 w-full max-w-md p-8 rounded-3xl relative shadow-2xl max-h-[90vh] overflow-y-auto">
+    <button onclick="closeModal()" aria-label="Close" class="absolute top-6 right-6 text-slate-400 hover:text-white text-xl">✕</button>
+
+    <!-- LOGIN / SIGNUP -->
+    <div id="authView">
+      <h3 class="text-xl font-bold mb-1">Partner Portal</h3>
+      <div id="refBanner" class="hidden bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-xs text-emerald-300 mb-3">🎉 Aap <span id="refByName" class="font-bold"></span> ke referral se aaye ho — sign up karo aur dono ko fayda milega!</div>
+      <div class="flex glass rounded-xl p-1 mb-4 text-sm font-semibold">
+        <button id="tabLogin" onclick="setTab('login')" class="flex-1 py-2 rounded-lg transition">Login</button>
+        <button id="tabSignup" onclick="setTab('signup')" class="flex-1 py-2 rounded-lg transition">Sign up</button>
+      </div>
+      <div class="flex glass rounded-xl p-1 mb-4 text-xs font-semibold">
+        <button id="methodPhone" onclick="setMethod('phone')" class="flex-1 py-1.5 rounded-lg transition">📱 Mobile</button>
+        <button id="methodEmail" onclick="setMethod('email')" class="flex-1 py-1.5 rounded-lg transition">✉️ Email</button>
+      </div>
+      <button type="button" onclick="googleNotice()" class="w-full border border-white/10 hover:border-slate-500 text-slate-300 py-2.5 rounded-xl text-sm font-medium transition mb-2 flex items-center justify-center gap-2">🔵 Continue with Google</button>
+      <p id="googleMsg" class="hidden text-[11px] text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2 mb-3">Google Sign-In needs a live backend/OAuth setup that this preview page doesn't have — please use Mobile or Email login below for now.</p>
+      <form id="authForm" class="space-y-4" novalidate>
+        <div id="nameWrap">
+          <label for="fName" class="block text-xs text-slate-400 mb-1">Full Name</label>
+          <input id="fName" type="text" autocomplete="name" placeholder="Your name" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div id="phoneWrap">
+          <label for="fPhone" class="block text-xs text-slate-400 mb-1">Mobile Number</label>
+          <input id="fPhone" type="tel" autocomplete="tel" placeholder="10-digit mobile number" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div id="emailWrap" class="hidden">
+          <label for="fEmail" class="block text-xs text-slate-400 mb-1">Email Address</label>
+          <input id="fEmail" type="email" autocomplete="email" placeholder="you@example.com" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <p id="idChip" class="hidden text-[11px] font-semibold text-emerald-300 -mt-2"></p>
+        <div>
+          <label for="fPass" class="block text-xs text-slate-400 mb-1">Password</label>
+          <input id="fPass" type="password" autocomplete="current-password" placeholder="At least 6 characters" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div id="confirmWrap" class="hidden">
+          <label for="fPass2" class="block text-xs text-slate-400 mb-1">Confirm Password</label>
+          <input id="fPass2" type="password" autocomplete="new-password" placeholder="Re-enter password" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <p id="authErr" class="text-xs text-red-400 hidden" role="alert"></p>
+        <button id="authSubmit" type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3.5 rounded-xl text-sm transition shadow-lg shadow-emerald-500/20">Login</button>
+        <button type="button" onclick="openForgot()" id="forgotLink" class="w-full text-center text-[11px] text-slate-500 hover:text-slate-300 underline underline-offset-2">Forgot password?</button>
+        <p class="text-[11px] text-slate-500">A 6-digit verification code is sent to your mobile or email.</p>
+      </form>
+    </div>
+
+    <!-- FORGOT PASSWORD -->
+    <div id="forgotView" class="hidden">
+      <h3 class="text-xl font-bold mb-1">Reset Password</h3>
+      <p class="text-xs text-slate-500 mb-4">Enter your registered mobile or email. We will send a 6-digit code to verify it is you before you can set a new password.</p>
+      <div id="forgotStep1" class="space-y-4">
+        <div>
+          <label for="fgHandle" class="block text-xs text-slate-400 mb-1">Registered Mobile or Email</label>
+          <input id="fgHandle" type="text" placeholder="10-digit mobile or email" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <p id="fgErr1" class="text-xs text-red-400 hidden"></p>
+        <button type="button" onclick="findForgotAccount()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition">Send OTP / Verification Code</button>
+      </div>
+      <div id="forgotStep2" class="hidden space-y-4 mt-4">
+        <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-xs text-emerald-300">Account found for <span id="fgAccountShown" class="font-bold"></span>. Set a new password below.</div>
+        <div>
+          <label for="fgNewPass" class="block text-xs text-slate-400 mb-1">New Password</label>
+          <input id="fgNewPass" type="password" placeholder="At least 6 characters" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <p id="fgErr2" class="text-xs text-red-400 hidden"></p>
+        <button type="button" onclick="confirmReset()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition">Update Password</button>
+      </div>
+      <button type="button" onclick="closeForgot()" class="w-full mt-4 text-center text-xs text-slate-500 hover:text-slate-300 underline underline-offset-2">← Back to login</button>
+    </div>
+
+    <!-- OTP VERIFICATION (LOGIN) -->
+    <div id="otpView" class="hidden">
+      <h3 class="text-xl font-bold mb-1">Verify Your Identity</h3>
+      <p id="otpSub" class="text-xs text-slate-400 mb-3">We send a one-time 6-digit code. It is valid for 5 minutes.</p>
+      <div id="otpTypeBanner" class="otp-glow bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-3 py-2.5 text-xs text-emerald-300 font-semibold mb-3" role="status" aria-live="polite"><span id="otpTypeText" class="otp-caret"></span></div>
+      <div id="otpChannelAlert" class="hidden bg-sky-500/10 border border-sky-500/30 rounded-xl p-3 text-xs text-sky-200 mb-3" role="alert"></div>
+      <div id="otpDevBox" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-xs text-amber-200 mb-3">
+        <p class="font-semibold mb-1">🧪 Dev mode — SMS gateway offline</p>
+        <p class="mb-2">Test code: <span id="otpDevCode" class="font-bold text-sm tracking-widest"></span></p>
+        <div class="flex gap-2"><button type="button" onclick="otpAutoFill()" class="flex-1 bg-amber-500/20 border border-amber-500/40 text-amber-200 py-2 rounded-lg font-semibold">Auto-fill</button><a id="otpWaLink" href="#" target="_blank" rel="noopener" class="hidden flex-1 text-center bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 py-2 rounded-lg font-semibold">Open in WhatsApp</a></div>
+      </div>
+      <label for="otpInput" class="block text-xs text-slate-400 mb-1">Enter 6-digit OTP</label>
+      <input id="otpInput" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 tracking-[0.5em] text-center focus:outline-none focus:border-emerald-500 mb-3">
+      <p id="otpErr" class="text-xs text-red-400 hidden mb-3" role="alert"></p>
+      <button id="otpVerifyBtn" type="button" onclick="verifyOtp()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition mb-2">Verify &amp; Continue</button>
+      <button id="otpResendBtn" type="button" onclick="resendOtp()" disabled class="w-full border border-white/10 text-slate-300 py-2.5 rounded-xl text-xs font-semibold mb-2 disabled:opacity-50 disabled:cursor-not-allowed">Resend OTP</button>
+      <button type="button" onclick="cancelOtp()" class="w-full text-center text-xs text-slate-500 hover:text-slate-300 underline underline-offset-2">← Cancel</button>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashView" class="hidden">
+      <div class="flex justify-start mb-2"><button type="button" onclick="logout()" class="text-[11px] border border-white/10 hover:border-red-400 hover:text-red-300 text-slate-300 px-3 py-1.5 rounded-lg font-semibold transition">⎋ Logout</button></div>
+      <div class="text-center mb-4">
+        <div class="w-14 h-14 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-2">✅</div>
+        <h3 class="text-lg font-bold">Welcome, <span id="dName"></span>!</h3>
+        <p class="text-xs text-slate-400">Logged in as <span id="dHandle"></span></p>
+      </div>
+
+      <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-xs text-emerald-300 mb-4">🦊 Sathi Guide: Agar tutorial abhi tak nahi dekha, toh <button onclick="watchTutorial()" class="underline font-semibold">yahan dekho</button> — samajhna zaroori hai kaam kaise karta hai, tabhi genuine leads milenge!</div>
+
+      <div id="adminSyncBar" class="hidden items-center justify-between glass-admin border border-emerald-500/20 rounded-xl px-3 py-2 mb-3">
+        <span class="text-[10px] text-slate-400">☁️ Google Sheet live DB · <span id="syncStatus">Connecting…</span></span>
+        <button type="button" onclick="sheetRefresh(true)" class="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[11px] font-bold px-3 py-1.5 rounded-lg transition">
+          <svg id="syncIcon" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>
+          Instant Refresh
+        </button>
+      </div>
+      <input id="adminSearch" type="search" placeholder="🔍 Search by Client Name, Phone, Submitter, or Ref Code..." oninput="adminSearchChanged()" class="hidden w-full glass-input border border-emerald-500/40 rounded-xl px-4 py-2.5 text-sm text-slate-200 mb-3 focus:outline-none focus:border-emerald-500">
+      <div class="flex glass-admin rounded-xl p-1 mb-4 text-xs font-semibold flex-wrap" id="dashTabs">
+        <button id="dashTabStats" onclick="setDashTab('stats')" class="flex-1 py-2 rounded-lg transition">Overview</button>
+        <button id="dashTabLead" onclick="setDashTab('lead')" class="flex-1 py-2 rounded-lg transition">Submit New Lead</button>
+        <button id="dashTabAdmin" onclick="setDashTab('admin')" class="hidden flex-1 py-2 rounded-lg transition">🔐 Leads Sheet</button>
+        <button id="dashTabUsers" onclick="setDashTab('users')" class="hidden flex-1 py-2 rounded-lg transition">👥 Admin Control</button>
+        <button id="dashTabTree" onclick="setDashTab('tree')" class="hidden flex-1 py-2 rounded-lg transition">🌳 Referral Tree</button>
+      </div>
+
+      <div id="dashStats">
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div class="glass-admin border border-white/10 p-3 rounded-xl"><p class="text-[10px] text-slate-400">Total Earnings</p><p id="stEarn" class="text-lg font-bold text-emerald-400">₹0</p></div>
+          <div class="glass-admin border border-white/10 p-3 rounded-xl"><p class="text-[10px] text-slate-400">Active Balance</p><p id="stBal" class="text-lg font-bold text-emerald-400">₹0</p></div>
+          <div class="glass-admin border border-white/10 p-3 rounded-xl"><p class="text-[10px] text-slate-400">Leads Submitted</p><p id="stLeads" class="text-lg font-bold text-slate-200">0</p></div>
+          <div class="glass-admin border border-white/10 p-3 rounded-xl"><p class="text-[10px] text-slate-400">Successful Conversions</p><p id="stConv" class="text-lg font-bold text-slate-200">0</p></div>
+        </div>
+        <div id="leadListWrap" class="hidden mb-4">
+          <p class="text-[11px] text-slate-400 mb-2">Your recent leads</p>
+          <div id="leadList" class="space-y-1.5 max-h-32 overflow-y-auto"></div>
+        </div>
+
+        <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 mb-4">
+          <p class="text-xs font-bold text-emerald-300 mb-1">🎁 Your Referral Link</p>
+          <p class="text-[11px] text-slate-400 mb-2">Share this — earn up to ₹500 when someone you refer buys a policy.</p>
+          <div class="flex items-center gap-2 mb-2">
+            <input id="refLinkInput" readonly class="flex-grow glass-input border border-white/10 rounded-lg px-2.5 py-2 text-[11px] text-slate-300">
+            <button type="button" onclick="copyRefLink()" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2.5 py-2 rounded-lg font-semibold">📋 Copy</button>
+          </div>
+          <button type="button" onclick="shareRefLinkWa()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold py-2 rounded-lg transition">💬 Share on WhatsApp</button>
+          <p id="refCopiedMsg" class="hidden text-[10px] text-emerald-400 mt-1">Link copied!</p>
+        </div>
+      </div>
+
+      <form id="leadForm" class="hidden space-y-3">
+        <div>
+          <label for="ldName" class="block text-xs text-slate-400 mb-1">Lead's Name</label>
+          <input id="ldName" required class="w-full glass-input border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label for="ldPhone" class="block text-xs text-slate-400 mb-1">Lead's Mobile</label>
+          <input id="ldPhone" required inputmode="numeric" maxlength="10" class="w-full glass-input border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label for="ldInterest" class="block text-xs text-slate-400 mb-1">Interested In</label>
+          <select id="ldInterest" class="w-full glass-input border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500"></select>
+        </div>
+        <p id="leadMsg" class="text-xs text-emerald-400 hidden">✅ Lead saved to the system.</p>
+        <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition">Submit Lead</button>
+      </form>
+
+      <div id="dashAdmin" class="hidden">
+        <p class="text-[11px] text-slate-400 mb-2">All leads across all partners (live from Google Sheet)</p>
+        <div class="overflow-x-auto rounded-xl border border-white/10 glass-table">
+          <table class="sc-table">
+            <thead><tr><th>Date</th><th>Client Name</th><th>Client Phone</th><th>Service</th><th>Submitted By (Name · Phone)</th><th>Lead Status</th><th>Admin Actions</th></tr></thead>
+            <tbody id="adminLeadTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="dashUsers" class="hidden">
+        <div class="glass-admin border border-sky-500/30 rounded-xl p-3 mb-4">
+          <p class="text-xs font-bold text-sky-300 mb-1">📡 Live Auth &amp; Session Monitor</p>
+          <p class="text-[10px] text-slate-400 mb-2">Every sign-up and login across all devices (refreshes with the 15-second sync). Latest 100 shown.</p>
+          <div class="overflow-x-auto rounded-lg border border-white/10 max-h-56 overflow-y-auto glass-table">
+            <table class="sc-table">
+              <thead><tr><th>User Name</th><th>Phone</th><th>Activity</th><th>Referral Used</th><th>Timestamp</th></tr></thead>
+              <tbody id="activityTable"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="glass-admin border border-amber-500/30 rounded-xl p-3 mb-4">
+          <p class="text-xs font-bold text-amber-300 mb-1">🛡️ Database Safety &amp; Backup</p>
+          <p class="text-[10px] text-slate-400 mb-3">Export a full snapshot (all users, leads &amp; referral data) anytime, or restore from a previous backup in an emergency.</p>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <button type="button" onclick="exportDatabaseBackup()" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold py-2.5 rounded-lg transition">⬇️ Export JSON Backup</button>
+            <label class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs font-bold py-2.5 rounded-lg transition text-center cursor-pointer">
+              ⬆️ Restore Database
+              <input type="file" accept="application/json" class="hidden" onchange="restoreDatabaseBackup(this)">
+            </label>
+          </div>
+          <p class="text-[10px] text-amber-400/80 mt-2">⚠️ Restoring replaces all current data with the backup file's contents.</p>
+          <p id="cloudStatusMsg" class="text-[10px] mt-2"></p>
+        </div>
+        <p class="text-[11px] text-slate-400 mb-2">All registered partner accounts (live from Google Sheet)</p>
+        <div class="overflow-x-auto rounded-xl border border-white/10 glass-table">
+          <table class="sc-table">
+            <thead><tr><th>Name</th><th>Email</th><th>Mobile</th><th>Password</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="adminUserTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="dashTree" class="hidden">
+        <p class="text-[11px] text-slate-400 mb-2">Referral chain — who referred whom, their leads, and bonus status. Root partners (no referrer) shown first.</p>
+        <div id="treeWrap" class="space-y-2"></div>
+      </div>
+
+      <div class="flex gap-3 mt-5">
+        <button onclick="closeModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-medium py-3 rounded-xl text-sm transition">Close</button>
+        <button onclick="logout()" class="flex-1 border border-white/10 hover:border-red-400 hover:text-red-300 text-slate-300 font-medium py-3 rounded-xl text-sm transition">Log out</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN: EDIT LEAD MODAL -->
+<div id="editLeadModal" class="fixed inset-0 z-[75] hidden items-center justify-center p-4 bg-slate-950/85 backdrop-blur-sm" onclick="if(event.target===this)closeEditLead()">
+  <div class="pop-anim glass-modal border border-emerald-500/30 w-full max-w-sm rounded-3xl p-6 relative shadow-2xl">
+    <button onclick="closeEditLead()" aria-label="Close" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">✕</button>
+    <h3 class="text-lg font-bold mb-3">✏️ Edit Lead</h3>
+    <div class="space-y-3">
+      <div><label for="elName" class="block text-xs text-slate-400 mb-1">Client Name</label><input id="elName" class="w-full glass-input border border-white/10 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500"></div>
+      <div><label for="elPhone" class="block text-xs text-slate-400 mb-1">Client Mobile</label><input id="elPhone" inputmode="numeric" maxlength="10" class="w-full glass-input border border-white/10 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500"></div>
+      <div><label for="elService" class="block text-xs text-slate-400 mb-1">Service / Plan</label><input id="elService" class="w-full glass-input border border-white/10 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500"></div>
+      <div><label for="elNotes" class="block text-xs text-slate-400 mb-1">Notes</label><textarea id="elNotes" rows="3" class="w-full glass-input border border-white/10 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500"></textarea></div>
+      <p id="elErr" class="hidden text-xs text-red-400"></p>
+      <button type="button" onclick="saveEditLead()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const inr = n => '₹ ' + Math.round(n).toLocaleString('en-IN');
+const ADMIN_PHONES = ['9750264613', '9650264613']; // master admin accounts (full access to all branches)
+const ADMIN_PHONE = ADMIN_PHONES[1];
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwTbF40VjEM-xDz_bVkVKiYJe7SP5URq6zQ7yA8_ahEmGt3CNZ2tjiA6UvhzgkjIldE/exec';
+const _urlRef = new URLSearchParams(window.location.search).get('ref');
+if (_urlRef) { try { sessionStorage.setItem('SATHICARE_PENDING_REF', _urlRef); } catch (e) {} }
+const pendingReferralCode = _urlRef || (function () { try { return sessionStorage.getItem('SATHICARE_PENDING_REF'); } catch (e) { return null; } })();
+// ZERO-LEAK GUARD: arriving via ?ref= means this page view is a GUEST view. Any session that
+// exists in this browser is ignored (not deleted) until the visitor explicitly logs in / signs up here.
+let guestOverride = !!_urlRef && (function () { try { return sessionStorage.getItem('SATHICARE_REF_AUTHED') !== '1'; } catch (e) { return true; } })();
+function endGuestOverride() { guestOverride = false; try { sessionStorage.setItem('SATHICARE_REF_AUTHED', '1'); } catch (e) {} }
+
+/* ---------- WhatsApp ---------- */
+function waLink(text) { return 'https://wa.me/919650264613?text=' + encodeURIComponent(text); }
+(function () { $('waFloat').href = waLink('👋 Hello SathiCare Team, mujhe partner program aur leads ke baare me janna hai! 🚀'); })();
+
+/* ---------- FAQ See More / See Less ---------- */
+function toggleFaq() {
+  const extras = document.querySelectorAll('.faq-item-extra');
+  const expanded = !extras[0].classList.contains('hidden');
+  extras.forEach(el => el.classList.toggle('hidden', expanded));
+  $('faqToggle').textContent = expanded ? 'See More Questions ▾' : 'Show Less ▴';
+}
+
+/* ---------- Contact / WhatsApp connect (enabled only once issue text is entered) ---------- */
+function ctUpdateBtn() {
+  const has = $('ctIssue').value.trim().length > 0;
+  const btn = $('ctWaBtn');
+  btn.disabled = !has;
+  btn.className = 'w-full flex items-center justify-center gap-2 font-bold py-3.5 rounded-xl text-sm transition ' + (has ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20' : 'bg-slate-800 text-slate-500 cursor-not-allowed');
+}
+$('ctIssue').addEventListener('input', ctUpdateBtn);
+function ctConnectWhatsapp() {
+  const issue = $('ctIssue').value.trim();
+  if (!issue) return;
+  const email = $('ctEmail').value.trim();
+  const msg = '👋 Hello SathiCare Team! 🚀\n📝 Issue: ' + issue + (email ? '\n✉️ Email: ' + email : '');
+  window.open(waLink(msg), '_blank');
+}
+
+/* ---------- Welcome / Tutorial Popup (frequency-capped) + on-page video ---------- */
+const GUIDE_KEY = 'sathi_guide_dismissed', WATCHED_KEY = 'sathi_tutorial_watched', GUIDE_DELAY_MS = 1500;
+const YT_EMBED_POPUP = 'https://www.youtube.com/embed/y-ReJ-M3cQA?rel=0&playsinline=1&modestbranding=1';
+const YT_EMBED = 'https://www.youtube-nocookie.com/embed/y-ReJ-M3cQA?rel=0&playsinline=1&t=1'; // t=1 = cache-buster for refreshed channel branding
+function openWelcome() {
+  const pop = $('welcomePopup');
+  if (!pop.classList.contains('hidden')) return;
+  pop.classList.remove('hidden'); pop.classList.add('flex'); document.body.style.overflow = 'hidden';
+  $('guideFloat').classList.add('hidden'); // MUST be hidden while the popup is open
+  try { localStorage.setItem(WATCHED_KEY, '1'); } catch (e) {}
+}
+function closeWelcome() {
+  const pop = $('welcomePopup');
+  if (pop.classList.contains('hidden')) return;       // (Esc key calls this even when closed)
+  pop.classList.add('hidden'); pop.classList.remove('flex'); document.body.style.overflow = '';
+  try { sessionStorage.setItem(GUIDE_KEY, 'true'); } catch (e) {} // don't nag again this session
+  $('guideFloat').classList.remove('hidden'); // show the floating button again now that the popup is closed
+}
+function scrollToTutorial() { const el = $('tutorial'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }
+function dismissGuideToTutorial() { closeWelcome(); setTimeout(scrollToTutorial, 150); }
+function floatGoToTutorial() { scrollToTutorial(); }
+function dismissGuide() { closeWelcome(); }
+function ytIframe(autoplay) {
+  return '<iframe class="w-full h-full" src="' + YT_EMBED + (autoplay ? '&autoplay=1' : '') + '" title="SathiCare Tutorial" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+}
+function openVideoModal() {
+  $('videoModalFrameWrap').innerHTML = ytIframe(true);
+  $('videoModal').classList.remove('hidden'); $('videoModal').classList.add('flex');
+  document.body.style.overflow = 'hidden';
+  try { localStorage.setItem(WATCHED_KEY, '1'); } catch (e) {}
+}
+function closeVideoModal() {
+  $('videoModalFrameWrap').innerHTML = ''; // stop playback
+  $('videoModal').classList.add('hidden'); $('videoModal').classList.remove('flex');
+  document.body.style.overflow = '';
+}
+function loadTutorialInline() { $('tutorialFrameWrap').innerHTML = ytIframe(true); try { localStorage.setItem(WATCHED_KEY, '1'); } catch (e) {} }
+function watchTutorial() {
+  guidePendingAfterAuth = false; closeWelcome(); closeModal();
+  openVideoModal();
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeWelcome(); closeModal(); closeSubCalc(); closeDirectory(); closeVideoModal(); } });
+// AUTO-TRIGGER: once per browser session (until dismissed), 1.5s after load.
+// Referral-flow safe: if the ?ref= sign-up modal is already open, wait until it is closed instead of covering it.
+let guidePendingAfterAuth = false;
+function guideDismissed() { try { return sessionStorage.getItem(GUIDE_KEY) === 'true'; } catch (e) { return false; } }
+window.addEventListener('DOMContentLoaded', () => {
+  if (guideDismissed()) { $('guideFloat').classList.remove('hidden'); return; }
+  setTimeout(() => {
+    if (guideDismissed()) { $('guideFloat').classList.remove('hidden'); return; }
+    if (!$('modal').classList.contains('hidden')) { guidePendingAfterAuth = true; return; }
+    openWelcome();
+  }, GUIDE_DELAY_MS);
+});
+
+/* ---------- LIC Plan Library (verified plan numbers where confirmed against licindia.in) ---------- */
+const CATEGORY_PLANS = {
+  'Endowment Plans': [
+    { name: 'New Endowment', no: '714', type: 'savings', term: 20, ppt: 20, growth: 1.5, desc: 'Classic with-profit endowment — savings plus life cover, payable to you at maturity or to your nominee on death.' },
+    { name: 'New Jeevan Anand', no: '715', type: 'savings', term: 20, ppt: 20, growth: 1.5, desc: 'Endowment plan where life cover continues even after maturity — a popular protection-plus-savings combo.' },
+    { name: 'Jeevan Lakshya', no: '733', type: 'savings', term: 25, ppt: 20, growth: 1.5, desc: 'Endowment plan with yearly income benefit to the family if the policyholder dies during the term, plus a maturity payout.' },
+    { name: 'Jeevan Labh', no: '736', type: 'savings', term: 21, ppt: 15, growth: 1.55, desc: 'Limited-premium endowment plan combining savings with life cover — pay for a limited term, stay covered for longer.' },
+    { name: 'New Bima Jyoti', no: '890', type: 'savings', term: 20, ppt: 20, growth: 1.5, desc: 'Non-linked endowment plan with guaranteed additions during the policy term, on top of the life cover.' },
+    { name: 'Nav Jeevan Shree', no: '912', type: 'savings', term: 20, ppt: 20, growth: 1.55, desc: 'Endowment-style savings plan with life cover and maturity benefit payable at the end of the policy term.' },
+    { name: 'New Jeevan Sathi', no: '888', type: 'savings', term: 20, ppt: 20, growth: 1.45, desc: 'Joint-life endowment plan covering both spouses under a single policy, with benefits on either life.' },
+    { name: 'New Jeevan Sathi', no: '889', type: 'savings', term: 20, ppt: 20, growth: 1.45, desc: 'Variant of the joint-life endowment plan covering both spouses under a single policy.' },
+    { name: 'Bima Platinum', no: '770', type: 'savings', term: 20, ppt: 15, growth: 1.5, desc: 'Limited-premium endowment plan offering savings and life cover over a chosen policy term.' }
+  ],
+  'Mahila Plans': [
+    { name: 'Bima Lakshmi', no: '881', type: 'savings', term: 20, ppt: 20, growth: 1.4, desc: 'Savings-and-protection plan positioned for women policyholders, combining a maturity benefit with life cover.' }
+  ],
+  'Micro Plans': [
+    { name: 'Micro Bachat', no: '751', type: 'savings', term: 15, ppt: 15, growth: 1.3, desc: 'Small-ticket endowment plan designed for low, affordable premiums with a modest sum assured.' },
+    { name: 'Jan Suraksha', no: '880', type: 'savings', term: 15, ppt: 15, growth: 1.3, desc: 'Micro-insurance savings plan aimed at affordable, accessible cover for lower-income households.' }
+  ],
+  'MoneyBack Plans': [
+    { name: 'New MoneyBack (20yrs)', no: '720', type: 'moneyback', term: 20, ppt: 20, growth: 1.4, desc: 'Pays a percentage of the sum assured at fixed intervals, balance plus bonus at maturity.' },
+    { name: 'New MoneyBack (25yrs)', no: '721', type: 'moneyback', term: 25, ppt: 25, growth: 1.45, desc: 'Same money-back structure over a longer 25-year term, with periodic payouts plus a final maturity benefit.' },
+    { name: 'Bima Shree', no: '748', type: 'moneyback', term: 20, ppt: 20, growth: 1.5, desc: 'Higher sum assured money-back plan with periodic survival benefits and a maturity payout.' }
+  ],
+  'Children Plans': [
+    { name: 'New Children MoneyBack', no: '732', type: 'moneyback', term: 20, ppt: 20, growth: 1.4, desc: 'Pays out at intervals to help fund a child\'s education milestones, plus a maturity payout.' },
+    { name: 'Jeevan Tarun', no: '734', type: 'moneyback', term: 25, ppt: 25, growth: 1.45, desc: 'Child-focused plan with survival benefits from age 20 onward and a lump sum at maturity.' },
+    { name: 'Amrit Baal', no: '774', type: 'savings', term: 20, ppt: 20, growth: 1.4, desc: 'Child-focused savings plan with regular premiums, built around milestone payouts for a child\'s future needs.' },
+    { name: 'Amrit Baal (Single Premium)', no: '774', type: 'single', term: 20, ppt: 1, growth: 1.3, desc: 'Single-premium version of the child-focused savings plan — pay once, benefits payable at chosen milestones.' }
+  ],
+  'WholeLife Plans': [
+    { name: 'Jeevan Umang', no: '745', type: 'savings', term: 30, ppt: 20, growth: 1.9, desc: 'Whole-life plan paying an annual survival benefit from the end of the premium term, plus a maturity payout at age 100.' },
+    { name: 'Jeevan Utsav', no: '771', type: 'savings', term: 30, ppt: 20, growth: 1.6, desc: 'Whole-life plan with a choice of regular income benefit starting a few years after the premium term ends.' },
+    { name: 'Jeevan Utsav (Single Premium)', no: '883', type: 'single', term: 30, ppt: 1, growth: 1.5, desc: 'Single-premium whole-life plan — pay once, get lifelong guaranteed income plus a life cover.' }
+  ],
+  'Single Premium Plans': [
+    { name: 'Single Premium Endowment', no: '717', type: 'single', term: 1, ppt: 1, growth: 1.3, desc: 'One lump-sum payment for savings plus protection cover across the policy term.' },
+    { name: 'New Jeevan Sathi', no: '888', type: 'single', term: 1, ppt: 1, growth: 1.3, desc: 'Single-premium route for the joint-life endowment plan covering both spouses under one policy.' }
+  ],
+  'Pension Plans': [
+    { name: 'Jeevan Shanti', no: '758', type: 'pension', term: 1, ppt: 1, growth: 1, desc: 'Deferred or immediate annuity plan — pay once, receive guaranteed pension income for life from your chosen age.' },
+    { name: 'Jeevan Akshay', no: '857', type: 'pension', term: 1, ppt: 1, growth: 1, desc: 'Immediate annuity plan: pay a lump sum and start receiving a regular pension right away.' },
+    { name: 'Smart Pension', no: '879', type: 'pension', term: 1, ppt: 1, growth: 1, desc: 'Deferred annuity plan offering guaranteed pension income with flexible payout options from a chosen vesting age.' }
+  ],
+  'Term Plans': [
+    { name: 'Jeevan Raksha', no: '894', type: 'term', term: 30, ppt: 30, growth: 0, desc: 'Pure protection term plan — high life cover at a low premium, no maturity payout if the policyholder survives the term.' },
+    { name: 'New Jeevan Amar', no: '955', type: 'term', term: 30, ppt: 30, growth: 0, desc: 'Flexible term plan with level or increasing cover, also available offline through advisors.' },
+    { name: 'Yuva Term', no: '875', type: 'term', term: 30, ppt: 30, growth: 0, desc: 'Term plan positioned for younger applicants, offering high cover at a comparatively low premium.' },
+    { name: 'Bima Kavach', no: '887', type: 'term', term: 30, ppt: 30, growth: 0, desc: 'Pure protection term plan offering a high sum assured for a low, affordable premium.' }
+  ],
+  'Ulip Plans': [
+    { name: 'Index Plus', no: '873', type: 'ulip', term: 15, ppt: 15, growth: 2.1, desc: 'Regular-premium ULIP linked to Nifty 50/100 index funds, with life cover and refund of mortality charges at maturity.' },
+    { name: 'Protection Plus', no: '886', type: 'ulip', term: 15, ppt: 15, growth: 2.0, desc: 'Regular-premium ULIP combining market-linked fund growth with a life cover component.' },
+    { name: 'SIIP', no: '752', type: 'ulip', term: 15, ppt: 15, growth: 2.0, desc: 'Systematic Investment Insurance Plan — regular-premium ULIP for disciplined, long-term market-linked investing.' },
+    { name: 'Nivesh Plus', no: '749', type: 'ulip', term: 15, ppt: 1, growth: 2.0, desc: 'Single-premium ULIP — wealth-building via market-linked funds with life cover attached and fund switching.' }
+  ]
+};
+const FREQ_MULT = { monthly: 12, quarterly: 4, halfyearly: 2, yearly: 1 };
+const BENEFITS_TEXT = {
+  savings: ['🛡️ Accidental death: nominee ko sum assured + accrued bonus milta hai, plus accidental rider se additional payout ho sakta hai (combined risk cover badh jaata hai).', '💚 Natural death: bhi sum assured + vested bonus + final bonus (agar declared) milta hai.', '⏳ Limited Premium Payment: 20-25 saal ke term me sirf 10-15 saal premium bharo, coverage aur maturity benefit poore term tak chalta rehta hai.', '🔁 Triple Benefit: (1) family ko turant payout, (2) Premium Waiver Rider liya ho toh baaki premiums LIC khud bharta hai, (3) maturity par poora payout milta hai jaise sab premium bhare gaye ho.'],
+  term: ['🛡️ Accidental death: base sum assured ke sath agar accidental rider liya hai toh extra payout milta hai — combined cover kaafi high ho jaata hai.', '💚 Natural death: pura sum assured nominee ko milta hai — koi maturity payout nahi hota agar policyholder survive karta hai.', '💰 Bahut kam premium me bada cover milta hai — pure protection, savings component nahi hota.'],
+  moneyback: ['🛡️ Accidental aur natural dono death par sum assured + bonus milta hai.', '💵 Policy term ke dauraan fixed intervals par ek hissa payout hota rehta hai, baaki maturity par.', '⏳ Limited Premium option available — coverage poore term tak continue rehta hai.'],
+  pension: ['💰 Ek baar premium bharo, life-long guaranteed pension milta hai.', '👨‍👩‍👧 Joint life option se spouse ko bhi pension continue milta hai.', '🔒 Purchase price generally 100% capital vapas milta hai (as per plan terms) nominee ko death hone par.'],
+  ulip: ['📈 Market-linked wealth-building — professionally managed funds, apke risk-appetite ke hisaab se fund choose kar sakte ho.', '🛡️ Life cover included — death par higher of fund value ya sum assured milta hai.', '💱 Fund switch aur partial withdrawal options milte hain.', '⚠️ Returns market performance par depend karte hain — guaranteed nahi hote.'],
+  single: ['🛡️ Ek hi premium me life-long cover aur guaranteed income milta hai.', '💚 Death benefit turant activate ho jata hai policy start hote hi.']
+};
+
+function futureValueMonthlySIP(monthly, annualRatePct, years) {
+  const r = annualRatePct / 100 / 12, n = years * 12;
+  if (r === 0) return monthly * n;
+  return monthly * ((Math.pow(1 + r, n) - 1) / r) * (1 + r);
+}
+
+function buildPlanCard(plan, invest, ratePct, age) {
+  const div = document.createElement('div');
+  div.className = 'plan-card glass border border-white/10 rounded-2xl p-4' + (plan.type === 'ulip' ? ' ring-1 ring-emerald-500/40' : '');
+  let figure = '';
+  if (plan.type === 'term') {
+    figure = 'Illustrative life cover: <span class="text-emerald-300 font-bold">' + inr(invest * 12 * 200) + '</span>' + (age ? ' · cover till age ' + (age + (plan.term || 30)) : '');
+  } else if (plan.type === 'pension') {
+    figure = 'Illustrative annual pension (approx.): <span class="text-emerald-300 font-bold">' + inr(invest * 12 * 0.07) + '</span>';
+  } else if (plan.type === 'single') {
+    figure = 'Explore for single-premium maturity illustration';
+  } else {
+    const term = plan.term || 20;
+    const fv = futureValueMonthlySIP(invest, ratePct, term);
+    figure = 'Illustrative value in ' + term + ' yrs at ' + ratePct + '%/yr: <span class="text-emerald-300 font-bold">' + inr(fv) + '</span>' + (age ? ' · matures at age ' + (age + term) : '');
+  }
+  div.innerHTML = '<div class="flex items-start justify-between gap-3">' +
+    '<div><p class="font-bold text-emerald-300 text-sm">' + plan.name + (plan.no ? ' <span class="text-slate-500 font-normal text-[10px]">(Plan ' + plan.no + ')</span>' : '') + (plan.type === 'ulip' ? ' <span class="text-[9px] bg-emerald-500 text-slate-950 font-bold px-1.5 py-0.5 rounded">ULIP</span>' : '') + '</p>' +
+    '<p class="text-[11px] text-slate-400 mt-1 leading-relaxed">' + plan.desc + '</p>' +
+    '<p class="text-[11px] text-slate-300 mt-2">' + figure + '</p></div>' +
+    '<button type="button" class="flex-shrink-0 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[11px] font-bold px-3 py-2 rounded-lg transition">Explore</button></div>';
+  div.querySelector('button').addEventListener('click', () => openSubCalc(plan));
+  return div;
+}
+
+// Curated 10-plan shortlist across categories, always shown (not filtered down to one).
+const CURATED_SHORTLIST = [
+  CATEGORY_PLANS['Endowment Plans'][0],   // Jeevan Labh
+  CATEGORY_PLANS['Endowment Plans'][1],   // New Jeevan Anand
+  CATEGORY_PLANS['Ulip Plans'][0],        // Nivesh Plus
+  CATEGORY_PLANS['Ulip Plans'][1],        // Index Plus
+  CATEGORY_PLANS['Term Plans'][0],        // New Tech-Term
+  CATEGORY_PLANS['Term Plans'][1],        // New Jeevan Amar
+  CATEGORY_PLANS['Children Plans'][0],    // Children's Money Back
+  CATEGORY_PLANS['Children Plans'][1],    // Jeevan Tarun
+  CATEGORY_PLANS['Pension Plans'][1],     // Jeevan Akshay-VII
+  CATEGORY_PLANS['Mahila Plans'][0]       // Term with women's rate
+];
+
+/* ---------- Mandatory budget gate (calculator + policy explorer) ---------- */
+function gateFail(ids, msgId) {
+  const msg = $(msgId); msg.classList.remove('hidden');
+  ids.forEach(id => {
+    const el = $(id);
+    el.classList.remove('gate-shake'); void el.offsetWidth;
+    el.classList.add('gate-shake', 'gate-err');
+    el.addEventListener('input', () => { el.classList.remove('gate-err', 'gate-shake'); if (!ids.some(i => $(i).classList.contains('gate-err'))) msg.classList.add('hidden'); }, { once: true });
+  });
+  try { $(ids[0]).focus({ preventScroll: false }); } catch (e) {}
+}
+// Live lock: if a mandatory figure is cleared after results were shown, hide the results again.
+['lrAge', 'lrIncome', 'lrInvest'].forEach(id => $(id).addEventListener('input', () => {
+  const ok = (parseInt($('lrAge').value, 10) >= 1) && (parseFloat($('lrIncome').value) > 0) && (parseFloat($('lrInvest').value) > 0);
+  if (!ok) $('lrResult').classList.add('hidden');
+}));
+function revealExpand(el) { el.classList.remove('hidden', 'reveal-expand'); void el.offsetWidth; el.classList.add('reveal-expand'); }
+
+$('lrSubmit').addEventListener('click', () => {
+  const income = parseFloat($('lrIncome').value) || 0;
+  const invest = parseFloat($('lrInvest').value) || 0;
+  const age = parseInt($('lrAge').value, 10) || 0;
+  const missing = [];
+  if (!(age >= 1 && age <= 100)) missing.push('lrAge');
+  if (!(income > 0)) missing.push('lrIncome');
+  if (!(invest > 0)) missing.push('lrInvest');
+  if (missing.length) { $('lrResult').classList.add('hidden'); $('lrInvestErr').classList.add('hidden'); gateFail(missing, 'lrGateMsg'); return; }
+  $('lrGateMsg').classList.add('hidden');
+  $('lrInvestErr').classList.toggle('hidden', invest >= 1000);
+  if (invest < 1000) return;
+  const ratePct = parseFloat($('lrRate').value);
+  const cards = $('lrCards'); cards.innerHTML = '';
+  CURATED_SHORTLIST.forEach(p => cards.appendChild(buildPlanCard(p, invest, ratePct, age)));
+
+  // Nivesh Plus tiered single-premium illustration, scaled to the chosen return rate.
+  const nivesh = document.createElement('div');
+  nivesh.className = 'bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4';
+  nivesh.innerHTML = '<p class="text-xs font-bold text-emerald-300 mb-2">💎 Nivesh Plus — single lump-sum tiers (illustrative, ' + ratePct + '%/yr, 25 yrs)</p>' +
+    '<div class="grid grid-cols-3 gap-2 text-center">' + [125000, 250000, 500000].map(amt => {
+      const fv = amt * Math.pow(1 + ratePct / 100, 25);
+      return '<div class="glass border border-white/10 rounded-xl p-2"><p class="text-[10px] text-slate-400">' + inr(amt) + '</p><p class="text-[11px] font-bold text-emerald-300 mt-1">' + inr(fv) + '</p></div>';
+    }).join('') + '</div>';
+  cards.appendChild(nivesh);
+
+  revealExpand($('lrResult'));
+  $('lrResult').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+});
+function closeLrResult() {
+  const box = $('lrResult');
+  box.style.transition = 'opacity .25s ease, max-height .25s ease';
+  box.style.opacity = '0';
+  setTimeout(() => {
+    box.classList.add('hidden'); box.style.opacity = ''; box.style.transition = '';
+    $('lrCards').innerHTML = '';
+    $('lrAge').value = ''; $('lrIncome').value = ''; $('lrInvest').value = ''; $('lrRate').value = '8'; $('lrInvestErr').classList.add('hidden'); $('lrGateMsg').classList.add('hidden'); ['lrAge', 'lrIncome', 'lrInvest'].forEach(i => $(i).classList.remove('gate-err'));
+    $('lrIncome').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    $('lrIncome').focus();
+  }, 250);
+}
+
+/* ---------- ULIP tiers (Nivesh Plus) — illustrative range, not guaranteed ---------- */
+(function () {
+  const tiers = [125000, 250000, 500000];
+  const wrap = $('ulipTiers');
+  tiers.forEach(amt => {
+    const lo = Math.round(amt * Math.pow(1.08, 25));
+    const hi = Math.round(amt * Math.pow(1.10, 25));
+    const d = document.createElement('div');
+    d.className = 'glass border border-white/10 rounded-xl p-2.5';
+    d.innerHTML = '<p class="text-[10px] text-slate-400">' + inr(amt) + ' one-time</p><p class="text-[11px] font-bold text-emerald-300 mt-1">' + inr(lo) + '–' + inr(hi) + '</p><p class="text-[9px] text-slate-600">in ~25 yrs, illustrative</p>';
+    wrap.appendChild(d);
+  });
+})();
+
+/* ---------- Directory ---------- */
+function openDirectory() {
+  const wrap = $('directoryList'); wrap.innerHTML = '';
+  Object.keys(CATEGORY_PLANS).forEach(cat => {
+    const sec = document.createElement('div');
+    sec.innerHTML = '<h4 class="text-xs uppercase tracking-wide text-emerald-400 font-bold mb-2.5">' + cat + '</h4>';
+    const grid = document.createElement('div'); grid.className = 'grid grid-cols-2 sm:grid-cols-3 gap-2.5';
+    CATEGORY_PLANS[cat].forEach(p => {
+      const tile = document.createElement('button');
+      tile.type = 'button';
+      tile.className = 'text-left glass border border-white/10 hover:border-emerald-500/50 rounded-2xl p-3 transition flex flex-col gap-1.5';
+      tile.innerHTML = (p.no ? '<span class="inline-flex self-start items-center justify-center bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold px-2 py-0.5 rounded-lg">' + p.no + '</span>' : '') +
+        '<span class="text-[12.5px] text-slate-200 font-semibold leading-snug">' + p.name + '</span>';
+      tile.addEventListener('click', () => { closeDirectory(); openSubCalc(p); });
+      grid.appendChild(tile);
+    });
+    sec.appendChild(grid);
+    wrap.appendChild(sec);
+  });
+  $('directoryModal').classList.remove('hidden'); $('directoryModal').classList.add('flex');
+  document.body.style.overflow = 'hidden';
+}
+function closeDirectory() { $('directoryModal').classList.add('hidden'); $('directoryModal').classList.remove('flex'); document.body.style.overflow = ''; }
+function openDirectoryCategory(cat) {
+  openDirectory();
+  setTimeout(() => {
+    const heads = $('directoryList').querySelectorAll('h4');
+    heads.forEach(h => { if (h.textContent.trim() === cat) h.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  }, 80);
+}
+
+/* ---------- Plan Explorer / deep-dive sub-calculator ---------- */
+let scPlan = null;
+function openSubCalc(plan) {
+  scPlan = plan;
+  $('scName').textContent = plan.name + (plan.no ? ' (Plan ' + plan.no + ')' : '');
+  $('scDesc').textContent = plan.desc;
+  $('scBenefits').innerHTML = (BENEFITS_TEXT[plan.type] || []).map(t => '<p>' + t + '</p>').join('');
+  const isSingle = plan.type === 'single' || plan.type === 'ulip' && plan.name.includes('Nivesh');
+  $('scPremOpt').value = (plan.type === 'single' || plan.type === 'pension') ? 'single' : (plan.type === 'ulip' ? (plan.name.includes('Nivesh') ? 'single' : 'regular') : 'regular');
+  $('scFreq').value = 'monthly';
+  $('scPremium').value = '';
+  $('scAge').value = '';
+  $('scGateMsg').classList.add('hidden'); ['scAge', 'scPremium'].forEach(i => $(i).classList.remove('gate-err'));
+  $('scName2').value = '';
+  $('scSA').value = 500000;
+  $('scOut').classList.add('hidden');
+  $('scInputsWrap').classList.remove('hidden');
+  updatePremiumOptUI();
+  $('subCalcModal').classList.remove('hidden'); $('subCalcModal').classList.add('flex');
+  document.body.style.overflow = 'hidden';
+}
+function closeSubCalc() { $('subCalcModal').classList.add('hidden'); $('subCalcModal').classList.remove('flex'); document.body.style.overflow = ''; }
+function updatePremiumOptUI() {
+  const single = $('scPremOpt').value === 'single';
+  $('scFreq').closest('div').classList.toggle('hidden', single);
+  $('scPremiumLabel').textContent = single ? 'Single Premium Amount (₹, min ₹1,000)' : 'Premium (₹, min ₹1,000)';
+}
+$('scPremOpt').addEventListener('change', updatePremiumOptUI);
+$('scPremium').addEventListener('change', () => { if (parseFloat($('scPremium').value) < 1000) $('scPremium').value = 1000; });
+
+$('scCalc').addEventListener('click', () => {
+  if (!scPlan) return;
+  const gateMissing = [];
+  { const ag = parseInt($('scAge').value, 10); if (!(ag >= 1 && ag <= 100)) gateMissing.push('scAge'); }
+  if (!(parseFloat($('scPremium').value) > 0)) gateMissing.push('scPremium');
+  if (gateMissing.length) { $('scOut').classList.add('hidden'); gateFail(gateMissing, 'scGateMsg'); return; }
+  $('scGateMsg').classList.add('hidden');
+  const premOpt = $('scPremOpt').value;
+  const freq = premOpt === 'single' ? 'yearly' : $('scFreq').value;
+  const amt = Math.max(1000, parseFloat($('scPremium').value) || 1000);
+  const age = Math.max(1, parseInt($('scAge').value, 10) || 30);
+  const sa = Math.max(0, parseFloat($('scSA').value) || 0);
+  const annual = premOpt === 'single' ? amt : amt * FREQ_MULT[freq];
+
+  if (premOpt === 'single') {
+    $('scFreqGrid').classList.add('hidden');
+    $('scPerDayLabel').textContent = 'That single premium works out to roughly';
+    $('scPerDay').textContent = inr(amt / (scPlan.type === 'ulip' ? 365 * 5 : 365)) + ' per day if spread over ' + (scPlan.type === 'ulip' ? '5' : '1') + ' yr(s)';
+  } else {
+    $('scFreqGrid').classList.remove('hidden');
+    $('scMonthly').textContent = inr(annual / 12);
+    $('scQuarterly').textContent = inr(annual / 4);
+    $('scHalf').textContent = inr(annual / 2);
+    $('scYearly').textContent = inr(annual);
+    $('scPerDayLabel').textContent = "Roughly, that's a saving of";
+    $('scPerDay').textContent = inr(annual / 365) + ' per day';
+  }
+
+  const term = premOpt === 'single' ? (scPlan.type === 'ulip' ? scPlan.term : 1) : scPlan.term;
+  const ppt = premOpt === 'single' ? 1 : (premOpt === 'limited' ? Math.max(5, Math.round(scPlan.ppt * 0.7)) : scPlan.term);
+  $('scTerm').textContent = term;
+  $('scPPT').textContent = ppt;
+
+  let outVal;
+  if (scPlan.type === 'term') {
+    outVal = Math.max(sa, annual * 200);
+    $('scOutLabel').textContent = 'Life cover on natural / accidental death (illustrative)';
+  } else if (scPlan.type === 'pension') {
+    outVal = amt * 0.07;
+    $('scOutLabel').textContent = 'Illustrative annual pension (approx.)';
+  } else {
+    const totalPaid = premOpt === 'single' ? amt : annual * ppt;
+    outVal = Math.max(sa, totalPaid * scPlan.growth);
+    $('scOutLabel').textContent = scPlan.type === 'ulip' ? 'Illustrative maturity value (market-linked, not guaranteed)' : 'Estimated maturity value (principal + illustrative bonus)';
+  }
+  $('scOutVal').textContent = inr(outVal);
+
+  let guidance = 'Steady, uninterrupted premiums usually beat occasional top-ups, since bonuses/returns compound on regular payments.';
+  if (age > 45 && scPlan.type === 'term') guidance = 'At this age, term premiums rise noticeably each year you wait — locking in cover sooner keeps the premium lower for the same cover.';
+  if (scPlan.type === 'pension') guidance = 'A slightly larger one-time premium usually buys a meaningfully higher monthly pension — worth comparing a couple of premium levels before deciding.';
+  if (scPlan.type === 'ulip') guidance = 'ULIPs reward patience — staying invested through market ups and downs over the full term tends to smooth out returns compared to withdrawing early.';
+  if (premOpt === 'limited') guidance += ' Limited Premium yahan chunne se aap sirf ' + ppt + ' saal premium bharte ho, lekin cover poore ' + term + ' saal chalta hai.';
+  $('scGuidance').textContent = guidance;
+
+  // Year-by-year table — single premium / ULIP shows lump sum only in Year 1.
+  const rows = []; const chartData = []; let cum = 0;
+  $('scColPrem').textContent = premOpt === 'single' ? 'Premium (Yr 1 only)' : 'Premium';
+  $('scColCum').textContent = 'Cum. Paid';
+  for (let y = 1; y <= term; y++) {
+    let yearPrem = 0;
+    if (premOpt === 'single') { if (y === 1) yearPrem = amt; }
+    else if (y <= ppt) { yearPrem = annual; }
+    cum += yearPrem;
+    const growthFactor = scPlan.growth ? (1 + (scPlan.growth - 1) * (y / term)) : 1;
+    const cover = scPlan.type === 'term' ? outVal : Math.max(sa, cum * (scPlan.growth || 1));
+    const indValueNum = cum * growthFactor;
+    const indValue = scPlan.type === 'term' ? '—' : inr(indValueNum);
+    const loanYes = scPlan.type !== 'term' && (premOpt === 'single' ? y >= 1 : y >= 3);
+    const loan = loanYes ? 'Yes' : 'No';
+    rows.push('<tr><td>' + y + '</td><td>' + (yearPrem ? inr(yearPrem) : '—') + '</td><td>' + inr(cum) + '</td><td>' + inr(cover) + '</td><td>' + indValue + '</td><td>' + loan + '</td></tr>');
+    chartData.push({ year: y, premium: yearPrem, cover, value: scPlan.type === 'term' ? 0 : indValueNum, loanEligible: loanYes });
+  }
+  $('scTableBody').innerHTML = rows.join('');
+
+  // ---- Portfolio dashboard: headline metrics, chart, ledger, dial (reuses the values above) ----
+  $('pfCover').textContent = inr(scPlan.type === 'term' ? outVal : sa);
+  if (scPlan.type === 'term') { $('pfMaturityLabel').textContent = '🛡️ Maturity Payout'; $('pfMaturity').textContent = 'N/A — pure protection plan'; }
+  else if (scPlan.type === 'pension') { $('pfMaturityLabel').textContent = '💎 Illustrative Annual Pension'; $('pfMaturity').textContent = inr(outVal); }
+  else { $('pfMaturityLabel').textContent = '💎 Est. Total Maturity Payout'; $('pfMaturity').textContent = inr(outVal); }
+  $('pfPremium').textContent = premOpt === 'single' ? (inr(amt) + ' one-time') : (inr(annual) + '/yr · ' + inr(annual / 12) + '/mo');
+  if (scPlan.type === 'term') $('pfMultiplier').textContent = 'Pure Protection';
+  else if (scPlan.type === 'pension') $('pfMultiplier').textContent = 'Lifelong Income';
+  else $('pfMultiplier').textContent = (scPlan.growth || 1).toFixed(2) + 'x · Tax-free u/s 10(10D)*';
+
+  buildPfChart(chartData, scPlan.type);
+  buildPfLedger(scPlan, ppt, term);
+  buildPfDial(scPlan.type);
+
+  $('scInputsWrap').classList.add('hidden');
+  revealExpand($('scOut'));
+  $('scOut').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+function backToExplorerInputs() {
+  $('scOut').classList.add('hidden');
+  $('scInputsWrap').classList.remove('hidden');
+  $('scInputsWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function toggleScTable() {
+  const wrap = $('scTableBodyWrap');
+  const open = wrap.classList.toggle('hidden');
+  $('scTableChevron').textContent = open ? '▾' : '▴';
+}
+function buildPfChart(data, planType) {
+  const w = 480, h = 150, padL = 36, padR = 10, padT = 10, padB = 20;
+  const maxVal = Math.max(1, ...data.map(d => Math.max(d.cover, d.value)));
+  const xFor = i => padL + (i / Math.max(1, data.length - 1)) * (w - padL - padR);
+  const yFor = v => padT + (1 - v / maxVal) * (h - padT - padB);
+  const lineFor = key => data.map((d, i) => (i === 0 ? 'M' : 'L') + xFor(i) + ',' + yFor(d[key])).join(' ');
+  const areaValue = lineFor('value') + ' L' + xFor(data.length - 1) + ',' + yFor(0) + ' L' + xFor(0) + ',' + yFor(0) + ' Z';
+  const points = data.map((d, i) => {
+    const x = xFor(i), y = yFor(planType === 'term' ? d.cover : d.value);
+    const title = 'Year ' + d.year + ': Premium Paid ₹' + Math.round(d.premium).toLocaleString('en-IN') + ' | Risk Cover ₹' + Math.round(d.cover).toLocaleString('en-IN') + ' | Surrender/Loan Value ' + (d.loanEligible ? '₹' + Math.round(d.value).toLocaleString('en-IN') : 'Not yet eligible');
+    return '<circle cx="' + x + '" cy="' + y + '" r="3.2" fill="#10b981" stroke="#020617" stroke-width="1"><title>' + title + '</title></circle>';
+  }).join('');
+  const svg = '<svg viewBox="0 0 ' + w + ' ' + h + '" class="w-full h-auto" role="img" aria-label="Yearly payout and cover timeline">' +
+    (planType === 'term'
+      ? '<path d="' + lineFor('cover') + '" fill="none" stroke="#34d399" stroke-width="2"/>'
+      : '<path d="' + areaValue + '" fill="rgba(16,185,129,0.15)"/><path d="' + lineFor('value') + '" fill="none" stroke="#10b981" stroke-width="2"/><path d="' + lineFor('cover') + '" fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4 3"/>') +
+    points + '</svg>';
+  $('pfChartWrap').innerHTML = svg +
+    '<div class="flex gap-4 text-[10px] text-slate-500 mt-1">' +
+    (planType === 'term' ? '<span><span class="inline-block w-2.5 h-2.5 rounded-full bg-[#34d399] mr-1"></span>Risk Cover</span>' :
+      '<span><span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1"></span>Accumulated Value</span><span><span class="inline-block w-2.5 h-2.5 rounded-full bg-slate-500 mr-1"></span>Cover</span>') + '</div>';
+}
+function buildPfLedger(plan, ppt, term) {
+  const tiles = [];
+  tiles.push('<div class="flex items-start gap-2"><span>🛡️</span><div><p class="text-slate-200 font-semibold">Accidental Death &amp; Disability Rider</p><p class="text-slate-500">' + (plan.type === 'term' || plan.type === 'savings' || plan.type === 'moneyback' ? 'Available as an optional add-on rider at proposal stage — increases premium slightly.' : 'Not a standard feature of this plan type; check with your advisor for rider options.') + '</p></div></div>');
+  tiles.push('<div class="flex items-start gap-2"><span>💰</span><div><p class="text-slate-200 font-semibold">Guaranteed Surrender Value &amp; Loan Eligibility</p><p class="text-slate-500">' + (plan.type === 'term' ? 'Pure term plans typically carry no surrender value or loan facility.' : 'Loan generally becomes available from Year ' + Math.min(3, term) + ' onward once a surrender value accrues, subject to LIC\'s terms.') + '</p></div></div>');
+  tiles.push('<div class="flex items-start gap-2"><span>🎁</span><div><p class="text-slate-200 font-semibold">Loyalty Additions &amp; Reversionary Bonus</p><p class="text-slate-500">' + (plan.growth > 1 ? 'Illustrated growth above already factors in an assumed simple reversionary bonus — actual bonus rates are declared yearly by LIC, not guaranteed in advance.' : 'This plan type does not carry a reversionary bonus component.') + '</p></div></div>');
+  if (ppt < term) tiles.push('<div class="flex items-start gap-2"><span>⏳</span><div><p class="text-slate-200 font-semibold">Limited Premium Payment</p><p class="text-slate-500">You pay for ' + ppt + ' of the ' + term + ' policy years — cover and maturity benefit continue for the full term regardless.</p></div></div>');
+  $('pfLedger').innerHTML = tiles.join('');
+}
+function buildPfDial(planType) {
+  const guaranteedPct = planType === 'ulip' ? 15 : (planType === 'term' ? 100 : 85); // illustrative split, not an official disclosure
+  const r = 46, circ = 2 * Math.PI * r;
+  const dash = (guaranteedPct / 100) * circ;
+  const svg = '<svg viewBox="0 0 120 120" class="w-28 h-28">' +
+    '<circle cx="60" cy="60" r="' + r + '" fill="none" stroke="#1e293b" stroke-width="12"/>' +
+    '<circle cx="60" cy="60" r="' + r + '" fill="none" stroke="#10b981" stroke-width="12" stroke-linecap="round" stroke-dasharray="' + dash + ' ' + circ + '" transform="rotate(-90 60 60)"/>' +
+    '<text x="60" y="56" text-anchor="middle" fill="#fff" font-size="20" font-weight="700">' + guaranteedPct + '%</text>' +
+    '<text x="60" y="74" text-anchor="middle" fill="#94a3b8" font-size="9">Guaranteed</text></svg>';
+  $('pfDial').innerHTML = svg;
+  $('pfDialCaption').textContent = planType === 'ulip'
+    ? 'Life cover component is LIC-backed; the market-linked fund value itself is not government-guaranteed and moves with markets.'
+    : 'Sum assured + bonus declared are backed by LIC, a statutory corporation under Sec 37 of the LIC Act (sovereign guarantee on the guaranteed portion).';
+}
+function findCategoryForPlan(plan) {
+  return Object.keys(CATEGORY_PLANS).find(cat => CATEGORY_PLANS[cat].some(p => p.name === plan.name)) || null;
+}
+function applyLeadForPlan() {
+  if (!scPlan) return;
+  const cat = findCategoryForPlan(scPlan);
+  closeSubCalc();
+  const u = currentUser();
+  if (!u) { openModal('signup'); return; }
+  openModal();
+  setDashTab('lead');
+  if (cat) {
+    if (![...$('ldInterest').options].some(o => o.value === cat)) $('ldInterest').add(new Option(cat, cat));
+    $('ldInterest').value = cat;
+  }
+  $('ldName').focus();
+}
+
+/* =========================================================================================
+   PERMANENT ZERO-DATA-LOSS DATABASE LAYER
+   - Firestore (if configured below) is the primary source of truth, synced in real time.
+   - A single immutable localStorage namespace (SATHICARE_MASTER_STORE_V1) is the offline
+     fallback / local cache. It is NEVER re-seeded with mock data if it already has records.
+   - The active login token (SATHICARE_ACTIVE_SESSION) is stored separately so it is never
+     touched by a data restore/migration and never drops a session on a code deploy.
+   ========================================================================================= */
+
+/* ---- 1. PASTE YOUR FIREBASE CONFIG HERE TO ENABLE CLOUD SYNC (optional) ---------------- */
+/* Get this object from: Firebase Console → Project Settings → General → Your apps → SDK config.
+   Leave the placeholder values as-is to run in local-only (localStorage) mode — the app works
+   fully either way, cloud sync just adds cross-device / cross-deploy persistence. */
+const firebaseConfig = {
+  apiKey: "PASTE_YOUR_API_KEY",
+  authDomain: "PASTE_YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "PASTE_YOUR_PROJECT_ID",
+  storageBucket: "PASTE_YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "PASTE_YOUR_SENDER_ID",
+  appId: "PASTE_YOUR_APP_ID"
+};
+function isFirebaseConfigured() { return !!(firebaseConfig.apiKey && !String(firebaseConfig.apiKey).startsWith('PASTE_')); }
+let db = null, cloudReady = false;
+if (isFirebaseConfigured() && window.firebase) {
+  try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); cloudReady = true; }
+  catch (e) { console.warn('[SathiCare] Firebase init failed — continuing in local-only mode.', e); }
+}
+
+/* ---- 2. IMMUTABLE LOCALSTORAGE MASTER STORE (fallback + offline cache) ----------------- */
+const MASTER_KEY = 'SATHICARE_MASTER_STORE_V1';
+const SESSION_KEY = 'SATHICARE_ACTIVE_SESSION';
+const USERS = 'users', LEADS = 'leads', SESSION = 'session'; // logical fields (SESSION handled specially)
+
+function readMaster() {
+  try { const raw = localStorage.getItem(MASTER_KEY); if (raw) return JSON.parse(raw); } catch (e) {}
+  return null;
+}
+function writeMaster(obj) { try { localStorage.setItem(MASTER_KEY, JSON.stringify(obj)); return true; } catch (e) { return false; } }
+
+// DATA PROTECTION GUARD: if the master store already exists, load it AS-IS — never overwrite
+// with initial/mock/sample arrays. Only build it once, migrating any pre-existing per-key demo
+// data so nobody's real users/leads are ever lost during an upgrade.
+let master = readMaster();
+if (!master) {
+  master = { users: {}, leads: {} };
+  try {
+    const legacyUsers = JSON.parse(localStorage.getItem('sathicare_users') || localStorage.getItem('sathi_users') || 'null');
+    const legacyLeads = JSON.parse(localStorage.getItem('sathicare_leads') || localStorage.getItem('sathi_leads') || 'null');
+    if (legacyUsers) master.users = legacyUsers;
+    if (legacyLeads) master.leads = legacyLeads;
+  } catch (e) {}
+  writeMaster(master);
+}
+
+const store = {
+  get(k) {
+    if (k === SESSION) {
+      try {
+        let s = localStorage.getItem(SESSION_KEY);
+        if (!s) { s = JSON.parse(localStorage.getItem('sathicare_session') || 'null'); if (s) localStorage.setItem(SESSION_KEY, s); localStorage.removeItem('sathicare_session'); }
+        return s || null;
+      } catch (e) { return null; }
+    }
+    return master[k] !== undefined ? master[k] : null;
+  },
+  set(k, v) {
+    if (k === SESSION) { try { if (v == null) localStorage.removeItem(SESSION_KEY); else localStorage.setItem(SESSION_KEY, v); return true; } catch (e) { return false; } }
+    master[k] = v;
+    const ok = writeMaster(master);
+    if (ok) cloudPush(k, v);
+    return ok;
+  },
+  del(k) {
+    if (k === SESSION) { try { ['SATHICARE_ACTIVE_SESSION', 'sathicare_session', 'sathi_session', 'currentUser', 'activeAdminSession'].forEach(x => localStorage.removeItem(x)); } catch (e) {} return; }
+    delete master[k]; writeMaster(master);
+  }
+};
+
+/* ---- 3. FIRESTORE SYNC (only active when isFirebaseConfigured() is true) --------------- */
+// Collections: `users` (profiles/refCodes/referredBy), `leads` (submissions + status), and
+// `referrals` (a payout ledger: one doc per bonus-paid event, for audit + the admin tree).
+let cloudPushTimer = null;
+function cloudPush(field) {
+  if (!cloudReady) return;
+  clearTimeout(cloudPushTimer);
+  cloudPushTimer = setTimeout(() => {
+    try {
+      if (field === USERS) {
+        const batch = db.batch();
+        Object.keys(master.users).forEach(handle => batch.set(db.collection('users').doc(handle), master.users[handle], { merge: true }));
+        batch.commit().catch(e => console.warn('[SathiCare] cloud user sync failed', e));
+      } else if (field === LEADS) {
+        const batch = db.batch();
+        Object.keys(master.leads).forEach(handle => {
+          master.leads[handle].forEach((lead, idx) => batch.set(db.collection('leads').doc(handle + '__' + idx), Object.assign({ handle, idx }, lead), { merge: true }));
+        });
+        batch.commit().catch(e => console.warn('[SathiCare] cloud lead sync failed', e));
+      }
+    } catch (e) { console.warn('[SathiCare] cloud push failed', e); }
+  }, 400);
+}
+function cloudLogReferralPayout(referrerHandle, leadHandle, leadIdx, amount, status) {
+  if (!cloudReady) return;
+  try { db.collection('referrals').add({ referrerHandle, leadHandle, leadIdx, amount, status, ts: Date.now() }).catch(() => {}); } catch (e) {}
+}
+// On load: pull the latest cloud state so every deployment/device shows the same persistent
+// database, then keep listening in real time. Cloud data wins on conflict (it's the source of truth).
+function cloudPullAndSubscribe() {
+  if (!cloudReady) return;
+  db.collection('users').onSnapshot(snap => {
+    const users = {};
+    snap.forEach(doc => users[doc.id] = doc.data());
+    if (Object.keys(users).length) { master.users = users; writeMaster(master); safeRerender(); }
+  }, e => console.warn('[SathiCare] users listener error', e));
+  db.collection('leads').onSnapshot(snap => {
+    const leads = {};
+    snap.forEach(doc => { const d = doc.data(); (leads[d.handle] = leads[d.handle] || []); leads[d.handle][d.idx] = d; });
+    Object.keys(leads).forEach(h => { leads[h] = leads[h].filter(Boolean); });
+    if (Object.keys(leads).length) { master.leads = leads; writeMaster(master); safeRerender(); }
+  }, e => console.warn('[SathiCare] leads listener error', e));
+}
+function safeRerender() { try { if (currentUser()) renderDashboard(); if (typeof isAdmin === 'function' && isAdmin(currentUser())) { renderAdminLeadTable(); renderAdminUserTable(); renderReferralTree(); renderActivityTable(); } } catch (e) {} }
+
+/* ---- 3b. GOOGLE SHEETS LIVE DATABASE (Apps Script Web App) ------------------------------ */
+// Writes: fire-and-forget POST (text/plain body avoids the CORS preflight Apps Script can't answer).
+// Reads (admin only): GET returns rows tagged USER / LEAD, merged into the local store.
+// SECURITY: plaintext passwords are NEVER sent — only the salted SHA-256 hash.
+async function sendToGoogleSheet(payload) {
+  try {
+    await fetch(SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+  } catch (err) {
+    console.error('Error posting to sheet:', err);
+  }
+}
+const sheetPost = sendToGoogleSheet; // (existing call sites use this name)
+const SHEET_KEYMAP = { name:'name', phone:'phone', mobile:'phone', email:'email', refcode:'refCode', referralcode:'refCode', referredby:'referredBy', timestamp:'timestamp', date:'timestamp', passwordhash:'passwordHash', hash:'passwordHash', salt:'salt',
+  clientname:'clientName', clientphone:'clientPhone', service:'service', submittedby:'submittedBy', submittedbyname:'submittedByName', submittedbyphone:'submittedByPhone', password:'passwordHash', event:'event', activitytype:'event', activity:'event', referralused:'referralUsed', notes:'notes', note:'notes', bonusstatus:'bonusStatus', status:'status', type:'type', rowtype:'type', recordtype:'type', kind:'type' };
+function sheetRowObj(r) {
+  if (Array.isArray(r)) {
+    // Positional fallback: USER,name,phone,refCode,referredBy,ts,hash,salt | LEAD,clientName,clientPhone,service,submittedBy,bonusStatus,ts,status
+    return String(r[0]).toUpperCase() === 'USER'
+      ? { type: 'USER', name: r[1], phone: r[2], refCode: r[3], referredBy: r[4], timestamp: r[5], passwordHash: r[6], salt: r[7] }
+      : { type: 'LEAD', clientName: r[1], clientPhone: r[2], service: r[3], submittedBy: r[4], bonusStatus: r[5], timestamp: r[6], status: r[7] };
+  }
+  const o = {};
+  Object.keys(r || {}).forEach(k => { const key = SHEET_KEYMAP[String(k).toLowerCase().replace(/[^a-z]/g, '')]; if (key && o[key] === undefined) o[key] = r[k]; });
+  return o;
+}
+function sheetRowType(r) { const o = sheetRowObj(r); return String(o.type || '').toUpperCase(); }
+function sheetExtractRows(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (!payload || typeof payload !== 'object') return [];
+  if (Array.isArray(payload.users) || Array.isArray(payload.leads)) {
+    return (payload.users || []).map(x => Object.assign({}, x, { type: 'USER' })).concat((payload.leads || []).map(x => Object.assign({}, x, { type: 'LEAD' })));
+  }
+  const base = payload.rows || payload.data || payload.records || [];
+  const acts = (payload.activity || payload.activities || payload.logs || []);
+  return Array.isArray(acts) && acts.length ? base.concat(acts.map(x => Object.assign({ type: 'ACTIVITY' }, x))) : base;
+}
+/* ---- status / bonus / tombstone helpers ---- */
+const TOMBSTONE_TTL = 10 * 60 * 1000; // deleted rows are hidden for 10 min while the Sheet catches up
+function leadTombKey(by, phone, svc) { return 'L|' + by + '|' + String(phone || '').replace(/\D/g, '').slice(-10) + '|' + String(svc || '').trim().toLowerCase(); }
+function addTombstone(key) { master.tombstones = master.tombstones || {}; master.tombstones[key] = Date.now(); writeMaster(master); }
+function isTombstoned(key) { const t = master.tombstones && master.tombstones[key]; return !!t && Date.now() - t < TOMBSTONE_TTL; }
+function toSheetStatus(s) { return s === 'Policy Completed' ? 'Completed' : s === 'Lead Rejected' ? 'Rejected' : s; }
+function fromSheetStatus(s) {
+  const v = String(s == null ? '' : s).trim();
+  if (!v || /under|pending/i.test(v)) return 'Under Process';
+  if (/^completed$|policy completed/i.test(v)) return 'Policy Completed';
+  if (/^rejected$|lead rejected/i.test(v)) return 'Lead Rejected';
+  return v;
+}
+function bonusFromSheet(b) { const v = String(b == null ? '' : b).trim(); if (/^paid/i.test(v)) return 'Paid'; if (/not/i.test(v)) return 'Not Paid'; return 'Under Process'; }
+function bonusOf(l) { return l.bonusStatus || (l.bonusPaid ? 'Paid' : 'Under Process'); }
+function setBonus(l, v) { l.bonusStatus = v; l.bonusPaid = (v === 'Paid'); }
+function addActivity(a) {
+  master.activity = master.activity || [];
+  const k = a.phone + '|' + a.event + '|' + Math.floor(a.ts / 60000);
+  if (master.activity.some(x => x.phone + '|' + x.event + '|' + Math.floor(x.ts / 60000) === k)) return false;
+  master.activity.push(a);
+  if (master.activity.length > 500) master.activity = master.activity.slice(-500);
+  return true;
+}
+
+function mergeSheetRows(payload) {
+  const rows = sheetExtractRows(payload).filter(r => r && typeof r === 'object');
+  let changed = false;
+  const users = master.users || {}, leads = master.leads || {};
+  const norm = v => String(v == null ? '' : v).trim();
+  const digits = v => norm(v).replace(/\D/g, '').slice(-10);
+  const tsOf = v => Date.parse(v) || Number(v) || Date.now();
+  rows.filter(r => sheetRowType(r) === 'USER').map(sheetRowObj).forEach(o => {
+    const handle = digits(o.phone) || norm(o.email).toLowerCase();
+    if (!handle || isTombstoned('U|' + handle)) return;
+    if (!users[handle]) {
+      users[handle] = { name: norm(o.name) || handle, salt: norm(o.salt), hash: norm(o.passwordHash), created: tsOf(o.timestamp), method: 'phone', blocked: false, email: null, phone: digits(o.phone) || null, referredBy: null, refCode: norm(o.refCode) || null, _refCodeOfParent: norm(o.referredBy) || null, fromSheet: true };
+      changed = true;
+    } else {
+      const u = users[handle];
+      if (!u.refCode && o.refCode) { u.refCode = norm(o.refCode); changed = true; }
+      if (o.referredBy && !u._refCodeOfParent) { u._refCodeOfParent = norm(o.referredBy); changed = true; }
+      if (!u.hash && o.passwordHash && o.salt) { u.hash = norm(o.passwordHash); u.salt = norm(o.salt); changed = true; }
+    }
+  });
+  // Link referredBy (a referral CODE) to the parent's handle — builds the mindmap branches dynamically.
+  Object.keys(users).forEach(h => {
+    const u = users[h], pc = u._refCodeOfParent;
+    if (!u.referredBy && pc && pc.toUpperCase() !== 'DIRECT') {
+      const parent = Object.keys(users).find(x => users[x].refCode && users[x].refCode.toUpperCase() === pc.toUpperCase());
+      if (parent && parent !== h) { u.referredBy = parent; changed = true; }
+    }
+  });
+  const matched = new Set();
+  rows.filter(r => sheetRowType(r) === 'LEAD').map(sheetRowObj).forEach(o => {
+    const by = digits(o.submittedByPhone) || digits(o.submittedBy) || norm(o.submittedBy).toLowerCase();
+    if (!by) return;
+    const cp = digits(o.clientPhone), svc = norm(o.service).toLowerCase();
+    if (isTombstoned(leadTombKey(by, cp, svc))) return;
+    const list = leads[by] = leads[by] || [];
+    const idx = list.findIndex((l, i) => !matched.has(by + '#' + i) && digits(l.phone) === cp && norm(l.interest).toLowerCase() === svc);
+    const subName = norm(o.submittedByName) || (users[by] && users[by].name) || '';
+    if (idx > -1) {
+      matched.add(by + '#' + idx);
+      const l = list[idx];
+      // Sheet is the live source of truth — except for edits made here in the last 90s (write may still be in flight).
+      if (!l.localEditTs || Date.now() - l.localEditTs > 90000) {
+        if (o.status) { const ns = fromSheetStatus(o.status); if (l.status !== ns) { l.status = ns; changed = true; } }
+        if (o.bonusStatus) { const nb = bonusFromSheet(o.bonusStatus); if (nb !== bonusOf(l)) { setBonus(l, nb); changed = true; } }
+      }
+      if (subName && !l.submittedByName) { l.submittedByName = subName; changed = true; }
+      if (o.notes && !l.notes) { l.notes = norm(o.notes); changed = true; }
+    } else {
+      const nl = { name: norm(o.clientName), phone: norm(o.clientPhone), interest: norm(o.service), status: fromSheetStatus(o.status), ts: tsOf(o.timestamp), submittedByName: subName, submittedByPhone: by, notes: norm(o.notes), fromSheet: true };
+      setBonus(nl, bonusFromSheet(o.bonusStatus));
+      list.push(nl);
+      matched.add(by + '#' + (list.length - 1));
+      changed = true;
+    }
+  });
+  // Activity (LOGIN / SIGNUP events) logged by the Apps Script.
+  const ACT = ['ACTIVITY', 'LOG', 'ACTIVITYLOG', 'LOGIN', 'SIGNUP', 'SESSION', 'AUTH'];
+  rows.filter(r => { const t = sheetRowType(r); return t !== 'USER' && t !== 'LEAD' && (ACT.includes(t) || sheetRowObj(r).event); }).forEach(r => {
+    const o = sheetRowObj(r);
+    const ph = digits(o.phone) || norm(o.email).toLowerCase(); if (!ph) return;
+    const t = sheetRowType(r);
+    const ev = String(o.event || (t === 'ACTIVITY' || t === 'LOG' || t === 'ACTIVITYLOG' ? 'LOGIN' : t)).toUpperCase();
+    if (addActivity({ phone: ph, name: norm(o.name), event: ev, ts: tsOf(o.timestamp), ref: norm(o.referralUsed) })) changed = true;
+  });
+  if (changed) { master.users = users; master.leads = leads; writeMaster(master); }
+  return changed;
+}
+let sheetSyncing = false;
+async function sheetRefresh(manual) {
+  if (sheetSyncing) return false;
+  sheetSyncing = true;
+  const icon = $('syncIcon'); if (icon) icon.classList.add('animate-spin');
+  const status = $('syncStatus');
+  let stage = 'network';
+  try {
+    // Plain GET, no custom headers → no CORS preflight. Apps Script answers via a 302 redirect that fetch follows.
+    const res = await fetch(SHEET_URL + '?action=getAll&t=' + Date.now());
+    stage = 'http ' + res.status;
+    const text = await res.text();
+    stage = 'parse';
+    let payload;
+    try { payload = JSON.parse(text); }
+    catch (e) { throw new Error('Not JSON — script returned: ' + text.slice(0, 120).replace(/\s+/g, ' ')); }
+    if (payload && payload.error) throw new Error('Script error: ' + payload.error);
+    stage = 'merge';
+    const n = sheetExtractRows(payload).length;
+    mergeSheetRows(payload);
+    if (status) status.innerHTML = '<span class="text-emerald-400">🟢 Google Sheet live DB • Connected &amp; Synced</span> <span class="text-slate-500">(' + new Date().toLocaleTimeString('en-IN') + ' · ' + n + ' rows)</span>';
+    safeRerender();
+    return true;
+  } catch (e) {
+    console.warn('[SathiCare] sheet sync failed at stage "' + stage + '":', e);
+    const hint = stage === 'network' ? 'network/CORS — deploy must be "Anyone" access & doGet must return JSON' : stage === 'parse' ? 'response was not JSON (check deployment access = Anyone)' : stage;
+    if (status) status.innerHTML = '<span class="text-red-400">🔴 Sync failed (' + hint + ') — showing local data</span>';
+    return false;
+  } finally {
+    sheetSyncing = false;
+    if (icon) setTimeout(() => icon.classList.remove('animate-spin'), 400);
+  }
+}
+// Admin-only: fetch on load, and auto-poll every 20s while the admin dashboard is open.
+function adminViewOpen() { return !document.hidden && !$('modal').classList.contains('hidden') && !$('dashView').classList.contains('hidden') && isAdmin(currentUser()); }
+window.addEventListener('DOMContentLoaded', () => { if (isAdmin(currentUser())) sheetRefresh(); });
+setInterval(() => { if (adminViewOpen()) sheetRefresh(); }, 15000);
+
+cloudPullAndSubscribe();
+
+/* ---- 4. DATABASE SAFETY & BACKUP (Export / Restore JSON, wired to Admin dashboard) ----- */
+function exportDatabaseBackup() {
+  const payload = { exportedAt: new Date().toISOString(), users: master.users, leads: master.leads };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'sathicare-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+function restoreDatabaseBackup(fileInput) {
+  const file = fileInput.files && fileInput.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data || typeof data !== 'object' || !data.users || !data.leads) { alert('This file does not look like a valid SathiCare backup.'); return; }
+      if (!confirm('This will REPLACE all current users and leads with the contents of this backup file. Continue?')) return;
+      master.users = data.users; master.leads = data.leads;
+      writeMaster(master);
+      cloudPush(USERS); cloudPush(LEADS);
+      alert('Database restored successfully from backup.');
+      renderAdminLeadTable(); renderAdminUserTable(); renderReferralTree();
+    } catch (err) { alert('Could not read this backup file: ' + err.message); }
+    fileInput.value = '';
+  };
+  reader.readAsText(file);
+}
+let mode = 'login', method = 'phone';
+async function hash(pw, salt) {
+  const data = new TextEncoder().encode(salt + ':' + pw);
+  if (window.crypto && crypto.subtle) { const buf = await crypto.subtle.digest('SHA-256', data); return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join(''); }
+  let h = 5381; for (const b of data) h = ((h << 5) + h + b) >>> 0; return 'f' + h.toString(16);
+}
+function randSalt() { const a = new Uint8Array(8); if (window.crypto) crypto.getRandomValues(a); else a.forEach((_, i) => a[i] = Math.random() * 256); return Array.from(a).map(b => b.toString(16).padStart(2, '0')).join(''); }
+function showErr(msg) { const e = $('authErr'); e.textContent = msg; e.classList.toggle('hidden', !msg); }
+/*
+FIREBASE AUTH SCAFFOLD (inactive by default — no project configured):
+To enable real Google Sign-In and real SMS-based Phone OTP, add your own Firebase project config,
+then load the SDK and swap googleNotice()/OTP-simulation calls for the real calls below.
+  <script type="module">   ← paste inside your own <script> tag in <head>, not here
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.x/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, RecaptchaVerifier, signInWithPhoneNumber }
+      from "https://www.gstatic.com/firebasejs/10.x/firebase-auth.js";
+    const firebaseConfig = { apiKey: "...", authDomain: "...", projectId: "..." }; // <-- your config
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    // Google: signInWithPopup(auth, new GoogleAuthProvider()).then(result => { ...log the user in... });
+    // Phone OTP: new RecaptchaVerifier('recaptcha-container', {}, auth); then signInWithPhoneNumber(auth, '+91' + phone, verifier);
+  (end of module snippet)
+Until a real config is added here, Google login shows an honest notice and the OTP screen below uses a
+simulated on-screen code — so login never silently breaks for a missing/unconfigured SMS provider.
+*/
+function googleNotice() { $('googleMsg').classList.remove('hidden'); }
+function setMethod(m) {
+  method = m;
+  $('methodPhone').className = 'flex-1 py-1.5 rounded-lg transition ' + (m === 'phone' ? 'tab-on' : 'text-slate-300');
+  $('methodEmail').className = 'flex-1 py-1.5 rounded-lg transition ' + (m === 'email' ? 'tab-on' : 'text-slate-300');
+  $('phoneWrap').classList.toggle('hidden', m !== 'phone');
+  $('emailWrap').classList.toggle('hidden', m !== 'email');
+  if (typeof updateIdChip === 'function') updateIdChip();
+}
+function setTab(m) {
+  mode = m; showErr('');
+  $('tabLogin').className = 'flex-1 py-2 rounded-lg transition ' + (m === 'login' ? 'tab-on' : 'text-slate-300');
+  $('tabSignup').className = 'flex-1 py-2 rounded-lg transition ' + (m === 'signup' ? 'tab-on' : 'text-slate-300');
+  $('nameWrap').classList.toggle('hidden', m === 'login');
+  $('confirmWrap').classList.toggle('hidden', m === 'login');
+  $('forgotLink').classList.toggle('hidden', m === 'signup');
+  $('authSubmit').textContent = 'Send OTP / Verification Code';
+  $('fPass').autocomplete = m === 'login' ? 'current-password' : 'new-password';
+}
+function currentUser() {
+  if (guestOverride) return null;
+  const s = store.get(SESSION);
+  if (!s) return null;
+  const u = (store.get(USERS) || {})[s];
+  // Guest isolation guard: a session token that no longer matches a real, unblocked account
+  // (deleted, blocked, or corrupted) must NEVER render a dashboard — force back to guest mode.
+  if (!u || u.blocked) { store.del(SESSION); return null; }
+  return { handle: s, ...u };
+}
+function isAdmin(u) { return !!u && (ADMIN_PHONES.includes(String(u.handle)) || ADMIN_PHONES.includes(String(u.phone || ''))); }
+function refreshBtn() {
+  const u = currentUser();
+  $('authBtn').textContent = u ? 'Dashboard (' + u.name.split(' ')[0] + ')' : 'Login / Partner Register';
+  $('logoutBtn').classList.toggle('hidden', !u);
+  updatePublicRefBox(u);
+  return u;
+}
+function updatePublicRefBox(u) {
+  const box = $('publicRefBox'), cta = $('publicRefCta');
+  if (!u) { box.classList.add('hidden'); cta.classList.remove('hidden'); return; }
+  let users = store.get(USERS) || {};
+  if (!u.refCode) { const code = generateRefCode(users); users[u.handle].refCode = code; store.set(USERS, users); u.refCode = code; }
+  const origin = window.location.origin + window.location.pathname;
+  $('publicRefLinkInput').value = origin + '?ref=' + u.refCode;
+  box.classList.remove('hidden'); cta.classList.add('hidden');
+}
+function copyPublicRefLink() {
+  const input = $('publicRefLinkInput'); input.select();
+  navigator.clipboard && navigator.clipboard.writeText(input.value).then(() => {
+    $('publicRefCopiedMsg').classList.remove('hidden');
+    setTimeout(() => $('publicRefCopiedMsg').classList.add('hidden'), 1500);
+  }).catch(() => { try { document.execCommand('copy'); $('publicRefCopiedMsg').classList.remove('hidden'); setTimeout(() => $('publicRefCopiedMsg').classList.add('hidden'), 1500); } catch (e) {} });
+}
+function sharePublicRefLinkWa() {
+  const link = $('publicRefLinkInput').value;
+  const text = 'Hey! Check out SathiCare for trusted care and support. Sign up using my link to get started: ' + link;
+  window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
+}
+function leadsFor(handle) { const all = store.get(LEADS) || {}; return all[handle] || []; }
+function fmtDate(ts) { return new Date(ts).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }); }
+const LEAD_STATUSES = ['Under Process', 'Policy Completed', 'No Response', 'Lead Rejected'];
+function statusColor(s) { return s === 'Policy Completed' ? 'text-emerald-400' : s === 'Lead Rejected' ? 'text-red-400' : s === 'No Response' ? 'text-amber-400' : 'text-slate-300'; }
+
+function renderDashboard() {
+  const u = currentUser(); if (!u) return;
+  $('dName').textContent = u.name; $('dHandle').textContent = u.handle;
+  const leads = leadsFor(u.handle);
+  const conv = leads.filter(l => l.status === 'Policy Completed').length;
+  const paidCount = leads.filter(l => l.status === 'Policy Completed' && bonusOf(l) === 'Paid').length;
+  const pendingBonusCount = conv - paidCount;
+  $('stLeads').textContent = leads.length;
+  $('stConv').textContent = conv;
+  $('stEarn').textContent = inr(conv * 500);
+  $('stBal').textContent = inr(pendingBonusCount * 500);
+  const listWrap = $('leadListWrap'), list = $('leadList');
+  list.innerHTML = '';
+  if (leads.length) {
+    listWrap.classList.remove('hidden');
+    leads.slice().reverse().forEach(l => {
+      const row = document.createElement('div');
+      row.className = 'glass border border-white/10 rounded-lg px-3 py-2 text-xs flex justify-between items-center';
+      const bonusTag = l.status === 'Policy Completed' ? ('<span class="ml-2 text-[9px] px-1.5 py-0.5 rounded ' + (bonusOf(l) === 'Paid' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400') + '">' + (bonusOf(l) === 'Paid' ? 'Paid ₹500' : bonusOf(l) === 'Not Paid' ? 'Not Paid' : 'Bonus Pending') + '</span>') : '';
+      row.innerHTML = '<span>' + esc(l.name) + ' <span class="text-slate-600">(' + esc(l.interest) + ')</span></span><span><span class="font-semibold ' + statusColor(l.status) + '">' + l.status + '</span>' + bonusTag + '</span>';
+      list.appendChild(row);
+    });
+  } else listWrap.classList.add('hidden');
+  Object.keys(CATEGORY_PLANS).forEach(cat => { if (![...$('ldInterest').options].some(o => o.value === cat)) $('ldInterest').add(new Option(cat, cat)); });
+
+  const origin = window.location.origin + window.location.pathname;
+  let usersForCode = store.get(USERS) || {};
+  if (!u.refCode) {
+    // Lazily generate + persist a clean code for accounts created before this feature existed.
+    const code = generateRefCode(usersForCode);
+    usersForCode[u.handle].refCode = code;
+    store.set(USERS, usersForCode);
+    u.refCode = code;
+  }
+  $('refLinkInput').value = origin + '?ref=' + u.refCode;
+
+  const admin = isAdmin(u);
+  $('dashTabAdmin').classList.toggle('hidden', !admin);
+  $('dashTabUsers').classList.toggle('hidden', !admin);
+  $('dashTabTree').classList.toggle('hidden', !admin);
+  $('adminSearch').classList.toggle('hidden', !admin); $('adminSyncBar').classList.toggle('hidden', !admin); $('adminSyncBar').classList.toggle('flex', admin);
+  if (admin) {
+    renderAdminLeadTable(); renderAdminUserTable(); renderReferralTree(); renderActivityTable();
+    const csm = $('cloudStatusMsg');
+    if (csm) csm.innerHTML = cloudReady ? '<span class="text-emerald-400">☁️ Cloud sync active — Firestore is the live source of truth.</span>' : '<span class="text-slate-500">☁️ Cloud sync inactive — running on local device storage only. Paste your Firebase config near the top of the script to enable it.</span>';
+  }
+}
+function generateRefCode(users) {
+  let code;
+  do { code = 'SATHI-' + Math.floor(1000 + Math.random() * 9000); }
+  while (Object.values(users).some(u => u.refCode === code));
+  return code;
+}
+function findHandleByRefCode(users, code) {
+  if (!code) return null;
+  const upper = code.toUpperCase();
+  const match = Object.keys(users).find(h => users[h].refCode === upper);
+  return match || null;
+}
+function copyRefLink() {
+  const input = $('refLinkInput');
+  input.select();
+  navigator.clipboard && navigator.clipboard.writeText(input.value).then(() => {
+    $('refCopiedMsg').classList.remove('hidden');
+    setTimeout(() => $('refCopiedMsg').classList.add('hidden'), 1500);
+  }).catch(() => { try { document.execCommand('copy'); $('refCopiedMsg').classList.remove('hidden'); setTimeout(() => $('refCopiedMsg').classList.add('hidden'), 1500); } catch (e) {} });
+}
+function shareRefLinkWa() {
+  // Universal WhatsApp share intent — opens the user's own contact picker, never the admin's chat.
+  const link = $('refLinkInput').value;
+  const text = 'Hey! Check out SathiCare for trusted care and support. Sign up using my link to get started: ' + link;
+  window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
+}
+
+function adminQuery() { const el = $('adminSearch'); return el ? el.value.trim().toLowerCase() : ''; }
+function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function adminSearchChanged() { renderAdminLeadTable(); renderAdminUserTable(); renderReferralTree(); renderActivityTable(); }
+function fmtDateTime(ts) { return new Date(ts).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }); }
+const BONUS_OPTIONS = [['Under Process', 'Bonus: Under Process'], ['Paid', 'Bonus: Paid (₹500)'], ['Not Paid', 'Bonus: Not Paid']];
+const STATUS_OPTIONS = [['Under Process', 'Under Process'], ['Policy Completed', 'Completed'], ['Lead Rejected', 'Rejected']];
+function statusLabel(s) { return s === 'Policy Completed' ? 'Completed' : s === 'Lead Rejected' ? 'Rejected' : s; }
+function statusBadge(s) {
+  const cls = s === 'Policy Completed' ? 'bg-emerald-500/20 text-emerald-400' : s === 'Lead Rejected' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400';
+  return '<span class="text-[9px] px-1.5 py-0.5 rounded font-semibold ' + cls + '">' + esc(statusLabel(s)) + '</span>';
+}
+function statusOptionsHtml(cur) {
+  const opts = STATUS_OPTIONS.slice(); if (!opts.some(o => o[0] === cur)) opts.push([cur, cur]);
+  return opts.map(o => '<option value="' + esc(o[0]) + '"' + (o[0] === cur ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('');
+}
+function bonusOptionsHtml(cur) { return BONUS_OPTIONS.map(o => '<option value="' + o[0] + '"' + (o[0] === cur ? ' selected' : '') + '>' + o[1] + '</option>').join(''); }
+const SEL_CLS = 'glass-input border border-white/10 rounded px-1.5 py-1 text-[10px] ';
+
+function renderAdminLeadTable() {
+  const all = store.get(LEADS) || {}, users = store.get(USERS) || {};
+  const q = adminQuery();
+  const body = $('adminLeadTable'); body.innerHTML = '';
+  let any = false, total = 0;
+  Object.keys(all).forEach(handle => {
+    const pu = users[handle];
+    all[handle].forEach((l, idx) => {
+      total++;
+      const sName = l.submittedByName || (pu && pu.name) || '—';
+      const sPhone = l.submittedByPhone || (pu && pu.phone) || (handle.includes('@') ? '—' : handle);
+      const hay = [l.name, l.phone, l.interest, sName, sPhone, statusLabel(l.status), pu && pu.refCode, l.notes].join(' ').toLowerCase();
+      if (q && !hay.includes(q)) return;
+      any = true;
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + fmtDate(l.ts) + '</td><td>' + esc(l.name) + (l.notes ? ' <span title="' + esc(l.notes) + '">📝</span>' : '') + '</td><td>' + esc(l.phone) + '</td><td>' + esc(l.interest) + '</td>' +
+        '<td>' + esc(sName) + ' <span class="text-slate-500">· ' + esc(sPhone) + '</span></td>' +
+        '<td><select data-st class="' + SEL_CLS + statusColor(l.status) + '">' + statusOptionsHtml(l.status) + '</select></td>' +
+        '<td class="space-x-1"><select data-bn class="' + SEL_CLS + '">' + bonusOptionsHtml(bonusOf(l)) + '</select>' +
+        '<button data-edit title="Edit lead" class="text-[11px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded">✏️</button>' +
+        '<button data-del title="Delete lead" class="text-[11px] bg-red-600/70 hover:bg-red-600 px-2 py-1 rounded">🗑️</button></td>';
+      tr.querySelector('[data-st]').addEventListener('change', e => adminUpdateLeadStatus(handle, idx, e.target.value));
+      tr.querySelector('[data-bn]').addEventListener('change', e => adminSetBonus(handle, idx, e.target.value));
+      tr.querySelector('[data-edit]').addEventListener('click', () => openEditLead(handle, idx));
+      tr.querySelector('[data-del]').addEventListener('click', () => adminDeleteLead(handle, idx));
+      body.appendChild(tr);
+    });
+  });
+  if (!any) body.innerHTML = '<tr><td colspan="7" class="text-slate-500">' + (total ? 'No leads match your search.' : 'No leads yet.') + '</td></tr>';
+}
+function afterLeadChange() { renderAdminLeadTable(); renderReferralTree(); try { renderDashboard(); } catch (e) {} }
+function adminUpdateLeadStatus(handle, idx, status) {
+  const all = store.get(LEADS) || {}; const l = all[handle] && all[handle][idx]; if (!l) return;
+  l.status = status; l.localEditTs = Date.now(); store.set(LEADS, all);
+  sheetPost({ action: 'updateLeadStatus', clientPhone: l.phone, newStatus: toSheetStatus(status), submittedByPhone: handle, submittedBy: handle, service: l.interest, bonusStatus: bonusOf(l) });
+  afterLeadChange();
+}
+function adminSetBonus(handle, idx, val) {
+  const all = store.get(LEADS) || {}; const l = all[handle] && all[handle][idx]; if (!l) return;
+  setBonus(l, val); l.localEditTs = Date.now(); store.set(LEADS, all);
+  sheetPost({ action: 'updateLead', submittedByPhone: handle, submittedBy: handle, clientPhone: l.phone, service: l.interest, status: toSheetStatus(l.status), bonusStatus: val });
+  cloudLogReferralPayout(handle, handle, idx, 500, val);
+  afterLeadChange();
+}
+function adminToggleBonus(handle, idx) {
+  const l = ((store.get(LEADS) || {})[handle] || [])[idx]; if (!l) return;
+  adminSetBonus(handle, idx, bonusOf(l) === 'Paid' ? 'Under Process' : 'Paid');
+}
+function adminDeleteLead(handle, idx) {
+  const all = store.get(LEADS) || {}; const l = all[handle] && all[handle][idx]; if (!l) return;
+  if (!confirm('Delete lead "' + l.name + '" (' + l.phone + ')? It will be removed from the app and the Google Sheet.')) return;
+  sheetPost({ action: 'deleteRow', identifier: l.phone, type: 'LEAD', submittedByPhone: handle, service: l.interest, clientName: l.name });
+  addTombstone(leadTombKey(handle, l.phone, l.interest));
+  all[handle].splice(idx, 1); store.set(LEADS, all);
+  afterLeadChange();
+  setTimeout(() => sheetRefresh(), 1500);
+}
+
+/* ---- Edit lead modal ---- */
+let editLeadCtx = null;
+function openEditLead(handle, idx) {
+  const l = ((store.get(LEADS) || {})[handle] || [])[idx]; if (!l) return;
+  editLeadCtx = { handle, idx };
+  $('elName').value = l.name || ''; $('elPhone').value = l.phone || ''; $('elService').value = l.interest || ''; $('elNotes').value = l.notes || '';
+  $('elErr').classList.add('hidden');
+  $('editLeadModal').classList.remove('hidden'); $('editLeadModal').classList.add('flex');
+}
+function closeEditLead() { $('editLeadModal').classList.add('hidden'); $('editLeadModal').classList.remove('flex'); editLeadCtx = null; }
+$('elPhone').addEventListener('input', e => e.target.value = e.target.value.replace(/\D/g, ''));
+function saveEditLead() {
+  if (!editLeadCtx) return;
+  const { handle, idx } = editLeadCtx;
+  const all = store.get(LEADS) || {}; const l = all[handle] && all[handle][idx]; if (!l) return closeEditLead();
+  const name = $('elName').value.trim(), phone = $('elPhone').value.trim(), service = $('elService').value.trim(), notes = $('elNotes').value.trim();
+  const err = m => { $('elErr').textContent = m; $('elErr').classList.remove('hidden'); };
+  if (name.length < 2) return err('Enter the client name.');
+  if (!/^\d{10}$/.test(phone)) return err('Enter a valid 10-digit mobile number.');
+  if (!service) return err('Enter the service / plan.');
+  const oldPhone = l.phone, oldService = l.interest;
+  if (leadTombKey(handle, oldPhone, oldService) !== leadTombKey(handle, phone, service)) addTombstone(leadTombKey(handle, oldPhone, oldService));
+  l.name = name; l.phone = phone; l.interest = service; l.notes = notes; l.localEditTs = Date.now();
+  store.set(LEADS, all);
+  sheetPost({ action: 'updateLead', submittedByPhone: handle, submittedBy: handle, oldClientPhone: oldPhone, oldService, clientName: name, clientPhone: phone, service, notes, status: toSheetStatus(l.status), bonusStatus: bonusOf(l) });
+  closeEditLead(); afterLeadChange();
+}
+
+/* ---- Live Auth & Session Monitor ---- */
+function logActivity(event, u) {
+  const ts = Date.now(), phone = u.phone || u.handle;
+  addActivity({ phone, name: u.name, event, ts, ref: '' }); writeMaster(master);
+  sheetPost({ action: 'logActivity', phone, name: u.name, event, timestamp: new Date(ts).toISOString() });
+  try { if (isAdmin(currentUser())) renderActivityTable(); } catch (e) {}
+}
+function referralUsedFor(users, h, fallback) {
+  const u = users[h]; if (!u) return fallback || 'DIRECT';
+  if (u.referredBy && users[u.referredBy] && users[u.referredBy].refCode) return users[u.referredBy].refCode;
+  return (u._refCodeOfParent || fallback || 'DIRECT');
+}
+function renderActivityTable() {
+  const body = $('activityTable'); if (!body) return;
+  const users = store.get(USERS) || {}, map = {}, q = adminQuery();
+  (master.activity || []).forEach(a => { map[a.phone + '|' + a.event + '|' + Math.floor(a.ts / 60000)] = a; });
+  Object.keys(users).forEach(h => { const u = users[h]; if (!u.created) return; const k = h + '|SIGNUP|' + Math.floor(u.created / 60000); if (!map[k]) map[k] = { phone: h, name: u.name, event: 'SIGNUP', ts: u.created }; });
+  let list = Object.values(map).sort((x, y) => y.ts - x.ts);
+  list = list.map(a => ({ a, name: a.name || (users[a.phone] && users[a.phone].name) || '—', ref: referralUsedFor(users, a.phone, a.ref) }));
+  if (q) list = list.filter(r => [r.name, r.a.phone, r.a.event, r.ref].join(' ').toLowerCase().includes(q));
+  list = list.slice(0, 100);
+  if (!list.length) { body.innerHTML = '<tr><td colspan="5" class="text-slate-500">No activity yet.</td></tr>'; return; }
+  body.innerHTML = list.map(r => '<tr><td>' + esc(r.name) + '</td><td>' + esc(r.a.phone) + '</td><td><span class="text-[9px] px-1.5 py-0.5 rounded font-semibold ' + (r.a.event === 'SIGNUP' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-sky-500/20 text-sky-300') + '">' + esc(r.a.event) + '</span></td><td>' + esc(r.ref) + '</td><td>' + fmtDateTime(r.a.ts) + '</td></tr>').join('');
+}
+
+/* ---------- Admin: recursive referral mindmap (Admin → Partner → Referred Partner → Leads) ---------- */
+function computeTreeParents(users) {
+  const handles = Object.keys(users), code2h = {}, parent = {}, children = {};
+  handles.forEach(h => { const c = users[h].refCode; if (c) code2h[String(c).trim().toUpperCase()] = h; });
+  handles.forEach(h => {
+    const u = users[h]; let p = null; const rb = u.referredBy;
+    if (rb && users[rb]) p = rb;
+    else if (rb && code2h[String(rb).trim().toUpperCase()]) p = code2h[String(rb).trim().toUpperCase()];
+    else { const c = String(u._refCodeOfParent || '').trim().toUpperCase(); if (c && c !== 'DIRECT' && code2h[c]) p = code2h[c]; }
+    parent[h] = (p === h) ? null : p;
+  });
+  handles.forEach(h => { const seen = new Set([h]); let c = parent[h]; while (c) { if (seen.has(c)) { parent[h] = null; break; } seen.add(c); c = parent[c]; } });
+  handles.forEach(h => { if (parent[h]) (children[parent[h]] = children[parent[h]] || []).push(h); });
+  return { parent, children };
+}
+function renderReferralTree() {
+  const users = store.get(USERS) || {}, allLeads = store.get(LEADS) || {};
+  const wrap = $('treeWrap'); wrap.innerHTML = '';
+  const handles = Object.keys(users);
+  if (!handles.length) { wrap.innerHTML = '<p class="text-xs text-slate-500">No partners yet.</p>'; return; }
+  const q = adminQuery();
+  const { parent, children } = computeTreeParents(users);
+  const isAdm = h => isAdmin({ handle: h, phone: users[h].phone });
+  const roots = handles.filter(h => !parent[h]).sort((x, y) => (isAdm(y) ? 1 : 0) - (isAdm(x) ? 1 : 0));
+  const selfMatch = h => { if (!q) return true; const u = users[h]; return [h, u.name, u.phone, u.email, u.refCode].join(' ').toLowerCase().includes(q) || (allLeads[h] || []).some(l => [l.name, l.phone, l.interest].join(' ').toLowerCase().includes(q)); };
+  const branchMatch = h => selfMatch(h) || (children[h] || []).some(branchMatch);
+
+  function nodeEl(h) {
+    const u = users[h], leads = allLeads[h] || [], kids = children[h] || [];
+    const conv = leads.filter(l => l.status === 'Policy Completed').length;
+    const paidAmt = leads.filter(l => bonusOf(l) === 'Paid').length * 500;
+    const pendAmt = leads.filter(l => l.status === 'Policy Completed' && bonusOf(l) === 'Under Process').length * 500;
+    const node = document.createElement('div'); node.className = 'tree-node';
+    const card = document.createElement('div');
+    card.className = 'glass border ' + (isAdm(h) ? 'border-amber-500/40' : 'border-white/10') + ' rounded-xl p-3';
+    card.innerHTML = '<p class="text-xs font-bold text-emerald-300">' + (isAdm(h) ? '👑 ' : '👤 ') + esc(u.name) + ' <span class="text-slate-400 font-normal">· ' + esc(u.phone || h) + '</span></p>' +
+      '<p class="text-[10px] text-slate-400 mt-1">Ref Code: <span class="text-emerald-400 font-semibold">' + esc(u.refCode || '—') + '</span> · Direct referrals: <b class="text-slate-200">' + kids.length + '</b> · Leads: <b class="text-slate-200">' + leads.length + '</b> · Converted: <b class="text-slate-200">' + conv + '</b></p>' +
+      '<div class="mt-1.5"><span class="text-[10px] px-2 py-0.5 rounded glass border border-white/10 font-semibold"><span class="text-emerald-400">Paid: ₹' + paidAmt + '</span> | <span class="text-amber-400">Pending: ₹' + pendAmt + '</span></span></div>' +
+      '<div class="mt-2 flex flex-wrap gap-1.5">' +
+      '<button data-act="edit" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded font-semibold">Edit Partner</button>' +
+      (pendAmt > 0 ? '<button data-act="pay" class="text-[10px] bg-amber-600/70 hover:bg-amber-600 px-2 py-1 rounded font-semibold">Mark Bonus Paid</button>' : '') +
+      (isAdm(h) ? '' : '<button data-act="del" class="text-[10px] bg-red-600/70 hover:bg-red-600 px-2 py-1 rounded font-semibold">Delete Partner</button>') + '</div>';
+    card.querySelector('[data-act="edit"]').addEventListener('click', () => adminEditUser(h));
+    const payBtn = card.querySelector('[data-act="pay"]');
+    if (payBtn) payBtn.addEventListener('click', () => { const i = leads.findIndex(l => l.status === 'Policy Completed' && bonusOf(l) === 'Under Process'); if (i > -1) adminSetBonus(h, i, 'Paid'); });
+    const delBtn = card.querySelector('[data-act="del"]');
+    if (delBtn) delBtn.addEventListener('click', () => adminDeleteUser(h));
+    node.appendChild(card);
+    const shownKids = kids.filter(branchMatch);
+    if (leads.length || shownKids.length) {
+      const box = document.createElement('div'); box.className = 'tree-children';
+      leads.forEach((l, idx) => {
+        const leaf = document.createElement('div'); leaf.className = 'tree-node tree-leaf';
+        leaf.innerHTML = '<div class="bg-slate-900/60 border border-white/10 rounded-lg px-2.5 py-2 flex flex-wrap items-center gap-2 text-[10px]">' +
+          '<span class="text-slate-200 font-semibold">📋 ' + esc(l.name) + '</span><span class="text-slate-500">' + esc(l.phone) + ' · ' + esc(l.interest) + '</span>' + statusBadge(l.status) +
+          '<select class="' + SEL_CLS + 'ml-auto">' + bonusOptionsHtml(bonusOf(l)) + '</select></div>';
+        leaf.querySelector('select').addEventListener('change', e => adminSetBonus(h, idx, e.target.value));
+        box.appendChild(leaf);
+      });
+      shownKids.forEach(k => box.appendChild(nodeEl(k)));
+      node.appendChild(box);
+    }
+    return node;
+  }
+
+  const head = document.createElement('div');
+  head.className = 'bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 text-xs font-bold text-emerald-300';
+  head.innerHTML = '👑 Admin (Master) <span class="text-slate-400 font-normal">· ' + esc(ADMIN_PHONE) + ' · ' + handles.length + ' partners in network</span>';
+  wrap.appendChild(head);
+  const shownRoots = roots.filter(branchMatch);
+  if (!shownRoots.length) { const m = document.createElement('p'); m.className = 'text-xs text-slate-500 mt-2'; m.textContent = 'No partners match that search.'; wrap.appendChild(m); return; }
+  const rootBox = document.createElement('div'); rootBox.className = 'tree-children';
+  shownRoots.forEach(h => rootBox.appendChild(nodeEl(h)));
+  wrap.appendChild(rootBox);
+}
+
+function renderAdminUserTable() {
+  const users = store.get(USERS) || {};
+  const body = $('adminUserTable'); body.innerHTML = '';
+  const handles = Object.keys(users);
+  if (!handles.length) { body.innerHTML = '<tr><td colspan="6" class="text-slate-500">No registered users yet.</td></tr>'; return; }
+  const uq = adminQuery();
+  handles.forEach(handle => {
+    const u = users[handle];
+    if (uq && ![u.name, handle, u.phone, u.email, u.refCode].join(' ').toLowerCase().includes(uq)) return;
+    const isEmailHandle = handle.includes('@') || u.method === 'email';
+    const emailVal = u.email || (isEmailHandle ? handle : '—');
+    const phoneVal = u.phone || (!isEmailHandle ? handle : '—');
+    const tr = document.createElement('tr');
+    const status = u.blocked ? '<span class="text-red-400">Blocked</span>' : '<span class="text-emerald-400">Active</span>';
+    tr.innerHTML = '<td>' + esc(u.name) + '</td><td>' + esc(emailVal) + '</td><td>' + esc(phoneVal) + '</td><td class="text-slate-500">🔒 hashed (not visible)</td><td>' + status + '</td>' +
+      '<td class="space-x-1"><button data-act="edit" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded">Edit</button>' +
+      '<button data-act="block" class="text-[10px] bg-amber-600/70 hover:bg-amber-600 px-2 py-1 rounded">' + (u.blocked ? 'Unblock' : 'Block') + '</button>' +
+      '<button data-act="delete" class="text-[10px] bg-red-600/70 hover:bg-red-600 px-2 py-1 rounded">Delete</button></td>';
+    tr.querySelector('[data-act="edit"]').addEventListener('click', () => adminEditUser(handle));
+    tr.querySelector('[data-act="block"]').addEventListener('click', () => adminToggleBlock(handle));
+    tr.querySelector('[data-act="delete"]').addEventListener('click', () => adminDeleteUser(handle));
+    body.appendChild(tr);
+  });
+}
+async function adminEditUser(handle) {
+  const users = store.get(USERS) || {};
+  const u = users[handle]; if (!u) return;
+  const newName = prompt('Edit name for ' + handle + ':', u.name);
+  if (newName === null) return;
+  if (newName.trim()) u.name = newName.trim();
+  const isEmailHandle = handle.includes('@') || u.method === 'email';
+  if (isEmailHandle) {
+    const newPhone = prompt('Add/update a phone number on file for ' + handle + ' (optional, login stays via email):', u.phone || '');
+    if (newPhone !== null) u.phone = newPhone.trim().replace(/\D/g, '') || null;
+  } else {
+    const newEmail = prompt('Add/update an email on file for ' + handle + ' (optional, login stays via mobile):', u.email || '');
+    if (newEmail !== null) u.email = newEmail.trim().toLowerCase() || null;
+  }
+  const newPw = prompt('Set a new password for this partner? (leave blank to keep current password)', '');
+  if (newPw && newPw.trim().length >= 6) {
+    const salt = randSalt();
+    u.salt = salt; u.hash = await hash(newPw.trim(), salt);
+  } else if (newPw && newPw.trim().length > 0) {
+    alert('Password not changed — it must be at least 6 characters.');
+  }
+  store.set(USERS, users);
+  sheetPost({ action: 'updateUser', phone: u.phone || handle, name: u.name, email: u.email || '', password: u.hash, passwordHash: u.hash, salt: u.salt });
+  renderAdminUserTable(); renderReferralTree(); renderActivityTable();
+}
+function adminToggleBlock(handle) {
+  const users = store.get(USERS) || {};
+  if (!users[handle]) return;
+  users[handle].blocked = !users[handle].blocked;
+  store.set(USERS, users);
+  renderAdminUserTable();
+}
+function adminDeleteUser(handle) {
+  const users = store.get(USERS) || {}; const u = users[handle]; if (!u) return;
+  if (isAdmin({ handle, phone: u.phone })) { alert('Master admin accounts cannot be deleted.'); return; }
+  if (!confirm('Delete partner ' + u.name + ' (' + handle + ')? The account is removed from the app and the Google Sheet. Leads they submitted are kept as records. This cannot be undone.')) return;
+  sheetPost({ action: 'deleteRow', identifier: u.phone || handle, type: 'USER', name: u.name });
+  addTombstone('U|' + handle);
+  delete users[handle]; store.set(USERS, users);
+  renderAdminUserTable(); renderAdminLeadTable(); renderReferralTree(); renderActivityTable();
+  setTimeout(() => sheetRefresh(), 1500);
+}
+
+function setDashTab(t) {
+  const admin = isAdmin(currentUser());
+  $('dashTabStats').className = 'flex-1 py-2 rounded-lg transition ' + (t === 'stats' ? 'tab-on' : 'text-slate-300');
+  $('dashTabLead').className = 'flex-1 py-2 rounded-lg transition ' + (t === 'lead' ? 'tab-on' : 'text-slate-300');
+  $('dashTabAdmin').className = (admin ? '' : 'hidden ') + 'flex-1 py-2 rounded-lg transition ' + (t === 'admin' ? 'tab-on' : 'text-slate-300');
+  $('dashTabUsers').className = (admin ? '' : 'hidden ') + 'flex-1 py-2 rounded-lg transition ' + (t === 'users' ? 'tab-on' : 'text-slate-300');
+  $('dashTabTree').className = (admin ? '' : 'hidden ') + 'flex-1 py-2 rounded-lg transition ' + (t === 'tree' ? 'tab-on' : 'text-slate-300');
+  $('dashStats').classList.toggle('hidden', t !== 'stats');
+  $('leadForm').classList.toggle('hidden', t !== 'lead');
+  $('dashAdmin').classList.toggle('hidden', t !== 'admin');
+  $('dashUsers').classList.toggle('hidden', t !== 'users');
+  $('dashTree').classList.toggle('hidden', t !== 'tree');
+}
+function refBannerRefresh() {
+  const users = store.get(USERS) || {};
+  const refHandle = findHandleByRefCode(users, pendingReferralCode);
+  const banner = $('refBanner');
+  if (refHandle && users[refHandle]) { $('refByName').textContent = users[refHandle].name; banner.classList.remove('hidden'); }
+  else banner.classList.add('hidden');
+}
+function openModal(tab) {
+  const u = refreshBtn();
+  $('forgotView').classList.add('hidden');
+  $('otpView').classList.add('hidden');
+  $('authView').classList.toggle('hidden', !!u);
+  $('dashView').classList.toggle('hidden', !u);
+  if (u) { renderDashboard(); setDashTab('stats'); if (isAdmin(u)) sheetRefresh(); }
+  else { setTab(tab || (pendingReferralCode ? 'signup' : 'login')); setMethod('phone'); $('googleMsg').classList.add('hidden'); refBannerRefresh(); }
+  $('modal').classList.remove('hidden'); $('modal').classList.add('flex');
+}
+// STRICT GUEST SESSION ISOLATION: a visitor arriving via ?ref=CODE (silently captured into
+// pendingReferralCode above) with no valid active session is shown the guest landing page —
+// NEVER an auto-authenticated dashboard — and is prompted straight into the referral sign-up.
+window.addEventListener('DOMContentLoaded', () => {
+  if (pendingReferralCode && !currentUser()) { setTimeout(() => openModal('signup'), 400); }
+});
+function closeModal() {
+  if (otpCtx) { clearInterval(otpTimer); otpTypeJob++; otpCtx = null; pendingSignup = null; }
+  $('modal').classList.add('hidden'); $('modal').classList.remove('flex');
+  if (guidePendingAfterAuth && !guideDismissed()) { guidePendingAfterAuth = false; setTimeout(openWelcome, 500); }
+}
+function logout() {
+  store.del(SESSION);
+  try { sessionStorage.removeItem('SATHICARE_REF_AUTHED'); sessionStorage.removeItem('SATHICARE_PENDING_REF'); } catch (e) {}
+  guestOverride = false; pendingLoginHandle = null; loginOtpVal = null;
+  try { $('authForm').reset(); } catch (e) {}
+  refreshBtn(); closeModal();
+  window.location.replace(window.location.pathname); // clean homepage, no ?ref= / stale state
+}
+/* ---------- Identifier detection (10-digit mobile vs email) ---------- */
+function detectIdentifier(v) {
+  v = String(v || '').trim();
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return 'email';
+  if (/^[6-9]\d{9}$/.test(v)) return 'phone';
+  return null;
+}
+function updateIdChip() {
+  const chip = $('idChip'), v = method === 'phone' ? $('fPhone').value : $('fEmail').value, k = detectIdentifier(v);
+  chip.classList.toggle('hidden', !k);
+  if (k) chip.textContent = k === 'phone' ? '📱 Mobile number detected — code will go by SMS / WhatsApp' : '✉️ Email detected — code will go to your inbox';
+}
+$('fPhone').addEventListener('input', e => {
+  const raw = e.target.value;
+  if (/[@a-zA-Z]/.test(raw)) { setMethod('email'); $('fEmail').value = raw.trim(); e.target.value = ''; $('fEmail').focus(); }
+  else e.target.value = raw.replace(/\D/g, '').slice(0, 10);
+  updateIdChip();
+});
+$('fEmail').addEventListener('input', () => {
+  const v = $('fEmail').value.trim();
+  if (/^\d{10}$/.test(v)) { setMethod('phone'); $('fPhone').value = v; $('fEmail').value = ''; $('fPhone').focus(); }
+  updateIdChip();
+});
+
+let pendingLoginHandle = null, loginOtpVal = null;
+$('authForm').addEventListener('submit', async e => {
+  e.preventDefault(); showErr('');
+  const name = $('fName').value.trim(), pw = $('fPass').value, pw2 = $('fPass2').value;
+  let handle;
+  if (method === 'phone') {
+    handle = $('fPhone').value.trim();
+    if (!/^[6-9]\d{9}$/.test(handle)) return showErr('Enter a valid 10-digit Indian mobile number.');
+  } else {
+    handle = $('fEmail').value.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(handle)) return showErr('Enter a valid email address.');
+  }
+  if (mode === 'signup' && name.length < 2) return showErr('Please enter your full name.');
+  if (pw.length < 6) return showErr('Password must be at least 6 characters.');
+  if (mode === 'signup' && pw !== pw2) return showErr('Passwords do not match.');
+  // Pull the live sheet first so the duplicate check (and cross-device login) sees accounts made on other devices.
+  const submitBtn = $('authSubmit'); const btnLabel = submitBtn.textContent; submitBtn.disabled = true; submitBtn.textContent = 'Please wait…';
+  try {
+    if (mode === 'signup' || !(store.get(USERS) || {})[handle]) await Promise.race([sheetRefresh(), new Promise(r => setTimeout(r, 6000))]);
+  } catch (e) {} finally { submitBtn.disabled = false; submitBtn.textContent = btnLabel; }
+  const users = store.get(USERS) || {};
+  if (mode === 'signup') {
+    if (users[handle]) {
+      alert('This mobile number is already registered! Please Login instead.');
+      setTab('login');
+      showErr('This mobile number is already registered! Please Login instead.');
+      return;
+    }
+    const salt = randSalt();
+    pendingSignup = { name, method, handle, salt, hash: await hash(pw, salt) };
+    return startOtpFlow('signup', handle);
+  }
+  const u = users[handle];
+  if (!u) return showErr('No account found. Please sign up first.');
+  if (u.blocked) return showErr('Your account has been blocked by the admin. Please contact SathiCare support.');
+  if (u.hash !== await hash(pw, u.salt)) return showErr('Incorrect password.');
+  // Password correct — require OTP before granting access.
+  pendingLoginHandle = handle;
+  startOtpFlow('login', handle);
+});
+/* =====================================================================================
+   DUAL-CHANNEL OTP (Email via MailApp / Mobile via SMS gateway) — Google Apps Script backend
+   The OTP is generated, stored (hashed, 5-min expiry) and checked ONLY on the server.
+   The browser never sees the code, so it cannot be read from devtools or forged.
+   ===================================================================================== */
+const OTP_RESEND_SECS = 60;
+let pendingSignup = null, otpCtx = null, otpTimer = null, otpTypeJob = 0;
+
+async function otpApi(payload) {
+  const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 20000);
+  try {
+    // text/plain body = "simple" request (no CORS preflight); Apps Script replies with readable JSON.
+    const res = await fetch(SHEET_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload), signal: ctl.signal });
+    const txt = await res.text();
+    try { return JSON.parse(txt); } catch (e) { return { status: 'error', error: 'bad_response' }; }
+  } catch (e) { return { status: 'error', error: 'network' }; }
+  finally { clearTimeout(to); }
+}
+function maskTarget(type, t) {
+  if (type === 'email') { const [u, d] = t.split('@'); return (u.slice(0, 2) + '***@' + d); }
+  return '+91-XXXXXX' + t.slice(-4);
+}
+// typewriter: returns when finished (or aborted by a newer job)
+function otpType(text, speed) {
+  const job = ++otpTypeJob, el = $('otpTypeText'); el.textContent = '';
+  return new Promise(res => {
+    let i = 0;
+    (function tick() {
+      if (job !== otpTypeJob) return res(false);
+      el.textContent = text.slice(0, ++i);
+      if (i < text.length) setTimeout(tick, speed || 22); else res(true);
+    })();
+  });
+}
+function otpBanner(kind) {
+  const b = $('otpTypeBanner');
+  b.className = 'otp-glow rounded-xl px-3 py-2.5 text-xs font-semibold mb-3 border ' + (kind === 'err' ? 'bg-red-500/10 border-red-500/30 text-red-300' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300');
+}
+function otpStartCountdown(secs) {
+  clearInterval(otpTimer);
+  const btn = $('otpResendBtn'); let left = secs; btn.disabled = true;
+  const paint = () => { btn.textContent = left > 0 ? 'Resend OTP in ' + left + 's' : 'Resend OTP'; };
+  paint();
+  otpTimer = setInterval(() => { left--; paint(); if (left <= 0) { clearInterval(otpTimer); btn.disabled = false; } }, 1000);
+}
+function otpShowView() {
+  $('authView').classList.add('hidden'); $('forgotView').classList.add('hidden'); $('otpView').classList.remove('hidden');
+  $('otpInput').value = ''; $('otpErr').classList.add('hidden'); $('otpChannelAlert').classList.add('hidden'); $('otpDevBox').classList.add('hidden');
+}
+function startOtpFlow(purpose, handle) {
+  const type = detectIdentifier(handle) || (handle.includes('@') ? 'email' : 'phone');
+  otpCtx = { purpose, handle, type, token: null, busy: false };
+  $('otpSub').textContent = (purpose === 'signup' ? 'Verify to create your account. ' : purpose === 'reset' ? 'Verify to reset your password. ' : 'Verify to log in. ') + 'The 6-digit code is valid for 5 minutes.';
+  otpShowView();
+  return sendOtpRequest();
+}
+async function sendOtpRequest() {
+  const c = otpCtx; if (!c || c.busy) return; c.busy = true;
+  $('otpResendBtn').disabled = true; $('otpResendBtn').textContent = 'Sending…';
+  otpBanner('ok');
+  const masked = maskTarget(c.type, c.handle);
+  const typing = otpType(c.type === 'email' ? 'Sending code to your registered email (' + masked + ')...' : 'Dispatching SMS alert to ' + masked + '...', 24);
+  const res = await otpApi({ action: 'sendOTP', target: c.handle, type: c.type });   // server generates the OTP
+  await typing;
+  c.busy = false;
+  if (!otpCtx || otpCtx !== c) return;
+  if (res && res.status === 'success') {
+    const dev = !!res.devOtp;
+    await otpType(dev ? 'Gateway offline — dev test code is ready below.' : (c.type === 'email' ? 'Sent! Check your inbox.' : 'Sent! Check your phone.'), 22);
+    const al = $('otpChannelAlert'); al.classList.remove('hidden');
+    al.textContent = c.type === 'email' ? '📩 Check your Email inbox/spam for your 6-digit verification code.' : '📱 Check your Mobile SMS / WhatsApp for your 6-digit verification code.';
+    if (dev) {
+      $('otpDevCode').textContent = res.devOtp; $('otpDevBox').classList.remove('hidden');
+      const wa = $('otpWaLink');
+      if (c.type === 'phone') { wa.href = 'https://api.whatsapp.com/send?phone=91' + c.handle + '&text=' + encodeURIComponent('Your SathiCare Partner verification code is ' + res.devOtp + '. Valid for 5 minutes.'); wa.classList.remove('hidden'); }
+      else wa.classList.add('hidden');
+    }
+    otpStartCountdown(OTP_RESEND_SECS);
+    $('otpInput').focus();
+  } else {
+    otpBanner('err');
+    const e = (res && res.error) || 'network';
+    const msg = e === 'cooldown' ? 'A code was just sent. Please wait ' + (res.retryAfter || 60) + 's before requesting another.'
+      : e === 'rate_limited' ? 'Too many codes requested. Please try again in about an hour.'
+      : e === 'sms_gateway_not_configured' ? 'SMS delivery is not set up yet. Please use Email instead, or contact SathiCare support.'
+      : e === 'email_failed' ? 'Could not send the email right now. Please try again shortly.'
+      : e === 'invalid_target' ? 'That mobile number / email does not look valid.'
+      : e === 'network' ? 'Could not reach the verification service. Check your connection and try again.'
+      : 'Verification service error (' + e + '). Make sure the latest Code.gs is deployed.';
+    await otpType('⚠️ ' + msg, 14);
+    otpStartCountdown(e === 'cooldown' ? (res.retryAfter || 60) : 5);
+  }
+}
+function resendOtp() { sendOtpRequest(); }
+function otpAutoFill() { const c = $('otpDevCode').textContent; if (c) { $('otpInput').value = c; $('otpInput').focus(); } }
+
+async function verifyOtp() {
+  const c = otpCtx; if (!c) return;
+  const code = $('otpInput').value.replace(/\D/g, ''), err = $('otpErr'), btn = $('otpVerifyBtn');
+  err.classList.add('hidden');
+  if (code.length !== 6) { err.textContent = 'Enter the 6-digit code.'; err.classList.remove('hidden'); return; }
+  btn.disabled = true; const lbl = btn.textContent; btn.textContent = 'Verifying…';
+  const res = await otpApi({ action: 'verifyOTP', target: c.handle, type: c.type, otp: code });
+  btn.disabled = false; btn.textContent = lbl;
+  if (!res || res.status !== 'success') {
+    const e = (res && res.error) || 'network';
+    err.textContent = e === 'expired' ? 'This code has expired. Tap "Resend OTP" for a new one.'
+      : e === 'too_many_attempts' ? 'Too many wrong attempts. Please request a new code.'
+      : e === 'invalid_otp' ? 'Incorrect OTP.' + (res.attemptsLeft != null ? ' ' + res.attemptsLeft + ' attempt(s) left.' : ' Please try again.')
+      : e === 'network' ? 'Could not reach the verification service. Please try again.'
+      : 'Verification failed (' + e + ').';
+    err.classList.remove('hidden'); return;
+  }
+  c.token = res.token || null;
+  clearInterval(otpTimer);
+  if (c.purpose === 'login') finishLogin(c);
+  else if (c.purpose === 'signup') await completeSignup(c);
+  else if (c.purpose === 'reset') { $('otpView').classList.add('hidden'); $('forgotView').classList.remove('hidden'); $('forgotStep1').classList.add('hidden'); $('forgotStep2').classList.remove('hidden'); }
+}
+function finishLogin(c) {
+  store.set(SESSION, c.handle); endGuestOverride();
+  { const lu = (store.get(USERS) || {})[c.handle]; if (lu) logActivity('LOGIN', Object.assign({ handle: c.handle }, lu)); }
+  $('authForm').reset(); updateIdChip();
+  pendingLoginHandle = null; otpCtx = null;
+  $('otpView').classList.add('hidden');
+  openModal();
+}
+async function completeSignup(c) {
+  const ps = pendingSignup; if (!ps || ps.handle !== c.handle) return;
+  const users = store.get(USERS) || {};
+  if (users[ps.handle]) { cancelOtp(); setTab('login'); return showErr('This mobile number is already registered! Please Login instead.'); }
+  const referrerHandle = findHandleByRefCode(users, pendingReferralCode);
+  users[ps.handle] = { name: ps.name, salt: ps.salt, hash: ps.hash, created: Date.now(), method: ps.method, blocked: false, email: ps.method === 'email' ? ps.handle : null, phone: ps.method === 'phone' ? ps.handle : null, referredBy: referrerHandle, refCode: generateRefCode(users) };
+  if (!store.set(USERS, users)) { cancelOtp(); return showErr('Could not save your account. Check that browser storage is enabled.'); }
+  store.set(SESSION, ps.handle); endGuestOverride();
+  { const nu = users[ps.handle];
+    sheetPost({ action: 'addUser', name: ps.name, phone: ps.method === 'phone' ? ps.handle : '', email: ps.method === 'email' ? ps.handle : '', password: nu.hash /* salted SHA-256 hash, never plaintext */, passwordHash: nu.hash, salt: nu.salt, refCode: nu.refCode, otpToken: c.token, referredBy: referrerHandle ? users[referrerHandle].refCode : (pendingReferralCode ? String(pendingReferralCode).toUpperCase() : 'DIRECT'), timestamp: new Date(nu.created).toISOString() }); }
+  pendingSignup = null; otpCtx = null;
+  $('authForm').reset(); updateIdChip();
+  $('otpView').classList.add('hidden');
+  openModal();
+}
+function cancelOtp() {
+  const purpose = otpCtx && otpCtx.purpose;
+  clearInterval(otpTimer); otpTypeJob++;
+  pendingLoginHandle = null; pendingSignup = null; otpCtx = null;
+  $('otpView').classList.add('hidden');
+  if (purpose === 'reset') { $('forgotView').classList.remove('hidden'); $('forgotStep1').classList.remove('hidden'); $('forgotStep2').classList.add('hidden'); }
+  else $('authView').classList.remove('hidden');
+}
+
+/* ---------- Forgot password (simulated recovery — no backend to send real OTP) ---------- */
+let fgHandleVal = null;
+function openForgot() { $('authView').classList.add('hidden'); $('forgotView').classList.remove('hidden'); $('forgotStep1').classList.remove('hidden'); $('forgotStep2').classList.add('hidden'); $('fgErr1').classList.add('hidden'); $('fgErr2').classList.add('hidden'); $('fgHandle').value = ''; }
+function closeForgot() { $('forgotView').classList.add('hidden'); $('authView').classList.remove('hidden'); }
+function findForgotAccount() {
+  const raw = $('fgHandle').value.trim();
+  const handle = raw.includes('@') ? raw.toLowerCase() : raw.replace(/\D/g, '');
+  const users = store.get(USERS) || {};
+  if (!users[handle]) { $('fgErr1').textContent = 'No account found for that mobile/email.'; $('fgErr1').classList.remove('hidden'); return; }
+  fgHandleVal = handle;
+  $('fgAccountShown').textContent = handle;
+  $('fgErr1').classList.add('hidden');
+  startOtpFlow('reset', handle);       // step 2 (new password) only unlocks after the code is verified
+}
+async function confirmReset() {
+  $('fgErr2').classList.add('hidden');
+  if (!otpCtx || otpCtx.purpose !== 'reset' || !otpCtx.token || otpCtx.handle !== fgHandleVal) { $('fgErr2').textContent = 'Please verify the OTP first.'; $('fgErr2').classList.remove('hidden'); return; }
+  const newPw = $('fgNewPass').value;
+  if (newPw.length < 6) { $('fgErr2').textContent = 'Password must be at least 6 characters.'; $('fgErr2').classList.remove('hidden'); return; }
+  const users = store.get(USERS) || {};
+  const salt = randSalt();
+  users[fgHandleVal].salt = salt;
+  users[fgHandleVal].hash = await hash(newPw, salt);
+  store.set(USERS, users);
+  otpCtx = null;
+  closeForgot();
+  showErr(''); $('fPass').value = ''; $('fPass2').value = '';
+  setTab('login');
+}
+
+/* ---------- Lead submission: save only (no WhatsApp auto-redirect) ---------- */
+$('ldPhone').addEventListener('input', e => e.target.value = e.target.value.replace(/\D/g, ''));
+$('leadForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const u = currentUser(); if (!u) return;
+  const leadName = $('ldName').value.trim(), leadPhone = $('ldPhone').value.trim(), interest = $('ldInterest').value;
+  const all = store.get(LEADS) || {};
+  all[u.handle] = all[u.handle] || [];
+  all[u.handle].push({ name: leadName, phone: leadPhone, interest, status: 'Under Process', bonusPaid: false, ts: Date.now(), submittedByName: u.name, submittedByPhone: u.phone || u.handle });
+  store.set(LEADS, all);
+  sheetPost({ action: 'addLead', clientName: leadName, clientPhone: leadPhone, service: interest, submittedByName: u.name, submittedByPhone: u.phone || u.handle, submittedBy: u.phone || u.handle, bonusStatus: 'Pending', status: 'Under Process', timestamp: new Date().toISOString() });
+  $('leadForm').reset();
+  $('leadMsg').classList.remove('hidden');
+  renderDashboard();
+  setTimeout(() => { $('leadMsg').classList.add('hidden'); setDashTab('stats'); }, 1500);
+});
+refreshBtn();
+</script>
+<script>
+/* Savings-kid mascot — canvas 2D cartoon character (no dependencies).
+   States: IDLE (counts a glowing gold coin, blinks, looks around, breathes)
+           CHASE (runs toward the cursor with spring easing: dx*0.05 / dy*0.05)
+           REACH (cursor still + kid arrived: stands tall, both hands reach up to tap the cursor, then back to idle).
+   Touch / no-hover devices run an autonomous "virtual cursor" loop. Scales with the hero, pauses off-screen / hidden tab. */
+(function () {
+  var cv = document.getElementById('kidMascotCanvas');
+  if (!cv || !cv.getContext) return;
+  var ctx = cv.getContext('2d'), hero = cv.parentElement;
+  var mm = window.matchMedia ? window.matchMedia.bind(window) : null;
+  var reduce = !!(mm && mm('(prefers-reduced-motion: reduce)').matches);
+  var fine = !!(mm && mm('(hover: hover) and (pointer: fine)').matches);
+  var W = 1, H = 1, dpr = 1, S = 140, t = 0, last = 0, raf = 0, visible = true;
+  var K = { x: 0, y: 0, vx: 0, vy: 0, run: 0, phase: 0, turn: 0, reach: 0, reachT: 0, reached: false, tapped: false,
+            lx: 0, ly: 0, ltx: 0, lty: 0, lt: 0, blink: 0, nb: 2, init: false, cx: 0, cy: 0, sp: 0 };
+  var cur = { x: 0, y: 0, active: false, moved: 0 }, auto = { next: 1.2 };
+  var parts = [], rings = [];
+  var OL = '#0b1220', SKIN = '#f4c7a1', SWEAT = '#e07a5f', SWEAT_D = '#c4573d', PANTS = '#334155', SHOE = '#f1f5f9', BEAN = '#10b981', BEAN_D = '#059669';
+  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+  function lerp(a, b, k) { return a + (b - a) * k; }
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+
+  function resize() {
+    var r = hero.getBoundingClientRect();
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = Math.max(1, r.width); H = Math.max(1, r.height);
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (K.init) { K.x = clamp(K.x, 20, W - 20); K.y = clamp(K.y, 40, H - 14); }
+    if (!raf) frame(0);
+  }
+
+  if (fine && !reduce) {
+    window.addEventListener('pointermove', function (e) {
+      if (e.pointerType === 'touch') return;
+      var r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+      if (x >= 0 && y >= 0 && x <= r.width && y <= r.height) {
+        if (Math.hypot(x - cur.x, y - cur.y) > 5 || !cur.active) K.reached = false;
+        cur.x = x; cur.y = y; cur.active = true; cur.moved = performance.now();
+      } else cur.active = false;
+    }, { passive: true });
+    document.addEventListener('mouseleave', function () { cur.active = false; });
+  }
+
+  function spark(x, y, burst) {
+    if (parts.length > 60) return;
+    var n = burst ? 9 : 1;
+    for (var i = 0; i < n; i++) {
+      var a = Math.random() * 6.2832, sp = burst ? rnd(1.2, 3.4) : rnd(0.2, 0.7);
+      parts.push({ x: x, y: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - (burst ? 1 : 0.4), l: 1, s: rnd(2, 4.5), g: Math.random() < 0.7 });
+    }
+  }
+
+  function ik(sx, sy, tx, ty, L, side) {
+    var dx = tx - sx, dy = ty - sy, d = Math.hypot(dx, dy) || 0.0001, md = 2 * L * 0.999;
+    if (d > md) { dx *= md / d; dy *= md / d; d = md; }
+    var a = Math.acos(d / (2 * L)), th = Math.atan2(dy, dx);
+    var c1 = { x: sx + L * Math.cos(th + a), y: sy + L * Math.sin(th + a) }, c2 = { x: sx + L * Math.cos(th - a), y: sy + L * Math.sin(th - a) };
+    var e = (c1.y + side * c1.x * 0.5) > (c2.y + side * c2.x * 0.5) ? c1 : c2;   // elbow low & outward
+    return { ex: e.x, ey: e.y, hx: sx + dx, hy: sy + dy };
+  }
+
+  /* ---------- simulation ---------- */
+  function update(dt, now) {
+    var k = dt * 60;
+    S = clamp(Math.min(W * 0.34, H * 0.3), 90, 210);
+    if (!K.init) { K.x = W * 0.5; K.y = H * 0.8; K.init = true; }
+    if (!fine) {                                  // autonomous playful loop (touch devices)
+      auto.next -= dt;
+      if (auto.next <= 0) { cur.x = rnd(W * 0.15, W * 0.85); cur.y = rnd(H * 0.3, H * 0.62); cur.active = true; cur.moved = now; K.reached = false; auto.next = rnd(5.5, 8); }
+    }
+    var moving = cur.active && (now - cur.moved < 350);
+    var tx = clamp(cur.x, S * 0.3, W - S * 0.3), ty = clamp(cur.y + S * 0.95, S * 1.1, H - 14);
+    var dx = tx - K.x, dy = ty - K.y, dist = Math.hypot(dx, dy);
+    var chasing = cur.active && (moving || dist > S * 0.07);
+    var wx = chasing ? dx * 0.05 : 0, wy = chasing ? dy * 0.05 : 0, sp = Math.hypot(wx, wy), cap = S * 0.11;
+    if (sp > cap) { wx *= cap / sp; wy *= cap / sp; }
+    K.vx += (wx - K.vx) * 0.25 * k; K.vy += (wy - K.vy) * 0.25 * k;
+    K.x += K.vx * k; K.y += K.vy * k;
+    var speed = Math.hypot(K.vx, K.vy); K.sp = speed;
+    K.run += (clamp(speed / (S * 0.025), 0, 1) - K.run) * 0.15 * k;
+    K.phase += (speed * 0.085 + (K.run > 0.1 ? 0.1 : 0)) * k;
+    // reach: arrive + cursor still -> tap it once, then return to idle
+    var settled = cur.active && !moving && dist <= S * 0.07;
+    if (settled && !K.reached && K.reachT <= 0) { K.reachT = 2.6; K.reached = true; K.tapped = false; }
+    if (K.reachT > 0) K.reachT -= dt;
+    K.reach += (((K.reachT > 0 && cur.active) ? 1 : 0) - K.reach) * 0.12 * k;
+    if (K.reach > 0.85 && !K.tapped) { K.tapped = true; spark(cur.x, cur.y, true); rings.push({ x: cur.x, y: cur.y, r: 4, a: 0.9 }); }
+    // facing + gaze
+    K.turn += ((cur.active ? clamp((cur.x - K.x) / (S * 1.2), -1, 1) : K.lx * 0.5) - K.turn) * 0.12 * k;
+    var ltx, lty;
+    if (cur.active) { ltx = clamp((cur.x - K.x) / (S * 2), -1, 1); lty = clamp((cur.y - (K.y - S * 0.8)) / (S * 2), -1, 1); }
+    else { K.lt -= dt; if (K.lt <= 0) { K.ltx = rnd(-1, 1); K.lty = rnd(-0.3, 0.5); K.lt = rnd(1.2, 3.2); } ltx = K.ltx; lty = K.lty; }
+    K.lx += (ltx - K.lx) * 0.1 * k; K.ly += (lty - K.ly) * 0.1 * k;
+    K.nb -= dt; if (K.nb <= 0) { K.blink = 0.15; K.nb = rnd(2, 5); }
+    // particles / rings
+    if (K.run < 0.3 && K.reach < 0.3 && Math.random() < 0.05 * k) spark(K.cx + rnd(-10, 10), K.cy + rnd(-10, 6), false);
+    for (var i = parts.length - 1; i >= 0; i--) { var p = parts[i]; p.x += p.vx * k; p.y += p.vy * k; p.vy += 0.04 * k; p.l -= 0.02 * k; if (p.l <= 0) parts.splice(i, 1); }
+    for (i = rings.length - 1; i >= 0; i--) { var rg = rings[i]; rg.r += 2.2 * k; rg.a -= 0.025 * k; if (rg.a <= 0) rings.splice(i, 1); }
+  }
+
+  /* ---------- drawing ---------- */
+  function ol() { return Math.max(1.5, S * 0.014); }
+  function limb(x1, y1, x2, y2, w, col) {
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = OL; ctx.lineWidth = w + ol() * 2; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    ctx.strokeStyle = col; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  }
+  function blob(x, y, rx, ry, col) {
+    ctx.beginPath(); ctx.ellipse(x, y, Math.max(rx, 0.1), Math.max(ry, 0.1), 0, 0, 6.2832);
+    ctx.fillStyle = col; ctx.fill(); ctx.lineWidth = ol(); ctx.strokeStyle = OL; ctx.stroke();
+  }
+  function star(x, y, s, col, a) {
+    ctx.globalAlpha = a; ctx.fillStyle = col; ctx.beginPath();
+    ctx.moveTo(x, y - s); ctx.quadraticCurveTo(x, y, x + s, y); ctx.quadraticCurveTo(x, y, x, y + s); ctx.quadraticCurveTo(x, y, x - s, y); ctx.quadraticCurveTo(x, y, x, y - s);
+    ctx.fill(); ctx.globalAlpha = 1;
+  }
+
+  function drawKid() {
+    var u = S, run = K.run, reach = K.reach, idle = 1 - Math.max(run, reach);
+    var breath = Math.sin(t * 2), bob = -Math.abs(Math.sin(K.phase)) * 0.045 * u * run - reach * 0.035 * u + breath * 0.004 * u;
+    var lean = clamp(K.vx / (S * 0.11), -1, 1) * 0.16 * run;
+
+    // ground shadow
+    ctx.fillStyle = 'rgba(0,0,0,' + (0.38 - Math.abs(bob) / u).toFixed(2) + ')';
+    ctx.beginPath(); ctx.ellipse(K.x, K.y + 2, 0.22 * u, 0.045 * u, 0, 0, 6.2832); ctx.fill();
+
+    ctx.save(); ctx.translate(K.x, K.y); ctx.translate(0, -0.3 * u); ctx.rotate(lean); ctx.translate(0, 0.3 * u);
+    var by = bob * u / u;                                    // px offset (already in px)
+
+    // legs
+    var hipY = -0.34 * u + by * 0.5;
+    for (var sd = -1; sd <= 1; sd += 2) {
+      var ph = K.phase + (sd > 0 ? 0 : Math.PI), lift = Math.max(0, Math.sin(ph)) * 0.09 * u * run, fx = sd * 0.075 * u + Math.sin(ph) * 0.035 * u * run, fy = -lift - reach * 0.03 * u;
+      limb(sd * 0.07 * u, hipY, fx, fy - 0.03 * u, 0.085 * u, PANTS);
+      blob(fx + sd * 0.01 * u, fy - 0.012 * u, 0.075 * u, 0.04 * u, SHOE);
+    }
+    // torso (cozy knit sweater)
+    var ty = -0.52 * u + by;
+    blob(0, ty, 0.15 * u, 0.17 * u * (1 + breath * 0.015), SWEAT);
+    ctx.strokeStyle = SWEAT_D; ctx.lineWidth = Math.max(1.5, 0.014 * u); ctx.lineCap = 'round';
+    for (var b = 0; b < 3; b++) { ctx.beginPath(); ctx.arc(0, ty - 0.02 * u + b * 0.07 * u, 0.12 * u, 0.25, Math.PI - 0.25); ctx.stroke(); }
+    blob(0, ty - 0.15 * u, 0.065 * u, 0.028 * u, SWEAT_D);   // collar
+
+    // head
+    var hx = K.turn * 0.02 * u, hy = -0.8 * u + by + breath * 0.004 * u, hr = 0.2 * u, fo = K.turn * 0.06 * u + K.lx * 0.02 * u;
+    blob(hx - hr, hy + 0.01 * u, 0.035 * u, 0.045 * u, SKIN); blob(hx + hr, hy + 0.01 * u, 0.035 * u, 0.045 * u, SKIN);  // ears
+    blob(hx, hy, hr, hr * 0.97, SKIN);
+    ctx.fillStyle = '#5b3a29'; ctx.beginPath(); ctx.ellipse(hx + fo * 0.6, hy - 0.1 * u, 0.15 * u, 0.045 * u, 0, 0, 6.2832); ctx.fill();   // fringe
+    var bl = K.blink > 0 ? Math.sin((1 - K.blink / 0.15) * Math.PI) : 0; if (K.blink > 0) K.blink -= 0.016;
+    var excite = Math.max(run, reach);
+    for (sd = -1; sd <= 1; sd += 2) {
+      var ex = hx + fo + sd * 0.078 * u, ey = hy + 0.015 * u;
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.ellipse(ex, ey, 0.047 * u, Math.max(0.055 * u * (1 - 0.92 * bl), 0.6), 0, 0, 6.2832); ctx.fill();
+      ctx.lineWidth = ol() * 0.8; ctx.strokeStyle = OL; ctx.stroke();
+      if (bl < 0.6) { ctx.fillStyle = '#1e293b'; ctx.beginPath(); ctx.arc(ex + K.lx * 0.018 * u, ey + K.ly * 0.016 * u, 0.027 * u, 0, 6.2832); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(ex + K.lx * 0.018 * u - 0.008 * u, ey + K.ly * 0.016 * u - 0.01 * u, 0.009 * u, 0, 6.2832); ctx.fill(); }
+      ctx.strokeStyle = '#3b2a20'; ctx.lineWidth = Math.max(1.5, 0.012 * u);
+      ctx.beginPath(); ctx.moveTo(ex - 0.04 * u, ey - 0.075 * u - excite * 0.014 * u); ctx.lineTo(ex + 0.04 * u, ey - 0.082 * u - excite * 0.02 * u); ctx.stroke();
+      ctx.fillStyle = 'rgba(244,114,128,0.45)'; ctx.beginPath(); ctx.arc(ex + sd * 0.03 * u, ey + 0.065 * u, 0.03 * u, 0, 6.2832); ctx.fill();
+    }
+    var mx = hx + fo, my = hy + 0.09 * u;
+    if (excite > 0.3) { ctx.fillStyle = '#7f1d1d'; ctx.beginPath(); ctx.ellipse(mx, my + 0.01 * u, 0.034 * u, 0.026 * u + excite * 0.012 * u, 0, 0, 6.2832); ctx.fill(); ctx.lineWidth = ol() * 0.8; ctx.strokeStyle = OL; ctx.stroke(); }
+    else { ctx.strokeStyle = OL; ctx.lineWidth = Math.max(1.6, 0.013 * u); ctx.beginPath(); ctx.moveTo(mx - 0.04 * u, my); ctx.quadraticCurveTo(mx, my + 0.05 * u, mx + 0.04 * u, my); ctx.stroke(); }
+    // beanie
+    ctx.beginPath(); ctx.arc(hx, hy - 0.02 * u, hr * 1.04, Math.PI * 1.02, Math.PI * 1.98); ctx.closePath();
+    ctx.fillStyle = BEAN; ctx.fill(); ctx.lineWidth = ol(); ctx.strokeStyle = OL; ctx.stroke();
+    blob(hx, hy - 0.115 * u, hr * 1.05, 0.04 * u, BEAN_D);
+    blob(hx + K.turn * 0.01 * u, hy - 0.25 * u, 0.05 * u, 0.05 * u, '#f8fafc');
+
+    // arms (2-bone IK)  — hand targets blend idle -> run -> reach
+    var sy = -0.6 * u + by, L = 0.165 * u, tap = (Math.sin(t * 1.1) > -0.3 ? Math.abs(Math.sin(t * 9)) : 0) * 0.04 * u;
+    var curL = { x: cur.x - K.x, y: cur.y - K.y }, rY = Math.min(curL.y, -0.5 * u);
+    var tgt = {
+      R: { x: lerp(lerp(0.085 * u, 0.2 * u, run), curL.x + 0.03 * u, reach), y: lerp(lerp(-0.455 * u + by, -0.47 * u + Math.sin(K.phase) * 0.07 * u, run), rY, reach) },
+      L: { x: lerp(lerp(0.045 * u, -0.2 * u, run), curL.x - 0.06 * u, reach), y: lerp(lerp(-0.56 * u + by + tap, -0.47 * u - Math.sin(K.phase) * 0.07 * u, run), rY + 0.02 * u, reach) }
+    };
+    var aL = ik(-0.155 * u, sy, tgt.L.x, tgt.L.y, L, -1), aR = ik(0.155 * u, sy, tgt.R.x, tgt.R.y, L, 1);
+    limb(-0.155 * u, sy, aL.ex, aL.ey, 0.075 * u, SWEAT); limb(aL.ex, aL.ey, aL.hx, aL.hy, 0.068 * u, SWEAT);
+    limb(0.155 * u, sy, aR.ex, aR.ey, 0.075 * u, SWEAT); limb(aR.ex, aR.ey, aR.hx, aR.hy, 0.068 * u, SWEAT);
+
+    // glowing gold coin held in the right hand
+    var cx = aR.hx, cy = aR.hy - 0.045 * u, cr = 0.062 * u;
+    K.cx = K.x + cx; K.cy = K.y + cy;
+    var gl = ctx.createRadialGradient(cx, cy, cr * 0.3, cx, cy, cr * 4.2);
+    gl.addColorStop(0, 'rgba(253,224,71,' + (0.5 + 0.15 * Math.sin(t * 3)).toFixed(2) + ')'); gl.addColorStop(1, 'rgba(253,224,71,0)');
+    ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(cx, cy, cr * 4.2, 0, 6.2832); ctx.fill();
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(0.8 + 0.2 * Math.cos(t * 2.5), 1);
+    var cg = ctx.createRadialGradient(-cr * 0.3, -cr * 0.3, cr * 0.1, 0, 0, cr);
+    cg.addColorStop(0, '#fef3c7'); cg.addColorStop(0.5, '#fbbf24'); cg.addColorStop(1, '#b45309');
+    ctx.beginPath(); ctx.arc(0, 0, cr, 0, 6.2832); ctx.fillStyle = cg; ctx.fill(); ctx.lineWidth = ol(); ctx.strokeStyle = '#78350f'; ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, 0, cr * 0.72, 0, 6.2832); ctx.lineWidth = Math.max(1, ol() * 0.6); ctx.strokeStyle = 'rgba(120,53,15,.55)'; ctx.stroke();
+    ctx.fillStyle = '#92400e'; ctx.font = 'bold ' + Math.round(cr * 1.15) + 'px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('\u20B9', 0, cr * 0.04);
+    ctx.restore();
+    blob(aR.hx, aR.hy, 0.042 * u, 0.042 * u, SKIN); blob(aL.hx, aL.hy, 0.042 * u, 0.042 * u, SKIN);
+    ctx.restore();
+  }
+
+  function frame(dt) {
+    var now = performance.now();
+    if (dt > 0) update(dt, now); else if (!K.init) { S = clamp(Math.min(W * 0.34, H * 0.3), 90, 210); K.x = W * 0.5; K.y = H * 0.8; K.init = true; }
+    ctx.clearRect(0, 0, W, H);
+    for (var i = 0; i < rings.length; i++) { ctx.globalAlpha = Math.max(0, rings[i].a); ctx.strokeStyle = '#34d399'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(rings[i].x, rings[i].y, rings[i].r, 0, 6.2832); ctx.stroke(); }
+    ctx.globalAlpha = 1;
+    drawKid();
+    for (i = 0; i < parts.length; i++) { var p = parts[i]; star(p.x, p.y, p.s * (0.5 + p.l * 0.5), p.g ? '#fde68a' : '#6ee7b7', Math.max(0, p.l)); }
+  }
+
+  function loop(ts) {
+    raf = 0;
+    if (!visible || document.hidden) return;
+    var dt = last ? Math.min((ts - last) / 1000, 0.05) : 0.016; last = ts; t += dt;
+    frame(dt);
+    raf = requestAnimationFrame(loop);
+  }
+  function start() { if (reduce || raf) return; last = 0; raf = requestAnimationFrame(loop); }
+
+  resize();
+  window.addEventListener('resize', resize);
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(hero);
+  if (window.IntersectionObserver) new IntersectionObserver(function (e) { visible = e[0].isIntersecting; if (visible) start(); }, { threshold: 0 }).observe(hero);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) start(); });
+  start();
+})();
+</script>
+</body>
+</html>
