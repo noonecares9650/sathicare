@@ -30,9 +30,7 @@ button:not(.fx-off):not(:disabled):active,nav a:active,#waFloat:active,a[class*=
 /* ===== Budget gate ===== */
 @keyframes gateShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
 .gate-shake{animation:gateShake .45s ease}
-@keyframes caretBlink{50%{opacity:0}}
-.otp-caret::after{content:'\258C';margin-left:2px;animation:caretBlink 1s steps(1) infinite}
-.otp-glow{box-shadow:0 0 18px rgba(52,211,153,.30)}
+.cap-wrap canvas{border-radius:10px;border:1px solid rgba(148,163,184,.35);background:#020617}
 .gate-err{border-color:#fbbf24!important;box-shadow:0 0 0 3px rgba(248,113,113,.3),0 0 16px rgba(251,191,36,.45)!important}
 @keyframes expandIn{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
 .reveal-expand{animation:expandIn .5s cubic-bezier(.2,.8,.2,1)}
@@ -573,13 +571,13 @@ input[type=range]{accent-color:#10b981}
     <div id="authView">
       <h3 class="text-xl font-bold mb-1">Partner Portal</h3>
       <div id="refBanner" class="hidden bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-xs text-emerald-300 mb-3">🎉 Aap <span id="refByName" class="font-bold"></span> ke referral se aaye ho — sign up karo aur dono ko fayda milega!</div>
-      <div class="flex glass rounded-xl p-1 mb-4 text-sm font-semibold">
-        <button id="tabLogin" onclick="setTab('login')" class="flex-1 py-2 rounded-lg transition">Login</button>
-        <button id="tabSignup" onclick="setTab('signup')" class="flex-1 py-2 rounded-lg transition">Sign up</button>
+      <div class="flex glass rounded-xl p-1 mb-3 text-xs font-semibold">
+        <button id="methodPhone" type="button" onclick="setMethod('phone')" class="flex-1 py-2 rounded-lg transition">📱 Mobile Number (Default)</button>
+        <button id="methodEmail" type="button" onclick="setMethod('email')" class="flex-1 py-2 rounded-lg transition">✉️ Email ID</button>
       </div>
-      <div class="flex glass rounded-xl p-1 mb-4 text-xs font-semibold">
-        <button id="methodPhone" onclick="setMethod('phone')" class="flex-1 py-1.5 rounded-lg transition">📱 Mobile</button>
-        <button id="methodEmail" onclick="setMethod('email')" class="flex-1 py-1.5 rounded-lg transition">✉️ Email</button>
+      <div class="flex glass rounded-xl p-1 mb-4 text-sm font-semibold">
+        <button id="tabLogin" type="button" onclick="setTab('login')" class="flex-1 py-2 rounded-lg transition">Login</button>
+        <button id="tabSignup" type="button" onclick="setTab('signup')" class="flex-1 py-2 rounded-lg transition">Sign up</button>
       </div>
       <button type="button" onclick="googleNotice()" class="w-full border border-white/10 hover:border-slate-500 text-slate-300 py-2.5 rounded-xl text-sm font-medium transition mb-2 flex items-center justify-center gap-2">🔵 Continue with Google</button>
       <p id="googleMsg" class="hidden text-[11px] text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2 mb-3">Google Sign-In needs a live backend/OAuth setup that this preview page doesn't have — please use Mobile or Email login below for now.</p>
@@ -590,69 +588,82 @@ input[type=range]{accent-color:#10b981}
         </div>
         <div id="phoneWrap">
           <label for="fPhone" class="block text-xs text-slate-400 mb-1">Mobile Number</label>
-          <input id="fPhone" type="tel" autocomplete="tel" placeholder="10-digit mobile number" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+          <input id="fPhone" type="tel" inputmode="numeric" maxlength="10" autocomplete="tel" placeholder="10-digit mobile number" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
         </div>
         <div id="emailWrap" class="hidden">
           <label for="fEmail" class="block text-xs text-slate-400 mb-1">Email Address</label>
           <input id="fEmail" type="email" autocomplete="email" placeholder="you@example.com" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
         </div>
-        <p id="idChip" class="hidden text-[11px] font-semibold text-emerald-300 -mt-2"></p>
-        <div>
-          <label for="fPass" class="block text-xs text-slate-400 mb-1">Password</label>
-          <input id="fPass" type="password" autocomplete="current-password" placeholder="At least 6 characters" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        <div id="dobWrap" class="hidden">
+          <label for="fDob" class="block text-xs text-slate-400 mb-1">Date of Birth <span class="text-red-400">*</span></label>
+          <input id="fDob" type="date" autocomplete="bday" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
         </div>
-        <div id="confirmWrap" class="hidden">
-          <label for="fPass2" class="block text-xs text-slate-400 mb-1">Confirm Password</label>
-          <input id="fPass2" type="password" autocomplete="new-password" placeholder="Re-enter password" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        <div>
+          <label for="fPass" id="fPassLabel" class="block text-xs text-slate-400 mb-1">6-Digit Password</label>
+          <input id="fPass" type="password" inputmode="numeric" maxlength="6" autocomplete="current-password" placeholder="Enter your password" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div id="refWrap" class="hidden">
+          <label for="fRef" class="block text-xs text-slate-400 mb-1">Referral Code <span class="text-slate-500">(optional)</span></label>
+          <input id="fRef" type="text" autocapitalize="characters" maxlength="20" placeholder="e.g. SATHI-1234" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 uppercase">
+        </div>
+        <div id="capWrap" class="cap-wrap">
+          <label for="capInput" class="block text-xs text-slate-400 mb-1">Captcha</label>
+          <div class="flex items-center gap-2 mb-2">
+            <canvas id="capCanvas" width="150" height="46" role="img" aria-label="Captcha code image"></canvas>
+            <button type="button" onclick="newCaptcha()" aria-label="Refresh captcha" title="Refresh captcha" class="shrink-0 w-11 h-11 rounded-xl border border-white/10 text-slate-200 text-xl leading-none">↻</button>
+          </div>
+          <input id="capInput" type="text" maxlength="4" autocomplete="off" autocapitalize="characters" placeholder="Enter Captcha" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 tracking-widest uppercase focus:outline-none focus:border-emerald-500">
+        </div>
+        <div id="dupBanner" class="hidden bg-amber-500/15 border border-amber-500/40 rounded-xl p-3 text-xs text-amber-200" role="alert">
+          <p class="mb-2 font-semibold">⚠️ An account is already registered with this details! Please log in.</p>
+          <button type="button" onclick="switchToLoginFromDup()" class="w-full bg-amber-500/20 border border-amber-500/50 text-amber-100 py-2 rounded-lg font-bold">Switch to Login</button>
         </div>
         <p id="authErr" class="text-xs text-red-400 hidden" role="alert"></p>
         <button id="authSubmit" type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3.5 rounded-xl text-sm transition shadow-lg shadow-emerald-500/20">Login</button>
         <button type="button" onclick="openForgot()" id="forgotLink" class="w-full text-center text-[11px] text-slate-500 hover:text-slate-300 underline underline-offset-2">Forgot password?</button>
-        <p class="text-[11px] text-slate-500">A 6-digit verification code is sent to your mobile or email.</p>
+        <p class="text-[11px] text-slate-500">Your account is saved to SathiCare's secure database, so you can log in from any device.</p>
       </form>
     </div>
 
-    <!-- FORGOT PASSWORD -->
+    <!-- FORGOT PASSWORD (Date-of-Birth verification) -->
     <div id="forgotView" class="hidden">
       <h3 class="text-xl font-bold mb-1">Reset Password</h3>
-      <p class="text-xs text-slate-500 mb-4">Enter your registered mobile or email. We will send a 6-digit code to verify it is you before you can set a new password.</p>
+      <p class="text-xs text-slate-500 mb-4">Verify with your registered mobile number or email and your Date of Birth.</p>
       <div id="forgotStep1" class="space-y-4">
-        <div>
-          <label for="fgHandle" class="block text-xs text-slate-400 mb-1">Registered Mobile or Email</label>
-          <input id="fgHandle" type="text" placeholder="10-digit mobile or email" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        <div class="flex glass rounded-xl p-1 text-xs font-semibold">
+          <button id="fgMethodPhone" type="button" onclick="fgSetMethod('phone')" class="flex-1 py-2 rounded-lg transition">📱 Mobile Number (Default)</button>
+          <button id="fgMethodEmail" type="button" onclick="fgSetMethod('email')" class="flex-1 py-2 rounded-lg transition">✉️ Email ID</button>
         </div>
-        <p id="fgErr1" class="text-xs text-red-400 hidden"></p>
-        <button type="button" onclick="findForgotAccount()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition">Send OTP / Verification Code</button>
+        <div id="fgPhoneWrap">
+          <label for="fgPhone" class="block text-xs text-slate-400 mb-1">Registered Mobile Number</label>
+          <input id="fgPhone" type="tel" inputmode="numeric" maxlength="10" autocomplete="tel" placeholder="10-digit mobile number" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div id="fgEmailWrap" class="hidden">
+          <label for="fgEmail" class="block text-xs text-slate-400 mb-1">Registered Email</label>
+          <input id="fgEmail" type="email" autocomplete="email" placeholder="you@example.com" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label for="fgDob" class="block text-xs text-slate-400 mb-1">Date of Birth</label>
+          <input id="fgDob" type="date" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+          <p class="text-xs text-slate-400 mt-1 italic font-medium">Note: Please enter the exact same Date of Birth (DOB) provided during your initial signup.</p>
+        </div>
+        <p id="fgErr1" class="text-xs text-red-400 hidden" role="alert"></p>
+        <button id="fgVerifyBtn" type="button" onclick="findForgotAccount()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition">Verify Details</button>
       </div>
       <div id="forgotStep2" class="hidden space-y-4 mt-4">
-        <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-xs text-emerald-300">Account found for <span id="fgAccountShown" class="font-bold"></span>. Set a new password below.</div>
+        <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-xs text-emerald-300">✅ Details verified for <span id="fgAccountShown" class="font-bold"></span>. Set your new password below.</div>
         <div>
-          <label for="fgNewPass" class="block text-xs text-slate-400 mb-1">New Password</label>
-          <input id="fgNewPass" type="password" placeholder="At least 6 characters" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+          <label for="fgNewPass" class="block text-xs text-slate-400 mb-1">Enter New 6-Digit Password</label>
+          <input id="fgNewPass" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password" placeholder="6-digit password" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
         </div>
-        <p id="fgErr2" class="text-xs text-red-400 hidden"></p>
-        <button type="button" onclick="confirmReset()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition">Update Password</button>
+        <div>
+          <label for="fgNewPass2" class="block text-xs text-slate-400 mb-1">Confirm New 6-Digit Password</label>
+          <input id="fgNewPass2" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password" placeholder="Re-enter 6-digit password" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+        </div>
+        <p id="fgErr2" class="text-xs text-red-400 hidden" role="alert"></p>
+        <button id="fgUpdateBtn" type="button" onclick="confirmReset()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition">Update Password</button>
       </div>
       <button type="button" onclick="closeForgot()" class="w-full mt-4 text-center text-xs text-slate-500 hover:text-slate-300 underline underline-offset-2">← Back to login</button>
-    </div>
-
-    <!-- OTP VERIFICATION (LOGIN) -->
-    <div id="otpView" class="hidden">
-      <h3 class="text-xl font-bold mb-1">Verify Your Identity</h3>
-      <p id="otpSub" class="text-xs text-slate-400 mb-3">We send a one-time 6-digit code. It is valid for 5 minutes.</p>
-      <div id="otpTypeBanner" class="otp-glow bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-3 py-2.5 text-xs text-emerald-300 font-semibold mb-3" role="status" aria-live="polite"><span id="otpTypeText" class="otp-caret"></span></div>
-      <div id="otpChannelAlert" class="hidden bg-sky-500/10 border border-sky-500/30 rounded-xl p-3 text-xs text-sky-200 mb-3" role="alert"></div>
-      <div id="otpDevBox" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-xs text-amber-200 mb-3">
-        <p class="font-semibold mb-1">🧪 Dev mode — SMS gateway offline</p>
-        <p class="mb-2">Test code: <span id="otpDevCode" class="font-bold text-sm tracking-widest"></span></p>
-        <div class="flex gap-2"><button type="button" onclick="otpAutoFill()" class="flex-1 bg-amber-500/20 border border-amber-500/40 text-amber-200 py-2 rounded-lg font-semibold">Auto-fill</button><a id="otpWaLink" href="#" target="_blank" rel="noopener" class="hidden flex-1 text-center bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 py-2 rounded-lg font-semibold">Open in WhatsApp</a></div>
-      </div>
-      <label for="otpInput" class="block text-xs text-slate-400 mb-1">Enter 6-digit OTP</label>
-      <input id="otpInput" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 tracking-[0.5em] text-center focus:outline-none focus:border-emerald-500 mb-3">
-      <p id="otpErr" class="text-xs text-red-400 hidden mb-3" role="alert"></p>
-      <button id="otpVerifyBtn" type="button" onclick="verifyOtp()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition mb-2">Verify &amp; Continue</button>
-      <button id="otpResendBtn" type="button" onclick="resendOtp()" disabled class="w-full border border-white/10 text-slate-300 py-2.5 rounded-xl text-xs font-semibold mb-2 disabled:opacity-50 disabled:cursor-not-allowed">Resend OTP</button>
-      <button type="button" onclick="cancelOtp()" class="w-full text-center text-xs text-slate-500 hover:text-slate-300 underline underline-offset-2">← Cancel</button>
     </div>
 
     <!-- DASHBOARD -->
@@ -725,7 +736,7 @@ input[type=range]{accent-color:#10b981}
 
       <div id="dashAdmin" class="hidden">
         <p class="text-[11px] text-slate-400 mb-2">All leads across all partners (live from Google Sheet)</p>
-        <div class="overflow-x-auto rounded-xl border border-white/10 glass-table">
+        <div class="overflow-auto max-h-[60vh] rounded-xl border border-white/10 glass-table">
           <table class="sc-table">
             <thead><tr><th>Date</th><th>Client Name</th><th>Client Phone</th><th>Service</th><th>Submitted By (Name · Phone)</th><th>Lead Status</th><th>Admin Actions</th></tr></thead>
             <tbody id="adminLeadTable"></tbody>
@@ -758,9 +769,9 @@ input[type=range]{accent-color:#10b981}
           <p id="cloudStatusMsg" class="text-[10px] mt-2"></p>
         </div>
         <p class="text-[11px] text-slate-400 mb-2">All registered partner accounts (live from Google Sheet)</p>
-        <div class="overflow-x-auto rounded-xl border border-white/10 glass-table">
+        <div class="overflow-auto max-h-[60vh] rounded-xl border border-white/10 glass-table">
           <table class="sc-table">
-            <thead><tr><th>Name</th><th>Email</th><th>Mobile</th><th>Password</th><th>Status</th><th>Actions</th></tr></thead>
+            <thead><tr><th>Name</th><th>Phone</th><th>Email</th><th>Own Ref Code</th><th>Referred By</th><th>DOB</th><th>Registered</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody id="adminUserTable"></tbody>
           </table>
         </div>
@@ -776,6 +787,18 @@ input[type=range]{accent-color:#10b981}
         <button onclick="logout()" class="flex-1 border border-white/10 hover:border-red-400 hover:text-red-300 text-slate-300 font-medium py-3 rounded-xl text-sm transition">Log out</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ADMIN: SECURITY LOCK (password re-authentication) -->
+<div id="adminLockModal" class="fixed inset-0 z-[95] hidden items-center justify-center p-4 bg-black/75" onclick="if(event.target===this)closeAdminLock()" role="dialog" aria-modal="true" aria-labelledby="adminLockTitle">
+  <div class="pop-anim glass-modal w-full max-w-sm rounded-2xl p-6 relative">
+    <button onclick="closeAdminLock()" aria-label="Close" class="absolute top-3 right-3 text-slate-400 hover:text-white text-lg">✕</button>
+    <h3 id="adminLockTitle" class="text-lg font-bold mb-1">🔒 Security Verification</h3>
+    <p class="text-xs text-slate-300 mb-4">Please enter your Admin Login Password to access this section.</p>
+    <input id="adminLockInput" type="password" autocomplete="current-password" placeholder="Admin password" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500 mb-2">
+    <p id="adminLockErr" class="hidden text-xs text-red-400 mb-2" role="alert"></p>
+    <button id="adminLockBtn" type="button" onclick="submitAdminLock()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition">Verify &amp; Open</button>
   </div>
 </div>
 
@@ -1444,7 +1467,7 @@ async function sendToGoogleSheet(payload) {
   }
 }
 const sheetPost = sendToGoogleSheet; // (existing call sites use this name)
-const SHEET_KEYMAP = { name:'name', phone:'phone', mobile:'phone', email:'email', refcode:'refCode', referralcode:'refCode', referredby:'referredBy', timestamp:'timestamp', date:'timestamp', passwordhash:'passwordHash', hash:'passwordHash', salt:'salt',
+const SHEET_KEYMAP = { dob:'dob', dateofbirth:'dob', name:'name', phone:'phone', mobile:'phone', email:'email', refcode:'refCode', referralcode:'refCode', referredby:'referredBy', timestamp:'timestamp', date:'timestamp', passwordhash:'passwordHash', hash:'passwordHash', salt:'salt',
   clientname:'clientName', clientphone:'clientPhone', service:'service', submittedby:'submittedBy', submittedbyname:'submittedByName', submittedbyphone:'submittedByPhone', password:'passwordHash', event:'event', activitytype:'event', activity:'event', referralused:'referralUsed', notes:'notes', note:'notes', bonusstatus:'bonusStatus', status:'status', type:'type', rowtype:'type', recordtype:'type', kind:'type' };
 function sheetRowObj(r) {
   if (Array.isArray(r)) {
@@ -1497,18 +1520,20 @@ function mergeSheetRows(payload) {
   const rows = sheetExtractRows(payload).filter(r => r && typeof r === 'object');
   let changed = false;
   const users = master.users || {}, leads = master.leads || {};
-  const norm = v => String(v == null ? '' : v).trim();
+  const norm = v => { const t = String(v == null ? '' : v).trim(); return t === '-' ? '' : t; };   // '-' is the sheet's empty placeholder
   const digits = v => norm(v).replace(/\D/g, '').slice(-10);
   const tsOf = v => Date.parse(v) || Number(v) || Date.now();
   rows.filter(r => sheetRowType(r) === 'USER').map(sheetRowObj).forEach(o => {
     const handle = digits(o.phone) || norm(o.email).toLowerCase();
     if (!handle || isTombstoned('U|' + handle)) return;
     if (!users[handle]) {
-      users[handle] = { name: norm(o.name) || handle, salt: norm(o.salt), hash: norm(o.passwordHash), created: tsOf(o.timestamp), method: 'phone', blocked: false, email: null, phone: digits(o.phone) || null, referredBy: null, refCode: norm(o.refCode) || null, _refCodeOfParent: norm(o.referredBy) || null, fromSheet: true };
+      users[handle] = { name: norm(o.name) || handle, salt: norm(o.salt), hash: norm(o.passwordHash), created: tsOf(o.timestamp), method: digits(o.phone) ? 'phone' : 'email', blocked: false, email: norm(o.email).toLowerCase() || null, phone: digits(o.phone) || null, dob: norm(o.dob), referredBy: null, refCode: norm(o.refCode) || null, _refCodeOfParent: norm(o.referredBy) || null, fromSheet: true };
       changed = true;
     } else {
       const u = users[handle];
       if (!u.refCode && o.refCode) { u.refCode = norm(o.refCode); changed = true; }
+      if (!u.dob && norm(o.dob)) { u.dob = norm(o.dob); changed = true; }
+      if (!u.email && norm(o.email)) { u.email = norm(o.email).toLowerCase(); changed = true; }
       if (o.referredBy && !u._refCodeOfParent) { u._refCodeOfParent = norm(o.referredBy); changed = true; }
       if (!u.hash && o.passwordHash && o.salt) { u.hash = norm(o.passwordHash); u.salt = norm(o.salt); changed = true; }
     }
@@ -1568,19 +1593,26 @@ async function sheetRefresh(manual) {
   const status = $('syncStatus');
   let stage = 'network';
   try {
-    // Plain GET, no custom headers → no CORS preflight. Apps Script answers via a 302 redirect that fetch follows.
-    const res = await fetch(SHEET_URL + '?action=getAll&t=' + Date.now());
-    stage = 'http ' + res.status;
-    const text = await res.text();
-    stage = 'parse';
-    let payload;
-    try { payload = JSON.parse(text); }
-    catch (e) { throw new Error('Not JSON — script returned: ' + text.slice(0, 120).replace(/\s+/g, ' ')); }
-    if (payload && payload.error) throw new Error('Script error: ' + payload.error);
+    let payload = null, secure = false;
+    if (adminAuth) {                                  // full secure view (includes DOB) — needs the admin password this session
+      const r = await apiPost({ action: 'getDashboardData', adminId: adminAuth.id, adminHash: adminAuth.hash });
+      if (r && r.status === 'success' && Array.isArray(r.rows)) { payload = r; secure = true; }
+      else console.warn('[SathiCare] secure dashboard fetch refused:', r && r.error);
+    }
+    if (!payload) {
+      // Legacy plain GET (no custom headers → no CORS preflight). Apps Script answers via a 302 redirect that fetch follows.
+      const res = await fetch(SHEET_URL + '?action=getAll&t=' + Date.now());
+      stage = 'http ' + res.status;
+      const text = await res.text();
+      stage = 'parse';
+      try { payload = JSON.parse(text); }
+      catch (e) { throw new Error('Not JSON — script returned: ' + text.slice(0, 120).replace(/\s+/g, ' ')); }
+      if (payload && payload.error) throw new Error('Script error: ' + payload.error);
+    }
     stage = 'merge';
     const n = sheetExtractRows(payload).length;
     mergeSheetRows(payload);
-    if (status) status.innerHTML = '<span class="text-emerald-400">🟢 Google Sheet live DB • Connected &amp; Synced</span> <span class="text-slate-500">(' + new Date().toLocaleTimeString('en-IN') + ' · ' + n + ' rows)</span>';
+    if (status) status.innerHTML = '<span class="text-emerald-400">🟢 Google Sheet live DB • Connected &amp; Synced' + (secure ? ' 🔒' : '') + '</span> <span class="text-slate-500">(' + new Date().toLocaleTimeString('en-IN') + ' · ' + n + ' rows)</span>';
     safeRerender();
     return true;
   } catch (e) {
@@ -1649,27 +1681,34 @@ then load the SDK and swap googleNotice()/OTP-simulation calls for the real call
     // Google: signInWithPopup(auth, new GoogleAuthProvider()).then(result => { ...log the user in... });
     // Phone OTP: new RecaptchaVerifier('recaptcha-container', {}, auth); then signInWithPhoneNumber(auth, '+91' + phone, verifier);
   (end of module snippet)
-Until a real config is added here, Google login shows an honest notice and the OTP screen below uses a
-simulated on-screen code — so login never silently breaks for a missing/unconfigured SMS provider.
+Until a real config is added here, Google login shows an honest notice. Login uses the mobile/email + 6-digit password
+flow below (no OTP is used anywhere).
 */
 function googleNotice() { $('googleMsg').classList.remove('hidden'); }
 function setMethod(m) {
   method = m;
-  $('methodPhone').className = 'flex-1 py-1.5 rounded-lg transition ' + (m === 'phone' ? 'tab-on' : 'text-slate-300');
-  $('methodEmail').className = 'flex-1 py-1.5 rounded-lg transition ' + (m === 'email' ? 'tab-on' : 'text-slate-300');
-  $('phoneWrap').classList.toggle('hidden', m !== 'phone');
+  $('methodPhone').className = 'flex-1 py-2 rounded-lg transition ' + (m === 'phone' ? 'tab-on' : 'text-slate-300');
+  $('methodEmail').className = 'flex-1 py-2 rounded-lg transition ' + (m === 'email' ? 'tab-on' : 'text-slate-300');
+  $('phoneWrap').classList.toggle('hidden', m !== 'phone');     // only ONE identifier field is ever shown
   $('emailWrap').classList.toggle('hidden', m !== 'email');
-  if (typeof updateIdChip === 'function') updateIdChip();
+  hideDup();
 }
 function setTab(m) {
-  mode = m; showErr('');
+  mode = m; showErr(''); hideDup();
   $('tabLogin').className = 'flex-1 py-2 rounded-lg transition ' + (m === 'login' ? 'tab-on' : 'text-slate-300');
   $('tabSignup').className = 'flex-1 py-2 rounded-lg transition ' + (m === 'signup' ? 'tab-on' : 'text-slate-300');
-  $('nameWrap').classList.toggle('hidden', m === 'login');
-  $('confirmWrap').classList.toggle('hidden', m === 'login');
+  ['nameWrap', 'dobWrap', 'refWrap'].forEach(id => $(id).classList.toggle('hidden', m === 'login'));
+  $('capWrap').classList.toggle('hidden', m === 'signup');
   $('forgotLink').classList.toggle('hidden', m === 'signup');
-  $('authSubmit').textContent = 'Send OTP / Verification Code';
-  $('fPass').autocomplete = m === 'login' ? 'current-password' : 'new-password';
+  $('authSubmit').textContent = m === 'login' ? 'Login' : 'Create Account';
+  const pw = $('fPass');
+  pw.autocomplete = m === 'login' ? 'current-password' : 'new-password';
+  // New passwords are exactly 6 digits. Login accepts longer so older accounts (created before this rule) can still sign in.
+  pw.maxLength = m === 'login' ? 32 : 6;
+  pw.setAttribute('inputmode', m === 'login' ? 'text' : 'numeric');
+  pw.placeholder = m === 'login' ? 'Enter your password' : 'Create 6-digit password';
+  if (m === 'signup' && !$('fRef').value && pendingReferralCode) $('fRef').value = String(pendingReferralCode).toUpperCase();
+  if (m === 'login') newCaptcha();
 }
 function currentUser() {
   if (guestOverride) return null;
@@ -1994,21 +2033,28 @@ function renderReferralTree() {
   wrap.appendChild(rootBox);
 }
 
+function fmtDobStr(v) {
+  if (!v) return '—';
+  const d = new Date(String(v).slice(0, 10) + 'T00:00:00');
+  return isNaN(d) ? esc(v) : d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+}
 function renderAdminUserTable() {
   const users = store.get(USERS) || {};
   const body = $('adminUserTable'); body.innerHTML = '';
-  const handles = Object.keys(users);
-  if (!handles.length) { body.innerHTML = '<tr><td colspan="6" class="text-slate-500">No registered users yet.</td></tr>'; return; }
+  const handles = Object.keys(users);                       // ALL registered users — no slicing / paging
+  if (!handles.length) { body.innerHTML = '<tr><td colspan="9" class="text-slate-500">No registered users yet.</td></tr>'; return; }
   const uq = adminQuery();
+  handles.sort((a, b) => (users[b].created || 0) - (users[a].created || 0));
   handles.forEach(handle => {
     const u = users[handle];
-    if (uq && ![u.name, handle, u.phone, u.email, u.refCode].join(' ').toLowerCase().includes(uq)) return;
     const isEmailHandle = handle.includes('@') || u.method === 'email';
     const emailVal = u.email || (isEmailHandle ? handle : '—');
     const phoneVal = u.phone || (!isEmailHandle ? handle : '—');
+    const refBy = referralUsedFor(users, handle, 'DIRECT');
+    if (uq && ![u.name, handle, u.phone, u.email, u.refCode, refBy, u.dob].join(' ').toLowerCase().includes(uq)) return;
     const tr = document.createElement('tr');
     const status = u.blocked ? '<span class="text-red-400">Blocked</span>' : '<span class="text-emerald-400">Active</span>';
-    tr.innerHTML = '<td>' + esc(u.name) + '</td><td>' + esc(emailVal) + '</td><td>' + esc(phoneVal) + '</td><td class="text-slate-500">🔒 hashed (not visible)</td><td>' + status + '</td>' +
+    tr.innerHTML = '<td>' + esc(u.name) + '</td><td>' + esc(phoneVal) + '</td><td>' + esc(emailVal) + '</td><td>' + esc(u.refCode || '—') + '</td><td>' + esc(refBy) + '</td><td class="text-amber-200">' + fmtDobStr(u.dob) + '</td><td>' + (u.created ? fmtDate(u.created) : '—') + '</td><td>' + status + '</td>' +
       '<td class="space-x-1"><button data-act="edit" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded">Edit</button>' +
       '<button data-act="block" class="text-[10px] bg-amber-600/70 hover:bg-amber-600 px-2 py-1 rounded">' + (u.blocked ? 'Unblock' : 'Block') + '</button>' +
       '<button data-act="delete" class="text-[10px] bg-red-600/70 hover:bg-red-600 px-2 py-1 rounded">Delete</button></td>';
@@ -2061,7 +2107,39 @@ function adminDeleteUser(handle) {
   setTimeout(() => sheetRefresh(), 1500);
 }
 
+/* ---------- Sensitive admin sections: password re-authentication ---------- */
+const LOCKED_TABS = ['admin', 'users', 'tree'];          // Leads Sheet / Admin Control (database) / Referral Tree
+let lockPendingTab = null, lockFails = 0, lockUntil = 0;
 function setDashTab(t) {
+  if (LOCKED_TABS.includes(t) && isAdmin(currentUser()) && !unlockedTabs.has(t)) { requestUnlock(t); return; }
+  renderDashTab(t);
+}
+function requestUnlock(t) {
+  lockPendingTab = t; $('adminLockInput').value = ''; $('adminLockErr').classList.add('hidden');
+  $('adminLockModal').classList.remove('hidden'); $('adminLockModal').classList.add('flex'); $('adminLockInput').focus();
+}
+function closeAdminLock() { $('adminLockModal').classList.add('hidden'); $('adminLockModal').classList.remove('flex'); lockPendingTab = null; }
+async function verifyAdminPassword(u, pw) {
+  if (u.hash && u.hash === await hash(pw, u.salt)) return true;               // local credential
+  const res = await apiPost({ action: 'verifyLogin', identifier: u.handle, type: String(u.handle).includes('@') ? 'email' : 'phone', passwordHash: await credHash(pw, u.handle) });
+  return res.status === 'success';                                            // credential held in the sheet
+}
+async function submitAdminLock() {
+  const err = $('adminLockErr'), show = m => { err.textContent = m; err.classList.remove('hidden'); };
+  const u = currentUser(); if (!u || !isAdmin(u)) return closeAdminLock();
+  if (Date.now() < lockUntil) return show('Too many attempts. Please wait ' + Math.ceil((lockUntil - Date.now()) / 1000) + 's.');
+  const pw = $('adminLockInput').value; if (!pw) return show('Enter your admin password.');
+  const btn = $('adminLockBtn'), label = btn.textContent; btn.disabled = true; btn.textContent = 'Verifying…';
+  const ok = await verifyAdminPassword(u, pw);
+  btn.disabled = false; btn.textContent = label;
+  if (!ok) { if (++lockFails >= 5) { lockFails = 0; lockUntil = Date.now() + 60000; } return show('❌ Incorrect password. Please try again.'); }
+  lockFails = 0; LOCKED_TABS.forEach(t => unlockedTabs.add(t));
+  await rememberAdmin(u.handle, pw);
+  const t = lockPendingTab; closeAdminLock();
+  if (t) renderDashTab(t);
+  sheetRefresh();                                                             // now with secure credentials
+}
+function renderDashTab(t) {
   const admin = isAdmin(currentUser());
   $('dashTabStats').className = 'flex-1 py-2 rounded-lg transition ' + (t === 'stats' ? 'tab-on' : 'text-slate-300');
   $('dashTabLead').className = 'flex-1 py-2 rounded-lg transition ' + (t === 'lead' ? 'tab-on' : 'text-slate-300');
@@ -2084,7 +2162,6 @@ function refBannerRefresh() {
 function openModal(tab) {
   const u = refreshBtn();
   $('forgotView').classList.add('hidden');
-  $('otpView').classList.add('hidden');
   $('authView').classList.toggle('hidden', !!u);
   $('dashView').classList.toggle('hidden', !u);
   if (u) { renderDashboard(); setDashTab('stats'); if (isAdmin(u)) sheetRefresh(); }
@@ -2098,261 +2175,213 @@ window.addEventListener('DOMContentLoaded', () => {
   if (pendingReferralCode && !currentUser()) { setTimeout(() => openModal('signup'), 400); }
 });
 function closeModal() {
-  if (otpCtx) { clearInterval(otpTimer); otpTypeJob++; otpCtx = null; pendingSignup = null; }
+  lockAdminSession();                       // closing the dashboard re-arms the admin security lock
   $('modal').classList.add('hidden'); $('modal').classList.remove('flex');
   if (guidePendingAfterAuth && !guideDismissed()) { guidePendingAfterAuth = false; setTimeout(openWelcome, 500); }
 }
 function logout() {
   store.del(SESSION);
   try { sessionStorage.removeItem('SATHICARE_REF_AUTHED'); sessionStorage.removeItem('SATHICARE_PENDING_REF'); } catch (e) {}
-  guestOverride = false; pendingLoginHandle = null; loginOtpVal = null;
+  guestOverride = false; lockAdminSession();
   try { $('authForm').reset(); } catch (e) {}
   refreshBtn(); closeModal();
   window.location.replace(window.location.pathname); // clean homepage, no ?ref= / stale state
 }
-/* ---------- Identifier detection (10-digit mobile vs email) ---------- */
-function detectIdentifier(v) {
-  v = String(v || '').trim();
-  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return 'email';
-  if (/^[6-9]\d{9}$/.test(v)) return 'phone';
-  return null;
-}
-function updateIdChip() {
-  const chip = $('idChip'), v = method === 'phone' ? $('fPhone').value : $('fEmail').value, k = detectIdentifier(v);
-  chip.classList.toggle('hidden', !k);
-  if (k) chip.textContent = k === 'phone' ? '📱 Mobile number detected — code will go by SMS / WhatsApp' : '✉️ Email detected — code will go to your inbox';
-}
-$('fPhone').addEventListener('input', e => {
-  const raw = e.target.value;
-  if (/[@a-zA-Z]/.test(raw)) { setMethod('email'); $('fEmail').value = raw.trim(); e.target.value = ''; $('fEmail').focus(); }
-  else e.target.value = raw.replace(/\D/g, '').slice(0, 10);
-  updateIdChip();
-});
-$('fEmail').addEventListener('input', () => {
-  const v = $('fEmail').value.trim();
-  if (/^\d{10}$/.test(v)) { setMethod('phone'); $('fPhone').value = v; $('fEmail').value = ''; $('fPhone').focus(); }
-  updateIdChip();
-});
-
-let pendingLoginHandle = null, loginOtpVal = null;
-$('authForm').addEventListener('submit', async e => {
-  e.preventDefault(); showErr('');
-  const name = $('fName').value.trim(), pw = $('fPass').value, pw2 = $('fPass2').value;
-  let handle;
-  if (method === 'phone') {
-    handle = $('fPhone').value.trim();
-    if (!/^[6-9]\d{9}$/.test(handle)) return showErr('Enter a valid 10-digit Indian mobile number.');
-  } else {
-    handle = $('fEmail').value.trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(handle)) return showErr('Enter a valid email address.');
-  }
-  if (mode === 'signup' && name.length < 2) return showErr('Please enter your full name.');
-  if (pw.length < 6) return showErr('Password must be at least 6 characters.');
-  if (mode === 'signup' && pw !== pw2) return showErr('Passwords do not match.');
-  // Pull the live sheet first so the duplicate check (and cross-device login) sees accounts made on other devices.
-  const submitBtn = $('authSubmit'); const btnLabel = submitBtn.textContent; submitBtn.disabled = true; submitBtn.textContent = 'Please wait…';
-  try {
-    if (mode === 'signup' || !(store.get(USERS) || {})[handle]) await Promise.race([sheetRefresh(), new Promise(r => setTimeout(r, 6000))]);
-  } catch (e) {} finally { submitBtn.disabled = false; submitBtn.textContent = btnLabel; }
-  const users = store.get(USERS) || {};
-  if (mode === 'signup') {
-    if (users[handle]) {
-      alert('This mobile number is already registered! Please Login instead.');
-      setTab('login');
-      showErr('This mobile number is already registered! Please Login instead.');
-      return;
-    }
-    const salt = randSalt();
-    pendingSignup = { name, method, handle, salt, hash: await hash(pw, salt) };
-    return startOtpFlow('signup', handle);
-  }
-  const u = users[handle];
-  if (!u) return showErr('No account found. Please sign up first.');
-  if (u.blocked) return showErr('Your account has been blocked by the admin. Please contact SathiCare support.');
-  if (u.hash !== await hash(pw, u.salt)) return showErr('Incorrect password.');
-  // Password correct — require OTP before granting access.
-  pendingLoginHandle = handle;
-  startOtpFlow('login', handle);
-});
 /* =====================================================================================
-   DUAL-CHANNEL OTP (Email via MailApp / Mobile via SMS gateway) — Google Apps Script backend
-   The OTP is generated, stored (hashed, 5-min expiry) and checked ONLY on the server.
-   The browser never sees the code, so it cannot be read from devtools or forged.
+   AUTH — Mobile/Email toggle, 6-digit password, login captcha, DOB signup + DOB password reset.
+   No OTP anywhere: nothing secret is ever shown on screen.
+   Passwords are never sent to the sheet in plain text — the credential is a salted SHA-256 ("sc1$…"),
+   salted with the account identifier so the same login works from any device.
    ===================================================================================== */
-const OTP_RESEND_SECS = 60;
-let pendingSignup = null, otpCtx = null, otpTimer = null, otpTypeJob = 0;
-
-async function otpApi(payload) {
-  const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 20000);
+const normId = (m, v) => { v = String(v || '').trim(); return m === 'email' ? v.toLowerCase() : v.replace(/\D/g, '').slice(-10); };
+const validId = (m, id) => m === 'email' ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id) : /^[6-9]\d{9}$/.test(id);
+async function credHash(pw, id) { return 'sc1$' + await hash(pw, id); }
+function validDob(v) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(v || '')) return false;
+  const d = new Date(v + 'T00:00:00'); if (isNaN(d)) return false;
+  return d <= new Date() && d.getFullYear() >= 1900;
+}
+async function apiPost(payload, ms) {
+  const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), ms || 20000);
   try {
-    // text/plain body = "simple" request (no CORS preflight); Apps Script replies with readable JSON.
     const res = await fetch(SHEET_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload), signal: ctl.signal });
     const txt = await res.text();
-    try { return JSON.parse(txt); } catch (e) { return { status: 'error', error: 'bad_response' }; }
+    try { const o = JSON.parse(txt); return (o && typeof o === 'object') ? o : { status: 'error', error: 'bad_response' }; } catch (e) { return { status: 'error', error: 'bad_response' }; }
   } catch (e) { return { status: 'error', error: 'network' }; }
   finally { clearTimeout(to); }
 }
-function maskTarget(type, t) {
-  if (type === 'email') { const [u, d] = t.split('@'); return (u.slice(0, 2) + '***@' + d); }
-  return '+91-XXXXXX' + t.slice(-4);
+const API_ERR = {
+  network: 'Could not reach the server. Please check your connection and try again.',
+  bad_response: 'The server gave an unreadable reply. Make sure the latest Code.gs is deployed as a NEW version (access: Anyone).'
+};
+
+/* ---------- Captcha (4 characters, high contrast, refreshable) ---------- */
+let capCode = '';
+function newCaptcha() {
+  const set = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', r = new Uint8Array(4);
+  if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(r); else for (let i = 0; i < 4; i++) r[i] = Math.random() * 256;
+  capCode = Array.from(r).map(b => set[b % set.length]).join('');
+  $('capInput').value = '';
+  const cv = $('capCanvas'); if (!cv || !cv.getContext) return;
+  const c = cv.getContext('2d'); if (!c) return;
+  c.fillStyle = '#020617'; c.fillRect(0, 0, 150, 46);
+  for (let i = 0; i < 6; i++) { c.strokeStyle = 'rgba(148,163,184,' + (0.25 + Math.random() * 0.25) + ')'; c.lineWidth = 1; c.beginPath(); c.moveTo(Math.random() * 150, Math.random() * 46); c.lineTo(Math.random() * 150, Math.random() * 46); c.stroke(); }
+  c.font = 'bold 30px monospace'; c.textBaseline = 'middle'; c.textAlign = 'center';
+  for (let i = 0; i < 4; i++) {
+    c.save(); c.translate(24 + i * 34, 24 + (Math.random() * 6 - 3)); c.rotate((Math.random() - 0.5) * 0.45);
+    c.fillStyle = i % 2 ? '#34d399' : '#f8fafc'; c.fillText(capCode[i], 0, 0); c.restore();
+  }
 }
-// typewriter: returns when finished (or aborted by a newer job)
-function otpType(text, speed) {
-  const job = ++otpTypeJob, el = $('otpTypeText'); el.textContent = '';
-  return new Promise(res => {
-    let i = 0;
-    (function tick() {
-      if (job !== otpTypeJob) return res(false);
-      el.textContent = text.slice(0, ++i);
-      if (i < text.length) setTimeout(tick, speed || 22); else res(true);
-    })();
+$('capInput').addEventListener('input', e => e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''));
+$('fPhone').addEventListener('input', e => e.target.value = e.target.value.replace(/\D/g, ''));
+$('fPass').addEventListener('input', e => { if (mode === 'signup') e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6); });
+$('fRef').addEventListener('input', e => e.target.value = e.target.value.toUpperCase());
+['fPhone', 'fEmail', 'fName', 'fDob'].forEach(id => $(id).addEventListener('input', hideDup));
+
+/* ---------- Duplicate-account banner ---------- */
+let dupCtx = null;
+function hideDup() { const b = $('dupBanner'); if (b) b.classList.add('hidden'); }
+function showDuplicate(id, m) { dupCtx = { id, m }; showErr(''); $('dupBanner').classList.remove('hidden'); }
+function switchToLoginFromDup() {
+  const c = dupCtx; hideDup(); setTab('login');
+  if (c) { setMethod(c.m); if (c.m === 'phone') $('fPhone').value = c.id; else $('fEmail').value = c.id; }
+  $('fPass').value = ''; $('fPass').focus();
+}
+
+/* ---------- Session helpers ---------- */
+let adminAuth = null;                 // { id, hash } — in memory only, wiped when the dashboard closes
+const unlockedTabs = new Set();
+function lockAdminSession() { unlockedTabs.clear(); adminAuth = null; }
+async function rememberAdmin(id, pw) { if (isAdmin({ handle: id, phone: id })) adminAuth = { id, hash: await credHash(pw, id) }; }
+async function finishAuth(id, pw) {
+  store.set(SESSION, id); endGuestOverride();
+  await rememberAdmin(id, pw);
+  { const lu = (store.get(USERS) || {})[id]; if (lu) logActivity('LOGIN', Object.assign({ handle: id }, lu)); }
+  $('authForm').reset(); hideDup(); showErr('');
+  openModal();
+}
+function adoptServerUser(users, id, u, rawHash) {
+  const cur = users[id] || {};
+  users[id] = Object.assign({ blocked: false, created: Date.now() }, cur, {
+    name: u.name || cur.name || id, salt: id, hash: rawHash, method: id.includes('@') ? 'email' : 'phone',
+    phone: u.phone ? String(u.phone) : (cur.phone || (id.includes('@') ? null : id)), email: u.email || cur.email || (id.includes('@') ? id : null),
+    dob: u.dob || cur.dob || '', refCode: u.refCode || cur.refCode || null, referredBy: cur.referredBy || null,
+    _refCodeOfParent: cur._refCodeOfParent || u.referredBy || null
   });
+  return users[id];
 }
-function otpBanner(kind) {
-  const b = $('otpTypeBanner');
-  b.className = 'otp-glow rounded-xl px-3 py-2.5 text-xs font-semibold mb-3 border ' + (kind === 'err' ? 'bg-red-500/10 border-red-500/30 text-red-300' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300');
-}
-function otpStartCountdown(secs) {
-  clearInterval(otpTimer);
-  const btn = $('otpResendBtn'); let left = secs; btn.disabled = true;
-  const paint = () => { btn.textContent = left > 0 ? 'Resend OTP in ' + left + 's' : 'Resend OTP'; };
-  paint();
-  otpTimer = setInterval(() => { left--; paint(); if (left <= 0) { clearInterval(otpTimer); btn.disabled = false; } }, 1000);
-}
-function otpShowView() {
-  $('authView').classList.add('hidden'); $('forgotView').classList.add('hidden'); $('otpView').classList.remove('hidden');
-  $('otpInput').value = ''; $('otpErr').classList.add('hidden'); $('otpChannelAlert').classList.add('hidden'); $('otpDevBox').classList.add('hidden');
-}
-function startOtpFlow(purpose, handle) {
-  const type = detectIdentifier(handle) || (handle.includes('@') ? 'email' : 'phone');
-  otpCtx = { purpose, handle, type, token: null, busy: false };
-  $('otpSub').textContent = (purpose === 'signup' ? 'Verify to create your account. ' : purpose === 'reset' ? 'Verify to reset your password. ' : 'Verify to log in. ') + 'The 6-digit code is valid for 5 minutes.';
-  otpShowView();
-  return sendOtpRequest();
-}
-async function sendOtpRequest() {
-  const c = otpCtx; if (!c || c.busy) return; c.busy = true;
-  $('otpResendBtn').disabled = true; $('otpResendBtn').textContent = 'Sending…';
-  otpBanner('ok');
-  const masked = maskTarget(c.type, c.handle);
-  const typing = otpType(c.type === 'email' ? 'Sending code to your registered email (' + masked + ')...' : 'Dispatching SMS alert to ' + masked + '...', 24);
-  const res = await otpApi({ action: 'sendOTP', target: c.handle, type: c.type });   // server generates the OTP
-  await typing;
-  c.busy = false;
-  if (!otpCtx || otpCtx !== c) return;
-  if (res && res.status === 'success') {
-    const dev = !!res.devOtp;
-    await otpType(dev ? 'Gateway offline — dev test code is ready below.' : (c.type === 'email' ? 'Sent! Check your inbox.' : 'Sent! Check your phone.'), 22);
-    const al = $('otpChannelAlert'); al.classList.remove('hidden');
-    al.textContent = c.type === 'email' ? '📩 Check your Email inbox/spam for your 6-digit verification code.' : '📱 Check your Mobile SMS / WhatsApp for your 6-digit verification code.';
-    if (dev) {
-      $('otpDevCode').textContent = res.devOtp; $('otpDevBox').classList.remove('hidden');
-      const wa = $('otpWaLink');
-      if (c.type === 'phone') { wa.href = 'https://api.whatsapp.com/send?phone=91' + c.handle + '&text=' + encodeURIComponent('Your SathiCare Partner verification code is ' + res.devOtp + '. Valid for 5 minutes.'); wa.classList.remove('hidden'); }
-      else wa.classList.add('hidden');
+
+/* ---------- Submit: login (with captcha) / signup (DOB + duplicate lock) ---------- */
+$('authForm').addEventListener('submit', async e => {
+  e.preventDefault(); showErr(''); hideDup();
+  const btn = $('authSubmit'), label = btn.textContent;
+  const idRaw = method === 'phone' ? $('fPhone').value : $('fEmail').value, id = normId(method, idRaw), pw = $('fPass').value;
+  if (!validId(method, id)) return showErr(method === 'phone' ? 'Enter a valid 10-digit Indian mobile number.' : 'Enter a valid email address.');
+  const busy = on => { btn.disabled = on; btn.textContent = on ? 'Please wait…' : label; };
+
+  if (mode === 'signup') {
+    const name = $('fName').value.trim(), dob = $('fDob').value, ref = $('fRef').value.trim().toUpperCase();
+    if (name.length < 2) return showErr('Please enter your full name.');
+    if (!validDob(dob)) return showErr('Please select your Date of Birth.');
+    if (!/^\d{6}$/.test(pw)) return showErr('Password must be exactly 6 digits.');
+    let users = store.get(USERS) || {};
+    if (users[id]) return showDuplicate(id, method);                       // local duplicate
+    busy(true);
+    const res = await apiPost({ action: 'addUser', name, phone: method === 'phone' ? id : '', email: method === 'email' ? id : '', dob, password: await credHash(pw, id), refBy: ref || 'DIRECT', referredBy: ref || 'DIRECT' });
+    busy(false);
+    if (res.status === 'duplicate') return showDuplicate(id, method);      // server duplicate (other device)
+    if (res.status !== 'success' || !res.user) {
+      return showErr(res.error === 'reserved' ? 'This number is reserved. Please contact SathiCare support.' : (API_ERR[res.error] || res.message || 'Registration failed. Please try again.'));
     }
-    otpStartCountdown(OTP_RESEND_SECS);
-    $('otpInput').focus();
-  } else {
-    otpBanner('err');
-    const e = (res && res.error) || 'network';
-    const msg = e === 'cooldown' ? 'A code was just sent. Please wait ' + (res.retryAfter || 60) + 's before requesting another.'
-      : e === 'rate_limited' ? 'Too many codes requested. Please try again in about an hour.'
-      : e === 'sms_gateway_not_configured' ? 'SMS delivery is not set up yet. Please use Email instead, or contact SathiCare support.'
-      : e === 'email_failed' ? 'Could not send the email right now. Please try again shortly.'
-      : e === 'invalid_target' ? 'That mobile number / email does not look valid.'
-      : e === 'network' ? 'Could not reach the verification service. Check your connection and try again.'
-      : 'Verification service error (' + e + '). Make sure the latest Code.gs is deployed.';
-    await otpType('⚠️ ' + msg, 14);
-    otpStartCountdown(e === 'cooldown' ? (res.retryAfter || 60) : 5);
+    users = store.get(USERS) || {};
+    const referrerHandle = findHandleByRefCode(users, ref);
+    users[id] = { name, salt: id, hash: await hash(pw, id), created: Date.now(), method, blocked: false, email: method === 'email' ? id : null, phone: method === 'phone' ? id : null, dob, referredBy: referrerHandle, _refCodeOfParent: ref || null, refCode: res.user.refCode || generateRefCode(users) };
+    if (!store.set(USERS, users)) return showErr('Could not save your account. Check that browser storage is enabled.');
+    return finishAuth(id, pw);
   }
-}
-function resendOtp() { sendOtpRequest(); }
-function otpAutoFill() { const c = $('otpDevCode').textContent; if (c) { $('otpInput').value = c; $('otpInput').focus(); } }
 
-async function verifyOtp() {
-  const c = otpCtx; if (!c) return;
-  const code = $('otpInput').value.replace(/\D/g, ''), err = $('otpErr'), btn = $('otpVerifyBtn');
-  err.classList.add('hidden');
-  if (code.length !== 6) { err.textContent = 'Enter the 6-digit code.'; err.classList.remove('hidden'); return; }
-  btn.disabled = true; const lbl = btn.textContent; btn.textContent = 'Verifying…';
-  const res = await otpApi({ action: 'verifyOTP', target: c.handle, type: c.type, otp: code });
-  btn.disabled = false; btn.textContent = lbl;
-  if (!res || res.status !== 'success') {
-    const e = (res && res.error) || 'network';
-    err.textContent = e === 'expired' ? 'This code has expired. Tap "Resend OTP" for a new one.'
-      : e === 'too_many_attempts' ? 'Too many wrong attempts. Please request a new code.'
-      : e === 'invalid_otp' ? 'Incorrect OTP.' + (res.attemptsLeft != null ? ' ' + res.attemptsLeft + ' attempt(s) left.' : ' Please try again.')
-      : e === 'network' ? 'Could not reach the verification service. Please try again.'
-      : 'Verification failed (' + e + ').';
-    err.classList.remove('hidden'); return;
+  // ---- login ----
+  if (!pw) return showErr('Please enter your password.');
+  if ($('capInput').value.trim().toUpperCase() !== capCode) {
+    const ci = $('capInput'); ci.classList.remove('gate-shake'); void ci.offsetWidth; ci.classList.add('gate-shake', 'gate-err');
+    setTimeout(() => ci.classList.remove('gate-err'), 1600);
+    newCaptcha(); return showErr('❌ Incorrect Captcha.');
   }
-  c.token = res.token || null;
-  clearInterval(otpTimer);
-  if (c.purpose === 'login') finishLogin(c);
-  else if (c.purpose === 'signup') await completeSignup(c);
-  else if (c.purpose === 'reset') { $('otpView').classList.add('hidden'); $('forgotView').classList.remove('hidden'); $('forgotStep1').classList.add('hidden'); $('forgotStep2').classList.remove('hidden'); }
-}
-function finishLogin(c) {
-  store.set(SESSION, c.handle); endGuestOverride();
-  { const lu = (store.get(USERS) || {})[c.handle]; if (lu) logActivity('LOGIN', Object.assign({ handle: c.handle }, lu)); }
-  $('authForm').reset(); updateIdChip();
-  pendingLoginHandle = null; otpCtx = null;
-  $('otpView').classList.add('hidden');
-  openModal();
-}
-async function completeSignup(c) {
-  const ps = pendingSignup; if (!ps || ps.handle !== c.handle) return;
-  const users = store.get(USERS) || {};
-  if (users[ps.handle]) { cancelOtp(); setTab('login'); return showErr('This mobile number is already registered! Please Login instead.'); }
-  const referrerHandle = findHandleByRefCode(users, pendingReferralCode);
-  users[ps.handle] = { name: ps.name, salt: ps.salt, hash: ps.hash, created: Date.now(), method: ps.method, blocked: false, email: ps.method === 'email' ? ps.handle : null, phone: ps.method === 'phone' ? ps.handle : null, referredBy: referrerHandle, refCode: generateRefCode(users) };
-  if (!store.set(USERS, users)) { cancelOtp(); return showErr('Could not save your account. Check that browser storage is enabled.'); }
-  store.set(SESSION, ps.handle); endGuestOverride();
-  { const nu = users[ps.handle];
-    sheetPost({ action: 'addUser', name: ps.name, phone: ps.method === 'phone' ? ps.handle : '', email: ps.method === 'email' ? ps.handle : '', password: nu.hash /* salted SHA-256 hash, never plaintext */, passwordHash: nu.hash, salt: nu.salt, refCode: nu.refCode, otpToken: c.token, referredBy: referrerHandle ? users[referrerHandle].refCode : (pendingReferralCode ? String(pendingReferralCode).toUpperCase() : 'DIRECT'), timestamp: new Date(nu.created).toISOString() }); }
-  pendingSignup = null; otpCtx = null;
-  $('authForm').reset(); updateIdChip();
-  $('otpView').classList.add('hidden');
-  openModal();
-}
-function cancelOtp() {
-  const purpose = otpCtx && otpCtx.purpose;
-  clearInterval(otpTimer); otpTypeJob++;
-  pendingLoginHandle = null; pendingSignup = null; otpCtx = null;
-  $('otpView').classList.add('hidden');
-  if (purpose === 'reset') { $('forgotView').classList.remove('hidden'); $('forgotStep1').classList.remove('hidden'); $('forgotStep2').classList.add('hidden'); }
-  else $('authView').classList.remove('hidden');
-}
+  busy(true);
+  try {
+    let users = store.get(USERS) || {}, u = users[id], ok = false;
+    if (u && u.blocked) return showErr('Your account has been blocked by the admin. Please contact SathiCare support.');
+    if (u && u.hash && u.hash === await hash(pw, u.salt)) ok = true;       // local cache
+    if (!ok) {                                                             // synced data (other device / changed password)
+      const res = await apiPost({ action: 'verifyLogin', identifier: id, type: method, passwordHash: await credHash(pw, id) });
+      if (res.status === 'success' && res.user) {
+        users = store.get(USERS) || {}; adoptServerUser(users, id, res.user, await hash(pw, id)); store.set(USERS, users); ok = true;
+      } else if (res.error === 'locked') { newCaptcha(); return showErr('Too many wrong attempts. Please try again in 15 minutes.'); }
+      else if (res.error === 'not_found' && !u) { newCaptcha(); return showErr('No account found. Please sign up first.'); }
+      else if (res.error === 'network' && !u) { newCaptcha(); return showErr(API_ERR.network); }
+      else { newCaptcha(); return showErr(res.error === 'invalid_credentials' || u ? 'Incorrect password.' : (API_ERR[res.error] || 'Login failed. Please try again.')); }
+    }
+    await finishAuth(id, pw);
+  } finally { busy(false); }
+});
 
-/* ---------- Forgot password (simulated recovery — no backend to send real OTP) ---------- */
-let fgHandleVal = null;
-function openForgot() { $('authView').classList.add('hidden'); $('forgotView').classList.remove('hidden'); $('forgotStep1').classList.remove('hidden'); $('forgotStep2').classList.add('hidden'); $('fgErr1').classList.add('hidden'); $('fgErr2').classList.add('hidden'); $('fgHandle').value = ''; }
-function closeForgot() { $('forgotView').classList.add('hidden'); $('authView').classList.remove('hidden'); }
-function findForgotAccount() {
-  const raw = $('fgHandle').value.trim();
-  const handle = raw.includes('@') ? raw.toLowerCase() : raw.replace(/\D/g, '');
-  const users = store.get(USERS) || {};
-  if (!users[handle]) { $('fgErr1').textContent = 'No account found for that mobile/email.'; $('fgErr1').classList.remove('hidden'); return; }
-  fgHandleVal = handle;
-  $('fgAccountShown').textContent = handle;
+/* ---------- Forgot password: Date-of-Birth verification ---------- */
+let fgMethod = 'phone', fgCtx = null, fgFails = 0, fgLockUntil = 0;
+function fgSetMethod(m) {
+  fgMethod = m;
+  $('fgMethodPhone').className = 'flex-1 py-2 rounded-lg transition ' + (m === 'phone' ? 'tab-on' : 'text-slate-300');
+  $('fgMethodEmail').className = 'flex-1 py-2 rounded-lg transition ' + (m === 'email' ? 'tab-on' : 'text-slate-300');
+  $('fgPhoneWrap').classList.toggle('hidden', m !== 'phone'); $('fgEmailWrap').classList.toggle('hidden', m !== 'email');
+}
+$('fgPhone').addEventListener('input', e => e.target.value = e.target.value.replace(/\D/g, ''));
+[$('fgNewPass'), $('fgNewPass2')].forEach(el => el.addEventListener('input', e => e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6)));
+function openForgot() {
+  $('authView').classList.add('hidden'); $('forgotView').classList.remove('hidden');
+  $('forgotStep1').classList.remove('hidden'); $('forgotStep2').classList.add('hidden');
+  $('fgErr1').classList.add('hidden'); $('fgErr2').classList.add('hidden');
+  ['fgPhone', 'fgEmail', 'fgDob', 'fgNewPass', 'fgNewPass2'].forEach(i => $(i).value = '');
+  fgCtx = null; fgSetMethod('phone');
+}
+function closeForgot() { fgCtx = null; $('forgotView').classList.add('hidden'); $('authView').classList.remove('hidden'); }
+function fgFail(msg) { const e = $('fgErr1'); e.textContent = msg; e.classList.remove('hidden'); }
+async function findForgotAccount() {
   $('fgErr1').classList.add('hidden');
-  startOtpFlow('reset', handle);       // step 2 (new password) only unlocks after the code is verified
+  if (Date.now() < fgLockUntil) return fgFail('Too many attempts. Please try again in ' + Math.ceil((fgLockUntil - Date.now()) / 60000) + ' minute(s).');
+  const id = normId(fgMethod, fgMethod === 'phone' ? $('fgPhone').value : $('fgEmail').value), dob = $('fgDob').value;
+  if (!validId(fgMethod, id)) return fgFail(fgMethod === 'phone' ? 'Enter a valid 10-digit mobile number.' : 'Enter a valid email address.');
+  if (!validDob(dob)) return fgFail('Please select your Date of Birth.');
+  const btn = $('fgVerifyBtn'), label = btn.textContent; btn.disabled = true; btn.textContent = 'Verifying…';
+  const res = await apiPost({ action: 'verifyDob', identifier: id, type: fgMethod, dob });
+  btn.disabled = false; btn.textContent = label;
+  if (res.status === 'success') {
+    fgFails = 0; fgCtx = { id, dob, type: fgMethod };
+    $('fgAccountShown').textContent = fgMethod === 'phone' ? '+91-XXXXXX' + id.slice(-4) : id.replace(/^(.{2}).*(@.*)$/, '$1***$2');
+    $('forgotStep1').classList.add('hidden'); $('forgotStep2').classList.remove('hidden'); $('fgNewPass').focus();
+    return;
+  }
+  if (res.error === 'network' || res.error === 'bad_response') return fgFail(API_ERR[res.error]);
+  if (res.error === 'locked') { fgLockUntil = Date.now() + 15 * 60000; return fgFail('Too many attempts. Please try again in 15 minutes.'); }
+  if (++fgFails >= 5) fgLockUntil = Date.now() + 15 * 60000;
+  fgFail('❌ Identifier or Date of Birth does not match our records.');
 }
 async function confirmReset() {
-  $('fgErr2').classList.add('hidden');
-  if (!otpCtx || otpCtx.purpose !== 'reset' || !otpCtx.token || otpCtx.handle !== fgHandleVal) { $('fgErr2').textContent = 'Please verify the OTP first.'; $('fgErr2').classList.remove('hidden'); return; }
-  const newPw = $('fgNewPass').value;
-  if (newPw.length < 6) { $('fgErr2').textContent = 'Password must be at least 6 characters.'; $('fgErr2').classList.remove('hidden'); return; }
+  const err = $('fgErr2'); err.classList.add('hidden');
+  const show = m => { err.textContent = m; err.classList.remove('hidden'); };
+  if (!fgCtx) return show('Please verify your details first.');
+  const pw = $('fgNewPass').value, pw2 = $('fgNewPass2').value;
+  if (!/^\d{6}$/.test(pw)) return show('Password must be exactly 6 digits.');
+  if (pw !== pw2) return show('Passwords do not match.');
+  const { id, dob, type } = fgCtx, btn = $('fgUpdateBtn'), label = btn.textContent; btn.disabled = true; btn.textContent = 'Updating…';
+  const res = await apiPost({ action: 'updatePassword', targetPhone: type === 'phone' ? id : '', targetEmail: type === 'email' ? id : '', dob, newPassword: await credHash(pw, id) });
+  btn.disabled = false; btn.textContent = label;
+  if (res.status !== 'success') {
+    if (res.error === 'network' || res.error === 'bad_response') return show(API_ERR[res.error]);
+    return show('❌ Identifier or Date of Birth does not match our records.');
+  }
   const users = store.get(USERS) || {};
-  const salt = randSalt();
-  users[fgHandleVal].salt = salt;
-  users[fgHandleVal].hash = await hash(newPw, salt);
-  store.set(USERS, users);
-  otpCtx = null;
-  closeForgot();
-  showErr(''); $('fPass').value = ''; $('fPass2').value = '';
-  setTab('login');
+  adoptServerUser(users, id, res.user || {}, await hash(pw, id)); store.set(USERS, users);
+  fgCtx = null; $('forgotView').classList.add('hidden'); $('authView').classList.remove('hidden');
+  await finishAuth(id, pw);                                   // log the user straight in
 }
 
 /* ---------- Lead submission: save only (no WhatsApp auto-redirect) ---------- */
