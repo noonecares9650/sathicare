@@ -2425,11 +2425,21 @@ async function findForgotAccount() {
   if (!validDob(dobRaw)) return fgFail('Please select your Date of Birth.');
   const dob = normalizeDOB(dobRaw); // DD-MM-YYYY from here on — never compare raw date strings
 
-  // Local-first: if this account is cached on this device and the DOB matches, verify instantly — no network wait.
-  // Both sides go through normalizeDOB so old ISO-format records and new DD-MM-YYYY records compare correctly.
+  // Local-first: scan every cached account by its actual email/phone FIELD (not just the object key — a
+  // record's storage key can drift from its field value after edits/sheet-merges, which is what was
+  // silently breaking this match before). Whichever real key is found is what gets used from here on,
+  // so the password reset below updates the actual account instead of accidentally creating a new one.
   const localUsers = store.get(USERS) || {};
-  if (localUsers[id] && localUsers[id].dob && normalizeDOB(localUsers[id].dob) === dob) {
-    fgFails = 0; fgCtx = { id, dob, type: fgMethod };
+  let matchedHandle = null;
+  for (const h in localUsers) {
+    const cand = localUsers[h];
+    const idMatches = fgMethod === 'email'
+      ? String(cand.email || '').trim().toLowerCase() === id
+      : String(cand.phone || '').replace(/\D/g, '') === id;
+    if (idMatches && cand.dob && normalizeDOB(cand.dob) === dob) { matchedHandle = h; break; }
+  }
+  if (matchedHandle) {
+    fgFails = 0; fgCtx = { id: matchedHandle, dob, type: fgMethod };
     $('fgAccountShown').textContent = fgMethod === 'phone' ? '+91-XXXXXX' + id.slice(-4) : id.replace(/^(.{2}).*(@.*)$/, '$1***$2');
     $('forgotStep1').classList.add('hidden'); $('forgotStep2').classList.remove('hidden'); $('fgNewPass').focus();
     return;
