@@ -838,6 +838,9 @@ const inr = n => '₹ ' + Math.round(n).toLocaleString('en-IN');
 const ADMIN_PHONES = ['9750264613', '9650264613']; // master admin accounts (full access to all branches)
 const ADMIN_PHONE = ADMIN_PHONES[1];
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwTbF40VjEM-xDz_bVkVKiYJe7SP5URq6zQ7yA8_ahEmGt3CNZ2tjiA6UvhzgkjIldE/exec';
+// NOTE: a key embedded in client-side JS is readable by anyone who views page source — this filters out
+// casual/accidental direct calls to the endpoint, it is not a substitute for real server-side auth.
+const BACKEND_SECRET_KEY = 'SATHI_SECURE_KEY_2026_@#X9';
 const _urlRef = new URLSearchParams(window.location.search).get('ref');
 if (_urlRef) { try { sessionStorage.setItem('SATHICARE_PENDING_REF', _urlRef); } catch (e) {} }
 const pendingReferralCode = _urlRef || (function () { try { return sessionStorage.getItem('SATHICARE_PENDING_REF'); } catch (e) { return null; } })();
@@ -1474,7 +1477,7 @@ async function sendToGoogleSheet(payload) {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(Object.assign({ secretKey: BACKEND_SECRET_KEY }, payload))
     });
   } catch (err) {
     console.error('Error posting to sheet:', err);
@@ -1541,12 +1544,12 @@ function mergeSheetRows(payload) {
     const handle = digits(o.phone) || norm(o.email).toLowerCase();
     if (!handle || isTombstoned('U|' + handle)) return;
     if (!users[handle]) {
-      users[handle] = { name: norm(o.name) || handle, salt: norm(o.salt), hash: norm(o.passwordHash), created: tsOf(o.timestamp), method: digits(o.phone) ? 'phone' : 'email', blocked: false, email: norm(o.email).toLowerCase() || null, phone: digits(o.phone) || null, dob: norm(o.dob), referredBy: null, refCode: norm(o.refCode) || null, _refCodeOfParent: norm(o.referredBy) || null, fromSheet: true };
+      users[handle] = { name: norm(o.name) || handle, salt: norm(o.salt), hash: norm(o.passwordHash), created: tsOf(o.timestamp), method: digits(o.phone) ? 'phone' : 'email', blocked: false, email: norm(o.email).toLowerCase() || null, phone: digits(o.phone) || null, dob: normalizeDOB(o.dob), referredBy: null, refCode: norm(o.refCode) || null, _refCodeOfParent: norm(o.referredBy) || null, fromSheet: true };
       changed = true;
     } else {
       const u = users[handle];
       if (!u.refCode && o.refCode) { u.refCode = norm(o.refCode); changed = true; }
-      if (!u.dob && norm(o.dob)) { u.dob = norm(o.dob); changed = true; }
+      if (!u.dob && norm(o.dob)) { u.dob = normalizeDOB(o.dob); changed = true; }
       if (!u.email && norm(o.email)) { u.email = norm(o.email).toLowerCase(); changed = true; }
       if (o.referredBy && !u._refCodeOfParent) { u._refCodeOfParent = norm(o.referredBy); changed = true; }
       if (!u.hash && o.passwordHash && o.salt) { u.hash = norm(o.passwordHash); u.salt = norm(o.salt); changed = true; }
@@ -2048,9 +2051,8 @@ function renderReferralTree() {
 }
 
 function fmtDobStr(v) {
-  if (!v) return '—';
-  const d = new Date(String(v).slice(0, 10) + 'T00:00:00');
-  return isNaN(d) ? esc(v) : d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  const n = normalizeDOB(v);
+  return n ? esc(n) : '—';
 }
 function renderAdminUserTable() {
   const users = store.get(USERS) || {};
@@ -2210,6 +2212,22 @@ function logout() {
 const normId = (m, v) => { v = String(v || '').trim(); return m === 'email' ? v.toLowerCase() : v.replace(/\D/g, '').slice(-10); };
 const validId = (m, id) => m === 'email' ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id) : /^[6-9]\d{9}$/.test(id);
 async function credHash(pw, id) { return 'sc1$' + await hash(pw, id); }
+/* ---------- Universal DOB normalizer (fixes DD/MM swap + format-mismatch bugs) ----------
+   Always stores/transmits/compares/renders DOB as DD-MM-YYYY. Used everywhere a DOB is
+   written, read, compared or displayed — never compare or render raw DOB strings directly. */
+function normalizeDOB(val) {
+  if (!val || val === "-") return "";
+  var str = String(val).trim().replace(/T.*$/, '');
+  var parts = str.split(/[-/]/);
+  if (parts.length === 3) {
+    if (parts[0].length === 4) { // YYYY-MM-DD (HTML date input standard)
+      return ("0" + parts[2]).slice(-2) + "-" + ("0" + parts[1]).slice(-2) + "-" + parts[0];
+    } else if (parts[2].length === 4) { // DD-MM-YYYY
+      return ("0" + parts[0]).slice(-2) + "-" + ("0" + parts[1]).slice(-2) + "-" + parts[2];
+    }
+  }
+  return str;
+}
 function validDob(v) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(v || '')) return false;
   const d = new Date(v + 'T00:00:00'); if (isNaN(d)) return false;
@@ -2217,8 +2235,9 @@ function validDob(v) {
 }
 async function apiPost(payload, ms) {
   const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), ms || 20000);
+  const signedPayload = Object.assign({ secretKey: BACKEND_SECRET_KEY }, payload); // every POST is signed, automatically
   try {
-    const res = await fetch(SHEET_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload), signal: ctl.signal });
+    const res = await fetch(SHEET_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(signedPayload), signal: ctl.signal });
     const txt = await res.text();
     try { const o = JSON.parse(txt); return (o && typeof o === 'object') ? o : { status: 'error', error: 'bad_response' }; } catch (e) { return { status: 'error', error: 'bad_response' }; }
   } catch (e) { return { status: 'error', error: 'network' }; }
@@ -2301,7 +2320,7 @@ function adoptServerUser(users, id, u, rawHash) {
   users[id] = Object.assign({ blocked: false, created: Date.now() }, cur, {
     name: u.name || cur.name || id, salt: id, hash: rawHash, method: id.includes('@') ? 'email' : 'phone',
     phone: u.phone ? String(u.phone) : (cur.phone || (id.includes('@') ? null : id)), email: u.email || cur.email || (id.includes('@') ? id : null),
-    dob: u.dob || cur.dob || '', refCode: u.refCode || cur.refCode || null, referredBy: cur.referredBy || null,
+    dob: normalizeDOB(u.dob) || cur.dob || '', refCode: u.refCode || cur.refCode || null, referredBy: cur.referredBy || null,
     _refCodeOfParent: cur._refCodeOfParent || u.referredBy || null
   });
   return users[id];
@@ -2321,9 +2340,10 @@ $('authForm').addEventListener('submit', async e => {
   const busy = on => { btn.disabled = on; btn.textContent = on ? 'Please wait…' : label; };
 
   if (mode === 'signup') {
-    const name = $('fName').value.trim(), dob = $('fDob').value, ref = $('fRef').value.trim().toUpperCase();
+    const name = $('fName').value.trim(), dobRaw = $('fDob').value, ref = $('fRef').value.trim().toUpperCase();
     if (name.length < 2) return showErr('Please enter your full name.');
-    if (!validDob(dob)) return showErr('Please select your Date of Birth.');
+    if (!validDob(dobRaw)) return showErr('Please select your Date of Birth.');
+    const dob = normalizeDOB(dobRaw); // stored/transmitted as DD-MM-YYYY from this point on
     if (!/^.{6,10}$/.test(pw)) return showErr('Password must be 6 to 10 characters.');
     let users = store.get(USERS) || {};
     if (users[id]) return showDuplicate(id, method); // local duplicate — the one check that must block
@@ -2400,13 +2420,15 @@ function fgFail(msg) { const e = $('fgErr1'); e.textContent = msg; e.classList.r
 async function findForgotAccount() {
   $('fgErr1').classList.add('hidden');
   if (Date.now() < fgLockUntil) return fgFail('Too many attempts. Please try again in ' + Math.ceil((fgLockUntil - Date.now()) / 60000) + ' minute(s).');
-  const id = normId(fgMethod, fgMethod === 'phone' ? $('fgPhone').value : $('fgEmail').value), dob = $('fgDob').value;
+  const id = normId(fgMethod, fgMethod === 'phone' ? $('fgPhone').value : $('fgEmail').value), dobRaw = $('fgDob').value;
   if (!validId(fgMethod, id)) return fgFail(fgMethod === 'phone' ? 'Enter a valid 10-digit mobile number.' : 'Enter a valid email address.');
-  if (!validDob(dob)) return fgFail('Please select your Date of Birth.');
+  if (!validDob(dobRaw)) return fgFail('Please select your Date of Birth.');
+  const dob = normalizeDOB(dobRaw); // DD-MM-YYYY from here on — never compare raw date strings
 
   // Local-first: if this account is cached on this device and the DOB matches, verify instantly — no network wait.
+  // Both sides go through normalizeDOB so old ISO-format records and new DD-MM-YYYY records compare correctly.
   const localUsers = store.get(USERS) || {};
-  if (localUsers[id] && localUsers[id].dob && localUsers[id].dob === dob) {
+  if (localUsers[id] && localUsers[id].dob && normalizeDOB(localUsers[id].dob) === dob) {
     fgFails = 0; fgCtx = { id, dob, type: fgMethod };
     $('fgAccountShown').textContent = fgMethod === 'phone' ? '+91-XXXXXX' + id.slice(-4) : id.replace(/^(.{2}).*(@.*)$/, '$1***$2');
     $('forgotStep1').classList.add('hidden'); $('forgotStep2').classList.remove('hidden'); $('fgNewPass').focus();
