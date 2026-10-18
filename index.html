@@ -68,6 +68,7 @@ input[type=range]{accent-color:#10b981}
 /* ===== Sathi AI Support bot ===== */
 #sathiAiPanel{transform:translateY(12px) scale(.98);opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease}
 #sathiAiPanel.open{transform:none;opacity:1;pointer-events:auto}
+#sathiAiFab{pointer-events:auto}
 .sathi-ai-bubble{max-width:92%;padding:10px 12px;border-radius:14px;font-size:12px;line-height:1.45;white-space:pre-wrap}
 .sathi-ai-bubble.bot{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.28);color:#d1fae5;border-bottom-left-radius:4px}
 .sathi-ai-bubble.user{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#e2e8f0;margin-left:auto;border-bottom-right-radius:4px}
@@ -131,10 +132,10 @@ input[type=range]{accent-color:#10b981}
 
 
 <!-- FLOATING WHATSAPP (stacked above Sathi AI trigger) -->
-<a id="waFloat" href="#" target="_blank" rel="noopener" class="fixed bottom-[5.75rem] right-5 z-50 bg-emerald-500 hover:bg-emerald-400 text-slate-950 w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-2xl shadow-emerald-500/30 transition" aria-label="Chat on WhatsApp">💬</a>
+<a id="waFloat" href="https://wa.me/919650264613" target="_blank" rel="noopener" onclick="openWaFloat(event)" style="pointer-events:auto;cursor:pointer" class="fixed bottom-[5.75rem] right-5 z-[999] bg-emerald-500 hover:bg-emerald-400 text-slate-950 w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-2xl shadow-emerald-500/30 transition" aria-label="Chat on WhatsApp">💬</a>
 
 <!-- SATHI AI SUPPORT BOT -->
-<div id="sathiAiRoot" class="fixed bottom-5 right-5 z-[55] flex flex-col items-end gap-3">
+<div id="sathiAiRoot" class="fixed bottom-5 right-5 z-[55] flex flex-col items-end gap-3 pointer-events-none">
   <div id="sathiAiPanel" class="w-[min(100vw-1.5rem,22rem)] max-h-[min(70vh,28rem)] glass-modal rounded-2xl overflow-hidden flex flex-col shadow-2xl" role="dialog" aria-label="Sathi AI Support" aria-hidden="true">
     <div class="flex items-center justify-between px-3.5 py-3 border-b border-white/10 bg-emerald-500/10">
       <div class="flex items-center gap-2.5 min-w-0">
@@ -175,6 +176,7 @@ input[type=range]{accent-color:#10b981}
         <a href="#" onclick="openDirectory();return false;" class="text-slate-200 hover:text-white hover:bg-white/10 px-4 py-2 rounded-xl text-sm font-medium transition">All Plans</a>
         <a href="#calculator" class="text-slate-200 hover:text-white hover:bg-white/10 px-4 py-2 rounded-xl text-sm font-medium transition">Calculator</a>
         <a href="#" onclick="openModal();return false;" class="text-slate-200 hover:text-white hover:bg-white/10 px-4 py-2 rounded-xl text-sm font-medium transition">Submit Lead</a>
+        <a href="#contactSection" onclick="scrollToContact(event)" class="text-sm font-medium text-slate-300 hover:text-emerald-400 transition-colors px-4 py-2">Contact</a>
       </nav>
       <div class="flex items-center gap-2.5 shrink-0">
         <span class="hidden sm:inline-flex items-center gap-1.5 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold px-3 py-2 rounded-xl">⚡ Earn ₹500/Lead</span>
@@ -539,6 +541,17 @@ input[type=range]{accent-color:#10b981}
   </div>
 </div>
 
+<!-- RENAME VIDEO MODAL (Master Admin only) -->
+<div id="renameVideoModal" class="fixed inset-0 z-[96] hidden items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onclick="if(event.target===this)closeRenameVideo()" role="dialog" aria-modal="true" aria-labelledby="rvHeading">
+  <div class="glass-modal rounded-2xl p-6 w-full max-w-md relative shadow-2xl">
+    <button type="button" onclick="closeRenameVideo()" aria-label="Close" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm">✕</button>
+    <h3 id="rvHeading" class="text-lg font-bold text-slate-100 mb-3">✏️ Enter New Title for this Video</h3>
+    <input id="rvTitle" type="text" maxlength="120" autocomplete="off" placeholder="New video title" onkeydown="if(event.key==='Enter'){event.preventDefault();submitRenameVideo()}" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+    <p id="rvErr" class="hidden text-xs text-red-300 mt-2"></p>
+    <button id="rvSaveBtn" type="button" onclick="submitRenameVideo()" class="mt-4 w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition">Save Title</button>
+  </div>
+</div>
+
 <!-- ADD VIDEO MODAL (Master Admin only) — YouTube | Direct MP4 tabs -->
 <div id="addVideoModal" class="fixed inset-0 z-[90] hidden items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onclick="if(event.target===this)closeAddVideoModal()" role="dialog" aria-modal="true" aria-labelledby="addVideoTitle">
   <div class="pop-anim glass-modal w-full max-w-md rounded-2xl p-5 relative">
@@ -641,7 +654,7 @@ input[type=range]{accent-color:#10b981}
 </section>
 
 <!-- CONTACT SECTION -->
-<section id="contact" class="max-w-4xl mx-auto px-6 py-16 scroll-mt-24">
+<section id="contactSection" class="max-w-4xl mx-auto px-6 py-16 scroll-mt-24">
   <div class="text-center mb-10">
     <h2 class="text-xs uppercase tracking-widest text-emerald-400 font-bold mb-3">We're Here to Help</h2>
     <h3 class="text-3xl font-bold tracking-tight">Contact SathiCare</h3>
@@ -1013,7 +1026,16 @@ function endGuestOverride() { guestOverride = false; try { sessionStorage.setIte
 
 /* ---------- WhatsApp ---------- */
 function waLink(text) { return 'https://wa.me/919650264613?text=' + encodeURIComponent(text); }
-(function () { $('waFloat').href = waLink('👋 Hello SathiCare Team, mujhe partner program aur leads ke baare me janna hai! 🚀'); })();
+function openWaFloat(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  window.open("https://wa.me/919650264613?text=" + encodeURIComponent("Hi SathiCare Team, I need assistance regarding my account/lead."), "_blank");
+  return false;
+}
+function scrollToContact(e) {
+  if (e) e.preventDefault();
+  const el = $('contactSection');
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 /* ---------- FAQ See More / See Less ---------- */
 function toggleFaq() {
@@ -1124,7 +1146,7 @@ function updateVideoAdminControls() {
   const admin = isAdmin(currentUser());
   const addBtn = $('addVideoBtn');
   if (addBtn) addBtn.classList.toggle('hidden', !admin);
-  document.querySelectorAll('.video-del-btn').forEach(btn => btn.classList.toggle('hidden', !admin));
+  document.querySelectorAll('.video-admin-bar').forEach(btn => btn.classList.toggle('hidden', !admin));
 }
 function renderVideoGallery(videos) {
   const grid = $('videoGalleryGrid');
@@ -1144,11 +1166,14 @@ function renderVideoGallery(videos) {
     return '<article class="vg-card glass border border-white/10 rounded-2xl overflow-hidden" role="button" tabindex="0" data-idx="' + idx + '" onclick="openGalleryPlayerAt(' + idx + ')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();openGalleryPlayerAt(' + idx + ')}">' +
       '<div class="vg-thumb">' +
         '<span class="vg-badge">' + cat + '</span>' +
-        '<button type="button" class="video-del-btn ' + delHidden + ' absolute top-2 right-2 z-10 bg-red-500/90 hover:bg-red-400 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg shadow-lg" data-vid="' + id + '" onclick="event.stopPropagation();deleteGalleryVideo(this.getAttribute(\'data-vid\'))" title="Delete video">🗑️ Delete</button>' +
         videoThumbHtml(v) +
         '<div class="vg-play"><span class="vg-play-btn" aria-hidden="true">▶</span></div>' +
       '</div>' +
-      '<div class="px-3.5 py-3 border-t border-white/10"><p class="text-sm font-semibold text-slate-100 leading-snug line-clamp-2">' + title + '</p></div>' +
+      '<div class="px-3.5 py-3 border-t border-white/10"><p class="text-sm font-semibold text-slate-100 leading-snug line-clamp-2 vg-title">' + title + '</p>' +
+      '<div class="video-admin-bar ' + delHidden + ' flex flex-wrap gap-2 mt-2.5">' +
+        '<button type="button" class="bg-slate-700/80 hover:bg-slate-600 text-slate-100 text-[11px] font-bold px-2.5 py-1.5 rounded-lg" data-vid="' + id + '" onclick="event.stopPropagation();openRenameVideo(this.getAttribute(\'data-vid\'))" title="Rename video">✏️ Rename / Edit Title</button>' +
+        '<button type="button" class="bg-red-500/90 hover:bg-red-400 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg" data-vid="' + id + '" onclick="event.stopPropagation();deleteGalleryVideo(this.getAttribute(\'data-vid\'))" title="Delete video">🗑️ Delete Video</button>' +
+      '</div></div>' +
     '</article>';
   }).join('');
   updateVideoAdminControls();
@@ -1278,7 +1303,7 @@ async function deleteGalleryVideo(id) {
   if (!isAdmin(currentUser())) return showToast('Master Admin only.');
   id = String(id || '').trim();
   if (!id) return;
-  if (!confirm('Delete this video from the gallery?')) return;
+  if (!confirm('Are you sure you want to delete this video?')) return;
   try {
     const res = await apiPost({
       action: 'deleteVideo',
@@ -1286,6 +1311,7 @@ async function deleteGalleryVideo(id) {
       videoId: id
     }, 15000);
     if (res.error === 'network') return showToast(API_ERR.network);
+    if (res.status === 'error' || res.error) return showToast(res.message || 'Could not delete video.', 'error');
     liveVideosCache = liveVideosCache.filter(v => String(v.videoId) !== id);
     renderVideoGallery(liveVideosCache);
     showToast('🗑️ Video removed.');
@@ -1294,9 +1320,44 @@ async function deleteGalleryVideo(id) {
     showToast('Could not delete video. Try again.');
   }
 }
+/* ---------- Rename / Edit video title (Master Admin) ---------- */
+let renameVideoId = '';
+function openRenameVideo(id) {
+  if (!isAdmin(currentUser())) return showToast('Master Admin only.');
+  const v = liveVideosCache.find(x => String(x.videoId) === String(id));
+  if (!v) return;
+  renameVideoId = String(id);
+  $('rvTitle').value = v.title || '';
+  $('rvErr').classList.add('hidden');
+  const m = $('renameVideoModal'); m.classList.remove('hidden'); m.classList.add('flex');
+  setTimeout(() => $('rvTitle').focus(), 50);
+}
+function closeRenameVideo() {
+  const m = $('renameVideoModal'); if (!m) return;
+  m.classList.add('hidden'); m.classList.remove('flex'); renameVideoId = '';
+}
+async function submitRenameVideo() {
+  const u = currentUser();
+  const showErr = msg => { const e = $('rvErr'); e.textContent = msg; e.classList.remove('hidden'); };
+  if (!isAdmin(u)) return showErr('Master Admin access required.');
+  const updatedTitle = $('rvTitle').value.trim();
+  if (!updatedTitle) return showErr('Please enter a title.');
+  const vId = renameVideoId; if (!vId) return;
+  const btn = $('rvSaveBtn'); btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const res = await apiPost({ action: 'editVideo', secretKey: BACKEND_SECRET_KEY, videoId: vId, newTitle: updatedTitle, adminPhone: String(u.phone || u.handle || '') }, 15000);
+    if (res.error === 'network') return showErr(API_ERR.network);
+    if (res.status === 'error' || res.error) return showErr(res.message || 'Could not update title.');
+    liveVideosCache.forEach(v => { if (String(v.videoId) === vId) v.title = updatedTitle; });
+    renderVideoGallery(liveVideosCache);
+    closeRenameVideo();
+    showToast('✅ Video title updated!');
+  } catch (e) { showErr('Could not update title. Try again.'); }
+  finally { btn.disabled = false; btn.textContent = 'Save Title'; }
+}
 window.addEventListener('DOMContentLoaded', () => { loadVideoGallery(); });
 
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeWelcome(); closeModal(); closeSubCalc(); closeDirectory(); closeVideoModal(); closeAddVideoModal(); closeGalleryPlayer(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeWelcome(); closeModal(); closeSubCalc(); closeDirectory(); closeVideoModal(); closeAddVideoModal(); closeGalleryPlayer(); closeRenameVideo(); } });
 // AUTO-TRIGGER: once per browser session (until dismissed), 1.5s after load.
 // Referral-flow safe: if the ?ref= sign-up modal is already open, wait until it is closed instead of covering it.
 let guidePendingAfterAuth = false;
