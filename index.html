@@ -62,6 +62,28 @@ input[type=range]{accent-color:#10b981}
 .tree-node::before{content:'';position:absolute;left:-18px;top:22px;width:16px;border-top:2px solid rgba(16,185,129,.35)}
 .tree-root>.tree-node::before{display:none}
 .tree-leaf::before{border-top-color:rgba(148,163,184,.35)}
+/* ===== Own referral code glow ===== */
+@keyframes refCodeGlow{0%,100%{text-shadow:0 0 8px rgba(16,185,129,.55),0 0 24px rgba(52,211,153,.35)}50%{text-shadow:0 0 14px rgba(16,185,129,.85),0 0 36px rgba(52,211,153,.55)}}
+.ref-code-glow{animation:refCodeGlow 2.4s ease-in-out infinite;letter-spacing:.06em}
+/* ===== Sathi AI Support bot ===== */
+#sathiAiPanel{transform:translateY(12px) scale(.98);opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease}
+#sathiAiPanel.open{transform:none;opacity:1;pointer-events:auto}
+.sathi-ai-bubble{max-width:92%;padding:10px 12px;border-radius:14px;font-size:12px;line-height:1.45;white-space:pre-wrap}
+.sathi-ai-bubble.bot{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.28);color:#d1fae5;border-bottom-left-radius:4px}
+.sathi-ai-bubble.user{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#e2e8f0;margin-left:auto;border-bottom-right-radius:4px}
+.sathi-ai-quick{font-size:11px;text-align:left;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#cbd5e1;width:100%}
+.sathi-ai-quick:hover{border-color:rgba(16,185,129,.45);color:#a7f3d0}
+/* ===== Tutorial gallery cards ===== */
+.vg-card{cursor:pointer;transition:transform .2s ease,border-color .2s ease}
+.vg-card:hover{transform:translateY(-3px);border-color:rgba(52,211,153,.45)!important}
+.vg-thumb{position:relative;aspect-ratio:16/9;background:#020617;overflow:hidden}
+.vg-thumb img,.vg-thumb .vg-fallback{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.vg-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,.35);transition:background .2s ease}
+.vg-card:hover .vg-play{background:rgba(2,6,23,.2)}
+.vg-play-btn{width:3.25rem;height:3.25rem;border-radius:9999px;display:flex;align-items:center;justify-content:center;background:rgba(16,185,129,.92);color:#020617;font-size:1.15rem;font-weight:800;box-shadow:0 0 0 0 rgba(52,211,153,.55);animation:vgPlayPulse 2s ease-in-out infinite}
+@keyframes vgPlayPulse{0%,100%{box-shadow:0 0 0 0 rgba(52,211,153,.5)}50%{box-shadow:0 0 0 12px rgba(52,211,153,0)}}
+.vg-badge{position:absolute;left:8px;top:8px;z-index:2;font-size:10px;font-weight:700;padding:3px 8px;border-radius:9999px;background:rgba(2,6,23,.75);border:1px solid rgba(52,211,153,.35);color:#6ee7b7;backdrop-filter:blur(8px)}
+@media (prefers-reduced-motion:reduce){.ref-code-glow,#sathiAiPanel,.vg-play-btn{animation:none;transition:none}}
 </style>
 </head>
 <body id="top" class="text-slate-100 antialiased selection:bg-emerald-500 selection:text-white">
@@ -108,8 +130,31 @@ input[type=range]{accent-color:#10b981}
 </div>
 
 
-<!-- FLOATING WHATSAPP -->
-<a id="waFloat" href="#" target="_blank" rel="noopener" class="fixed bottom-5 right-5 z-50 bg-emerald-500 hover:bg-emerald-400 text-slate-950 w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-2xl shadow-emerald-500/30 transition" aria-label="Chat on WhatsApp">💬</a>
+<!-- FLOATING WHATSAPP (stacked above Sathi AI trigger) -->
+<a id="waFloat" href="#" target="_blank" rel="noopener" class="fixed bottom-[5.75rem] right-5 z-50 bg-emerald-500 hover:bg-emerald-400 text-slate-950 w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-2xl shadow-emerald-500/30 transition" aria-label="Chat on WhatsApp">💬</a>
+
+<!-- SATHI AI SUPPORT BOT -->
+<div id="sathiAiRoot" class="fixed bottom-5 right-5 z-[55] flex flex-col items-end gap-3">
+  <div id="sathiAiPanel" class="w-[min(100vw-1.5rem,22rem)] max-h-[min(70vh,28rem)] glass-modal rounded-2xl overflow-hidden flex flex-col shadow-2xl" role="dialog" aria-label="Sathi AI Support" aria-hidden="true">
+    <div class="flex items-center justify-between px-3.5 py-3 border-b border-white/10 bg-emerald-500/10">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-9 h-9 rounded-full bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center text-lg shrink-0">🦊</div>
+        <div class="leading-tight min-w-0">
+          <p class="text-sm font-bold text-slate-100 truncate">Sathi AI Support</p>
+          <p class="text-[10px] text-emerald-400">● Online · Hinglish / English</p>
+        </div>
+      </div>
+      <button type="button" onclick="toggleSathiAi(false)" class="fx-off w-8 h-8 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm" aria-label="Close chat">✕</button>
+    </div>
+    <div id="sathiAiMsgs" class="flex-1 overflow-y-auto p-3 space-y-2.5 min-h-[10rem]"></div>
+    <div id="sathiAiQuick" class="px-3 pb-2 space-y-1.5 border-t border-white/5 pt-2"></div>
+    <form id="sathiAiForm" class="flex gap-2 p-3 border-t border-white/10" onsubmit="return sendSathiAiMsg(event)">
+      <input id="sathiAiInput" type="text" autocomplete="off" placeholder="Type your question…" class="flex-1 glass-input border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+      <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-2 rounded-xl text-xs shrink-0">Send</button>
+    </form>
+  </div>
+  <button id="sathiAiFab" type="button" onclick="toggleSathiAi()" class="bg-slate-900/95 hover:bg-slate-800 border border-emerald-500/45 text-emerald-300 text-xs font-bold px-4 py-3 rounded-full shadow-xl backdrop-blur transition animate-pulse-glow flex items-center gap-2">💬 Sathi AI Support</button>
+</div>
 
 <div class="bg-emerald-600/20 border-b border-emerald-500/30 text-emerald-400 text-xs py-2.5 px-4 text-center font-bold tracking-wide">
   🔥 EARN UPTO ₹500 CASH PER GENUINE LEAD • Trusted LIC Framework
@@ -468,8 +513,70 @@ input[type=range]{accent-color:#10b981}
       </button>
     </div>
   </div>
-  <p class="text-center mt-4"><a href="https://www.youtube.com/watch?v=y-ReJ-M3cQA" target="_blank" rel="noopener" class="inline-block bg-slate-800 hover:bg-slate-700 border border-white/10 text-emerald-400 text-sm font-semibold px-5 py-2.5 rounded-xl transition">▶ Watch on YouTube</a></p>
 </section>
+
+<!-- TUTORIALS & GUIDES — compact thumbnail grid + lightbox player -->
+<section id="videoGallery" class="max-w-6xl mx-auto px-6 pb-16 scroll-mt-24">
+  <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+    <div class="text-center sm:text-left">
+      <h2 class="text-xs uppercase tracking-widest text-emerald-400 font-bold mb-3">Video Library</h2>
+      <h3 class="text-3xl font-bold tracking-tight">Tutorials &amp; Guides</h3>
+      <p class="text-slate-400 text-sm mt-3">Tap a card to watch in HD — no redirects, no external links.</p>
+    </div>
+    <button id="addVideoBtn" type="button" onclick="openAddVideoModal()" class="hidden self-center sm:self-auto bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-sm font-bold px-5 py-2.5 rounded-xl transition shadow-lg shadow-emerald-500/20">+ Add Tutorial Video</button>
+  </div>
+  <div id="videoGalleryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+    <p id="videoGalleryEmpty" class="col-span-full text-center text-sm text-slate-500 py-10 glass border border-white/10 rounded-2xl">Loading videos…</p>
+  </div>
+</section>
+
+<!-- GALLERY LIGHTBOX PLAYER -->
+<div id="galleryPlayerModal" class="fixed inset-0 z-[95] hidden items-center justify-center p-4 bg-black/90 backdrop-blur-sm" onclick="if(event.target===this)closeGalleryPlayer()" role="dialog" aria-modal="true" aria-label="Video player">
+  <div class="pop-anim w-full max-w-4xl relative">
+    <button type="button" onclick="closeGalleryPlayer()" aria-label="Close" class="absolute -top-11 right-0 w-10 h-10 rounded-full bg-slate-800/90 hover:bg-slate-700 text-slate-200 flex items-center justify-center text-xl">✕</button>
+    <p id="galleryPlayerTitle" class="text-sm font-semibold text-slate-200 mb-2 truncate pr-12"></p>
+    <div class="aspect-video rounded-2xl overflow-hidden glass shadow-2xl bg-black" id="galleryPlayerFrame"></div>
+  </div>
+</div>
+
+<!-- ADD VIDEO MODAL (Master Admin only) — YouTube | Direct MP4 tabs -->
+<div id="addVideoModal" class="fixed inset-0 z-[90] hidden items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onclick="if(event.target===this)closeAddVideoModal()" role="dialog" aria-modal="true" aria-labelledby="addVideoTitle">
+  <div class="pop-anim glass-modal w-full max-w-md rounded-2xl p-5 relative">
+    <button type="button" onclick="closeAddVideoModal()" aria-label="Close" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm">✕</button>
+    <h3 id="addVideoTitle" class="text-lg font-bold text-slate-100 mb-1">Add Tutorial Video</h3>
+    <p class="text-xs text-slate-500 mb-4">Publish a YouTube embed or a direct hosted MP4 to the gallery.</p>
+    <div class="flex glass rounded-xl p-1 text-xs font-semibold mb-4">
+      <button id="avTabYt" type="button" onclick="avSetSourceTab('youtube')" class="flex-1 py-2 rounded-lg transition tab-on">YouTube Video</button>
+      <button id="avTabMp4" type="button" onclick="avSetSourceTab('mp4')" class="flex-1 py-2 rounded-lg transition text-slate-300">Direct MP4 / Hosted</button>
+    </div>
+    <div class="space-y-3">
+      <div id="avYtWrap">
+        <label for="avUrl" class="block text-xs text-slate-400 mb-1">YouTube Link</label>
+        <input id="avUrl" type="url" autocomplete="off" placeholder="https://www.youtube.com/watch?v=… or youtu.be / shorts" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+      </div>
+      <div id="avMp4Wrap" class="hidden">
+        <label for="avMp4Url" class="block text-xs text-slate-400 mb-1">Direct Video URL (.mp4 or hosted link)</label>
+        <input id="avMp4Url" type="url" autocomplete="off" placeholder="https://cdn.example.com/tutorial.mp4" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+      </div>
+      <div>
+        <label for="avTitle" class="block text-xs text-slate-400 mb-1">Video Title</label>
+        <input id="avTitle" type="text" maxlength="120" autocomplete="off" placeholder="Enter Title (e.g. Tutorial / Payouts / Reset Guide)" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+      </div>
+      <div>
+        <label for="avCategory" class="block text-xs text-slate-400 mb-1">Category Tag</label>
+        <select id="avCategory" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+          <option value="Tutorial">Tutorial</option>
+          <option value="Guide">Guide</option>
+          <option value="Payout">Payout</option>
+          <option value="Account">Account</option>
+          <option value="Plan Details">Plan Details</option>
+        </select>
+      </div>
+      <p id="avErr" class="hidden text-xs text-red-400" role="alert"></p>
+      <button id="avSubmitBtn" type="button" onclick="submitAddVideo()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition">🚀 Upload Video Now</button>
+    </div>
+  </div>
+</div>
 
 <section id="vision" class="border-t border-white/10/80 bg-slate-900/40 py-20">
   <div class="max-w-7xl mx-auto px-6">
@@ -630,35 +737,61 @@ input[type=range]{accent-color:#10b981}
       </form>
     </div>
 
-    <!-- FORGOT PASSWORD (Date-of-Birth verification) -->
+    <!-- FORGOT PASSWORD — 2-step on-site Email OTP (zero redirects) -->
     <div id="forgotView" class="hidden">
       <h3 class="text-xl font-bold mb-1">Reset Password</h3>
-      <p class="text-xs text-slate-500 mb-4">Verify with your registered mobile number or email and your Date of Birth.</p>
+      <p id="fgHint" class="text-xs text-slate-500 mb-4">Enter your registered mobile or email and the inbox where you want the 6-digit OTP.</p>
+
+      <!-- STEP 1: Request OTP -->
       <div id="forgotStep1" class="space-y-4">
         <div class="flex glass rounded-xl p-1 text-xs font-semibold">
           <button id="fgMethodPhone" type="button" onclick="fgSetMethod('phone')" class="flex-1 py-2 rounded-lg transition">📱 Mobile Number (Default)</button>
           <button id="fgMethodEmail" type="button" onclick="fgSetMethod('email')" class="flex-1 py-2 rounded-lg transition">✉️ Email ID</button>
         </div>
-        <div id="fgPhoneWrap">
-          <label for="fgPhone" class="block text-xs text-slate-400 mb-1">Registered Mobile Number</label>
-          <input id="fgPhone" type="tel" inputmode="numeric" maxlength="10" autocomplete="tel" placeholder="10-digit mobile number" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+
+        <!-- Case A: Mobile selected -->
+        <div id="fgPhoneMode" class="space-y-3">
+          <div>
+            <label for="fgPhone" class="block text-xs text-slate-400 mb-1">Registered Mobile Number</label>
+            <input id="fgPhone" type="tel" inputmode="numeric" maxlength="10" autocomplete="tel" placeholder="10-digit mobile number" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+          </div>
+          <div>
+            <label for="fgTargetEmailPhone" class="block text-xs text-slate-400 mb-1">Email ID to receive OTP</label>
+            <input id="fgTargetEmailPhone" type="email" autocomplete="email" placeholder="you@example.com" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+          </div>
         </div>
-        <div id="fgEmailWrap" class="hidden">
-          <label for="fgEmail" class="block text-xs text-slate-400 mb-1">Registered Email</label>
-          <input id="fgEmail" type="email" autocomplete="email" placeholder="you@example.com" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+
+        <!-- Case B: Email selected -->
+        <div id="fgEmailMode" class="hidden space-y-3">
+          <div>
+            <label for="fgEmail" class="block text-xs text-slate-400 mb-1">Registered Email ID</label>
+            <input id="fgEmail" type="email" autocomplete="username" placeholder="registered@example.com" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+          </div>
+          <div>
+            <label for="fgTargetEmail" class="block text-xs text-slate-400 mb-1">Email ID to receive OTP</label>
+            <input id="fgTargetEmail" type="email" autocomplete="email" placeholder="where to receive the OTP" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+            <label class="mt-2 flex items-center gap-2 text-[11px] text-slate-400 cursor-pointer select-none">
+              <input id="fgSameEmail" type="checkbox" class="rounded border-white/20 bg-slate-900 text-emerald-500 focus:ring-emerald-500" onchange="fgToggleSameEmail()">
+              <span>Same as registered email</span>
+            </label>
+          </div>
         </div>
-        <div>
-          <label for="fgDob" class="block text-xs text-slate-400 mb-1">Date of Birth</label>
-          <input id="fgDob" type="date" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
-          <p class="text-xs text-slate-400 mt-1 italic font-medium">Note: Please enter the exact same Date of Birth (DOB) provided during your initial signup.</p>
-        </div>
+
+        <div id="fgFailBanner" class="hidden bg-amber-500/15 border border-amber-500/40 rounded-xl p-3 text-xs text-amber-200" role="alert"></div>
         <p id="fgErr1" class="text-xs text-red-400 hidden" role="alert"></p>
-        <button id="fgVerifyBtn" type="button" onclick="findForgotAccount()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition">Verify Details</button>
+        <button id="fgSendOtpBtn" type="button" onclick="sendResetOtp()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition">✉️ Send OTP to Email</button>
       </div>
-      <div id="forgotStep2" class="hidden space-y-4 mt-4">
-        <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-xs text-emerald-300">✅ Details verified for <span id="fgAccountShown" class="font-bold"></span>. Set your new password below.</div>
+
+      <!-- STEP 2: Verify OTP + set new password (same modal) -->
+      <div id="forgotStep2" class="hidden space-y-4">
+        <div id="fgOtpSentBanner" class="bg-emerald-500/15 border border-emerald-500/40 rounded-xl p-3 text-xs text-emerald-200" role="status">✅ 6-digit OTP sent to your email address. Please check your inbox or spam folder.</div>
+        <p class="text-xs text-slate-400">Account: <span id="fgAccountShown" class="font-bold text-emerald-300"></span></p>
         <div>
-          <label for="fgNewPass" class="block text-xs text-slate-400 mb-1">Enter New Password</label>
+          <label for="fgOtp" class="block text-xs text-slate-400 mb-1">Enter 6-Digit OTP</label>
+          <input id="fgOtp" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3.5 text-center text-lg font-bold tracking-[0.35em] text-slate-100 focus:outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label for="fgNewPass" class="block text-xs text-slate-400 mb-1">New Password (6-10 characters)</label>
           <div class="relative">
             <input id="fgNewPass" type="password" minlength="6" maxlength="10" autocomplete="new-password" placeholder="6-10 characters" class="w-full glass-input border border-white/10 rounded-xl px-4 py-3 pr-11 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
             <button type="button" onclick="togglePwVisibility('fgNewPass', this)" aria-label="Show password" class="absolute right-1 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center text-slate-400 hover:text-slate-200">👁️</button>
@@ -671,8 +804,21 @@ input[type=range]{accent-color:#10b981}
             <button type="button" onclick="togglePwVisibility('fgNewPass2', this)" aria-label="Show password" class="absolute right-1 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center text-slate-400 hover:text-slate-200">👁️</button>
           </div>
         </div>
+        <div id="fgOtpFailBanner" class="hidden bg-red-500/15 border border-red-500/40 rounded-xl p-3 text-xs text-red-200" role="alert">❌ Invalid or expired OTP. Please try again.</div>
         <p id="fgErr2" class="text-xs text-red-400 hidden" role="alert"></p>
-        <button id="fgUpdateBtn" type="button" onclick="confirmReset()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition">Update Password</button>
+        <button id="fgUpdateBtn" type="button" onclick="verifyOtpAndUpdatePassword()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition">🔒 Verify OTP &amp; Update Password</button>
+        <button type="button" onclick="fgBackToStep1()" class="w-full text-center text-[11px] text-slate-500 hover:text-slate-300 underline underline-offset-2">← Resend OTP / change details</button>
+      </div>
+
+      <!-- Legacy stubs (no external URL redirect flow) -->
+      <div id="fgSuccessBanner" class="hidden" aria-hidden="true"></div>
+      <div id="fgNotFoundBanner" class="hidden" aria-hidden="true"></div>
+      <div id="fgPhoneWrap" class="hidden"></div><div id="fgEmailWrap" class="hidden"></div>
+      <input id="fgDob" type="hidden"><input id="fgVerifyBtn" type="hidden">
+      <div id="setPassView" class="hidden" aria-hidden="true">
+        <input id="spNewPass" type="hidden"><input id="spNewPass2" type="hidden">
+        <p id="spErr" class="hidden"></p>
+        <button id="spUpdateBtn" type="button" class="hidden"></button>
       </div>
       <button type="button" onclick="closeForgot()" class="w-full mt-4 text-center text-xs text-slate-500 hover:text-slate-300 underline underline-offset-2">← Back to login</button>
     </div>
@@ -688,11 +834,12 @@ input[type=range]{accent-color:#10b981}
 
       <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-xs text-emerald-300 mb-4">🦊 Sathi Guide: Agar tutorial abhi tak nahi dekha, toh <button onclick="watchTutorial()" class="underline font-semibold">yahan dekho</button> — samajhna zaroori hai kaam kaise karta hai, tabhi genuine leads milenge!</div>
 
-      <div id="adminSyncBar" class="hidden items-center justify-between glass-admin border border-emerald-500/20 rounded-xl px-3 py-2 mb-3">
-        <span class="text-[10px] text-slate-400">☁️ Google Sheet live DB · <span id="syncStatus">Connecting…</span></span>
+      <!-- MASTER ADMIN ONLY — partners never see this live-DB badge / Instant Refresh row -->
+      <div id="adminSyncBar" class="hidden items-center justify-between glass-admin border border-emerald-500/20 rounded-xl px-3 py-2 mb-3" style="display:none" aria-hidden="true">
+        <span class="text-[10px] text-slate-400">⚪ Google Sheet live DB <span id="syncStatus">🟢 Connected &amp; Synced</span></span>
         <button type="button" onclick="sheetRefresh(true)" class="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[11px] font-bold px-3 py-1.5 rounded-lg transition">
           <svg id="syncIcon" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>
-          Instant Refresh
+          🔄 Instant Refresh
         </button>
       </div>
       <input id="adminSearch" type="search" placeholder="🔍 Search by Client Name, Phone, Submitter, or Ref Code..." oninput="adminSearchChanged()" class="hidden w-full glass-input border border-emerald-500/40 rounded-xl px-4 py-2.5 text-sm text-slate-200 mb-3 focus:outline-none focus:border-emerald-500">
@@ -711,6 +858,19 @@ input[type=range]{accent-color:#10b981}
           <div class="glass-admin border border-white/10 p-3 rounded-xl"><p class="text-[10px] text-slate-400">Leads Submitted</p><p id="stLeads" class="text-lg font-bold text-slate-200">0</p></div>
           <div class="glass-admin border border-white/10 p-3 rounded-xl"><p class="text-[10px] text-slate-400">Successful Conversions</p><p id="stConv" class="text-lg font-bold text-slate-200">0</p></div>
         </div>
+
+        <!-- OWN REFERRAL CODE CARD -->
+        <div class="relative overflow-hidden rounded-2xl mb-4 border border-emerald-400/35 bg-gradient-to-br from-emerald-500/15 via-slate-950/80 to-slate-950/90 p-4 shadow-lg shadow-emerald-500/10">
+          <div class="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-emerald-400/15 blur-2xl"></div>
+          <p class="text-xs font-bold text-emerald-300 mb-1 tracking-wide">Your Partner Referral Code</p>
+          <p id="ownRefCodeDisplay" class="ref-code-glow text-2xl md:text-3xl font-extrabold text-emerald-300 my-2">SATHI-XXXX</p>
+          <p class="text-[11px] text-slate-400 mb-3">Share your code — partners who join with it boost your network earnings.</p>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <button type="button" onclick="copyOwnRefCode()" class="flex-1 bg-slate-800/90 hover:bg-slate-700 border border-white/10 text-slate-100 text-xs font-bold py-2.5 rounded-xl transition">📋 Copy Code</button>
+            <button type="button" onclick="shareOwnRefLink()" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold py-2.5 rounded-xl transition">🔗 Share Link</button>
+          </div>
+        </div>
+
         <div id="leadListWrap" class="hidden mb-4">
           <p class="text-[11px] text-slate-400 mb-2">Your recent leads</p>
           <div id="leadList" class="space-y-1.5 max-h-32 overflow-y-auto"></div>
@@ -837,10 +997,12 @@ const $ = id => document.getElementById(id);
 const inr = n => '₹ ' + Math.round(n).toLocaleString('en-IN');
 const ADMIN_PHONES = ['9750264613', '9650264613']; // master admin accounts (full access to all branches)
 const ADMIN_PHONE = ADMIN_PHONES[1];
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwTbF40VjEM-xDz_bVkVKiYJe7SP5URq6zQ7yA8_ahEmGt3CNZ2tjiA6UvhzgkjIldE/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxGPIVVDfG-oiSo2Zc9E9p1s3_5-buQdstjqndAwvz0srAXZEhfCv0VDFKLKJnztr1E/exec';
+const SHEET_URL = SCRIPT_URL; // legacy alias — all sheet/api POSTs use SCRIPT_URL
 // NOTE: a key embedded in client-side JS is readable by anyone who views page source — this filters out
 // casual/accidental direct calls to the endpoint, it is not a substitute for real server-side auth.
 const BACKEND_SECRET_KEY = 'SATHI_SECURE_KEY_2026_@#X9';
+const PUBLIC_ORIGIN = 'https://sathicare.netlify.app';
 const _urlRef = new URLSearchParams(window.location.search).get('ref');
 if (_urlRef) { try { sessionStorage.setItem('SATHICARE_PENDING_REF', _urlRef); } catch (e) {} }
 const pendingReferralCode = _urlRef || (function () { try { return sessionStorage.getItem('SATHICARE_PENDING_REF'); } catch (e) { return null; } })();
@@ -918,14 +1080,232 @@ function watchTutorial() {
   guidePendingAfterAuth = false; closeWelcome(); closeModal();
   openVideoModal();
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeWelcome(); closeModal(); closeSubCalc(); closeDirectory(); closeVideoModal(); } });
+
+/* ---------- Tutorials & Guides gallery (thumbnails + lightbox + Master Admin uploader) ---------- */
+let liveVideosCache = [];
+let avSourceTab = 'youtube';
+function extractYoutubeId(url) {
+  const m = String(url || '').match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/)|&v=)([\w-]{11})/);
+  return m ? m[1] : null;
+}
+function escHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function escAttr(s) { return escHtml(s).replace(/`/g, '&#96;'); }
+function normalizeGalleryVideo(v) {
+  const rawId = String(v.videoId || v.id || v.VideoId || v.VIDEO_ID || v.url || v.source || '').trim();
+  const ytFromUrl = extractYoutubeId(rawId);
+  const typeHint = String(v.type || v.sourceType || v.kind || '').toLowerCase();
+  let type = 'youtube';
+  if (typeHint === 'mp4' || typeHint === 'direct' || typeHint === 'hosted' || typeHint === 'video') type = 'mp4';
+  else if (ytFromUrl) type = 'youtube';
+  else if (/^https?:\/\//i.test(rawId) || /\.mp4(\?|$)/i.test(rawId)) type = 'mp4';
+  else if (/^[\w-]{11}$/.test(rawId)) type = 'youtube';
+  else if (rawId) type = 'mp4';
+  const videoId = type === 'youtube' ? (ytFromUrl || rawId) : rawId;
+  const category = String(v.category || v.tag || v.Category || v.badge || 'Tutorial').trim() || 'Tutorial';
+  return {
+    videoId: videoId,
+    title: v.title || v.name || v.Title || v.TITLE || 'Untitled',
+    category: category,
+    type: type
+  };
+}
+function isDirectVideo(v) { return v && (v.type === 'mp4' || (!extractYoutubeId(v.videoId) && /^https?:\/\//i.test(String(v.videoId || '')))); }
+function videoThumbHtml(v) {
+  if (!isDirectVideo(v) && /^[\w-]{11}$/.test(String(v.videoId || ''))) {
+    const src = 'https://i.ytimg.com/vi/' + escAttr(v.videoId) + '/hqdefault.jpg';
+    return '<div class="vg-fallback absolute inset-0 flex items-center justify-center bg-slate-950 text-emerald-400/80 text-3xl">▶</div>' +
+      '<img src="' + src + '" alt="" loading="lazy" onerror="this.remove()">';
+  }
+  return '<div class="vg-fallback flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-950 text-emerald-400/70 text-3xl">🎬</div>';
+}
+function updateVideoAdminControls() {
+  const admin = isAdmin(currentUser());
+  const addBtn = $('addVideoBtn');
+  if (addBtn) addBtn.classList.toggle('hidden', !admin);
+  document.querySelectorAll('.video-del-btn').forEach(btn => btn.classList.toggle('hidden', !admin));
+}
+function renderVideoGallery(videos) {
+  const grid = $('videoGalleryGrid');
+  if (!grid) return;
+  liveVideosCache = (Array.isArray(videos) ? videos : []).map(normalizeGalleryVideo).filter(v => v.videoId);
+  if (!liveVideosCache.length) {
+    grid.innerHTML = '<p id="videoGalleryEmpty" class="col-span-full text-center text-sm text-slate-500 py-10 glass border border-white/10 rounded-2xl">No videos yet. Master Admin can publish tutorials here.</p>';
+    updateVideoAdminControls();
+    return;
+  }
+  const admin = isAdmin(currentUser());
+  grid.innerHTML = liveVideosCache.map((v, idx) => {
+    const id = escAttr(v.videoId);
+    const title = escHtml(v.title);
+    const cat = escHtml(v.category);
+    const delHidden = admin ? '' : 'hidden';
+    return '<article class="vg-card glass border border-white/10 rounded-2xl overflow-hidden" role="button" tabindex="0" data-idx="' + idx + '" onclick="openGalleryPlayerAt(' + idx + ')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();openGalleryPlayerAt(' + idx + ')}">' +
+      '<div class="vg-thumb">' +
+        '<span class="vg-badge">' + cat + '</span>' +
+        '<button type="button" class="video-del-btn ' + delHidden + ' absolute top-2 right-2 z-10 bg-red-500/90 hover:bg-red-400 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg shadow-lg" data-vid="' + id + '" onclick="event.stopPropagation();deleteGalleryVideo(this.getAttribute(\'data-vid\'))" title="Delete video">🗑️ Delete</button>' +
+        videoThumbHtml(v) +
+        '<div class="vg-play"><span class="vg-play-btn" aria-hidden="true">▶</span></div>' +
+      '</div>' +
+      '<div class="px-3.5 py-3 border-t border-white/10"><p class="text-sm font-semibold text-slate-100 leading-snug line-clamp-2">' + title + '</p></div>' +
+    '</article>';
+  }).join('');
+  updateVideoAdminControls();
+}
+function openGalleryPlayerAt(idx) {
+  const v = liveVideosCache[idx];
+  if (!v) return;
+  openGalleryPlayer(v);
+}
+function openGalleryPlayer(v) {
+  const modal = $('galleryPlayerModal'), frame = $('galleryPlayerFrame'), titleEl = $('galleryPlayerTitle');
+  if (!modal || !frame) return;
+  if (titleEl) titleEl.textContent = v.title || 'SathiCare Tutorial';
+  const src = String(v.videoId || '').trim();
+  if (isDirectVideo(v)) {
+    frame.innerHTML = '<video class="w-full h-full bg-black" controls autoplay playsinline src="' + escAttr(src) + '"></video>';
+  } else {
+    const ytId = extractYoutubeId(src) || src;
+    frame.innerHTML = '<iframe class="w-full h-full" src="https://www.youtube-nocookie.com/embed/' + escAttr(ytId) + '?rel=0&playsinline=1&modestbranding=1&autoplay=1" title="' + escAttr(v.title || 'Video') + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>';
+  }
+  modal.classList.remove('hidden'); modal.classList.add('flex');
+  document.body.style.overflow = 'hidden';
+}
+function closeGalleryPlayer() {
+  const modal = $('galleryPlayerModal'), frame = $('galleryPlayerFrame');
+  if (frame) frame.innerHTML = '';
+  if (!modal) return;
+  modal.classList.add('hidden'); modal.classList.remove('flex');
+  if ($('modal').classList.contains('hidden') && $('videoModal').classList.contains('hidden') && $('addVideoModal').classList.contains('hidden') && $('welcomePopup').classList.contains('hidden')) {
+    document.body.style.overflow = '';
+  }
+}
+async function loadVideoGallery() {
+  const empty = $('videoGalleryEmpty');
+  if (empty) empty.textContent = 'Loading videos…';
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=getVideos&t=' + Date.now());
+    const text = await res.text();
+    let data = null;
+    try { data = JSON.parse(text); } catch (e) { data = null; }
+    let list = [];
+    if (Array.isArray(data)) list = data;
+    else if (data && Array.isArray(data.videos)) list = data.videos;
+    else if (data && Array.isArray(data.rows)) list = data.rows;
+    else if (data && data.status === 'success' && Array.isArray(data.data)) list = data.data;
+    renderVideoGallery(list);
+  } catch (err) {
+    console.warn('[SathiCare] getVideos failed', err);
+    if ($('videoGalleryGrid') && !liveVideosCache.length) {
+      $('videoGalleryGrid').innerHTML = '<p id="videoGalleryEmpty" class="col-span-full text-center text-sm text-slate-500 py-10 glass border border-white/10 rounded-2xl">Videos will appear here once the library is synced.</p>';
+    }
+  }
+}
+function avSetSourceTab(tab) {
+  avSourceTab = tab === 'mp4' ? 'mp4' : 'youtube';
+  const ytOn = avSourceTab === 'youtube';
+  if ($('avTabYt')) $('avTabYt').className = 'flex-1 py-2 rounded-lg transition ' + (ytOn ? 'tab-on' : 'text-slate-300');
+  if ($('avTabMp4')) $('avTabMp4').className = 'flex-1 py-2 rounded-lg transition ' + (!ytOn ? 'tab-on' : 'text-slate-300');
+  if ($('avYtWrap')) $('avYtWrap').classList.toggle('hidden', !ytOn);
+  if ($('avMp4Wrap')) $('avMp4Wrap').classList.toggle('hidden', ytOn);
+}
+function openAddVideoModal() {
+  if (!isAdmin(currentUser())) return showToast('Master Admin only.');
+  const m = $('addVideoModal'); if (!m) return;
+  if ($('avUrl')) $('avUrl').value = '';
+  if ($('avMp4Url')) $('avMp4Url').value = '';
+  if ($('avTitle')) $('avTitle').value = '';
+  if ($('avCategory')) $('avCategory').value = 'Tutorial';
+  avSetSourceTab('youtube');
+  const err = $('avErr'); if (err) { err.classList.add('hidden'); err.textContent = ''; }
+  m.classList.remove('hidden'); m.classList.add('flex');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => { try { $('avUrl').focus(); } catch (e) {} }, 50);
+}
+function closeAddVideoModal() {
+  const m = $('addVideoModal'); if (!m) return;
+  m.classList.add('hidden'); m.classList.remove('flex');
+  if ($('modal').classList.contains('hidden') && $('videoModal').classList.contains('hidden') && $('galleryPlayerModal').classList.contains('hidden') && $('welcomePopup').classList.contains('hidden')) {
+    document.body.style.overflow = '';
+  }
+}
+async function submitAddVideo() {
+  const err = $('avErr');
+  const showErr = msg => { if (!err) return; err.textContent = msg; err.classList.remove('hidden'); };
+  if (err) err.classList.add('hidden');
+  const u = currentUser();
+  if (!isAdmin(u)) return showErr('Master Admin access required.');
+  const titleVal = ($('avTitle').value || '').trim();
+  const catVal = ($('avCategory') && $('avCategory').value) || 'Tutorial';
+  let parsedSourceOrId = '';
+  if (avSourceTab === 'mp4') {
+    parsedSourceOrId = ($('avMp4Url').value || '').trim();
+    if (!/^https?:\/\/.+/i.test(parsedSourceOrId)) return showErr('Enter a valid direct video URL (https://…).');
+  } else {
+    const url = ($('avUrl').value || '').trim();
+    parsedSourceOrId = extractYoutubeId(url);
+    if (!parsedSourceOrId) return showErr('Paste a valid YouTube URL (watch, youtu.be, or shorts).');
+  }
+  if (!titleVal) return showErr('Enter a video title.');
+  const btn = $('avSubmitBtn'), label = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Uploading…';
+  try {
+    const res = await apiPost({
+      action: 'addVideo',
+      secretKey: BACKEND_SECRET_KEY,
+      videoId: parsedSourceOrId,
+      title: titleVal,
+      category: catVal,
+      adminPhone: u.phone || u.handle
+    }, 15000);
+    const ok = res.status === 'success' || res.success === true || res.ok === true;
+    if (!ok && res.error && res.error !== 'network' && res.error !== 'bad_response') {
+      return showErr(res.message || res.error || 'Could not add video.');
+    }
+    const entry = normalizeGalleryVideo({ videoId: parsedSourceOrId, title: titleVal, category: catVal, type: avSourceTab === 'mp4' ? 'mp4' : 'youtube' });
+    if (!liveVideosCache.some(v => String(v.videoId) === String(entry.videoId))) liveVideosCache.unshift(entry);
+    else liveVideosCache = [entry].concat(liveVideosCache.filter(v => String(v.videoId) !== String(entry.videoId)));
+    renderVideoGallery(liveVideosCache);
+    closeAddVideoModal();
+    showToast('✅ Video published successfully!');
+    setTimeout(loadVideoGallery, 800);
+  } finally {
+    btn.disabled = false; btn.textContent = label;
+  }
+}
+async function deleteGalleryVideo(id) {
+  if (!isAdmin(currentUser())) return showToast('Master Admin only.');
+  id = String(id || '').trim();
+  if (!id) return;
+  if (!confirm('Delete this video from the gallery?')) return;
+  try {
+    const res = await apiPost({
+      action: 'deleteVideo',
+      secretKey: BACKEND_SECRET_KEY,
+      videoId: id
+    }, 15000);
+    if (res.error === 'network') return showToast(API_ERR.network);
+    liveVideosCache = liveVideosCache.filter(v => String(v.videoId) !== id);
+    renderVideoGallery(liveVideosCache);
+    showToast('🗑️ Video removed.');
+    setTimeout(loadVideoGallery, 800);
+  } catch (e) {
+    showToast('Could not delete video. Try again.');
+  }
+}
+window.addEventListener('DOMContentLoaded', () => { loadVideoGallery(); });
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeWelcome(); closeModal(); closeSubCalc(); closeDirectory(); closeVideoModal(); closeAddVideoModal(); closeGalleryPlayer(); } });
 // AUTO-TRIGGER: once per browser session (until dismissed), 1.5s after load.
 // Referral-flow safe: if the ?ref= sign-up modal is already open, wait until it is closed instead of covering it.
 let guidePendingAfterAuth = false;
 function guideDismissed() { try { return sessionStorage.getItem(GUIDE_KEY) === 'true'; } catch (e) { return false; } }
 window.addEventListener('DOMContentLoaded', () => {
+  if (isResetLinkUrl()) return; // never show the tutorial popup over a password-reset deep-link
   if (guideDismissed()) { $('guideFloat').classList.remove('hidden'); return; }
   setTimeout(() => {
+    if (isResetLinkUrl()) return;
     if (guideDismissed()) { $('guideFloat').classList.remove('hidden'); return; }
     if (!$('modal').classList.contains('hidden')) { guidePendingAfterAuth = true; return; }
     openWelcome();
@@ -1473,7 +1853,7 @@ function safeRerender() { try { if (currentUser()) renderDashboard(); if (typeof
 // SECURITY: plaintext passwords are NEVER sent — only the salted SHA-256 hash.
 async function sendToGoogleSheet(payload) {
   try {
-    await fetch(SHEET_URL, {
+    await fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1629,7 +2009,7 @@ async function sheetRefresh(manual) {
     stage = 'merge';
     const n = sheetExtractRows(payload).length;
     mergeSheetRows(payload);
-    if (status) status.innerHTML = '<span class="text-emerald-400">🟢 Google Sheet live DB • Connected &amp; Synced' + (secure ? ' 🔒' : '') + '</span> <span class="text-slate-500">(' + new Date().toLocaleTimeString('en-IN') + ' · ' + n + ' rows)</span>';
+    if (status) status.innerHTML = '<span class="text-emerald-400">🟢 Connected &amp; Synced' + (secure ? ' 🔒' : '') + '</span> <span class="text-slate-500">(' + new Date().toLocaleTimeString('en-IN') + ' · ' + n + ' rows)</span>';
     safeRerender();
     return true;
   } catch (e) {
@@ -1743,6 +2123,7 @@ function refreshBtn() {
   $('authBtn').textContent = u ? 'Dashboard (' + u.name.split(' ')[0] + ')' : 'Login / Partner Register';
   $('logoutBtn').classList.toggle('hidden', !u);
   updatePublicRefBox(u);
+  try { updateVideoAdminControls(); } catch (e) {}
   return u;
 }
 function updatePublicRefBox(u) {
@@ -1806,12 +2187,23 @@ function renderDashboard() {
     u.refCode = code;
   }
   $('refLinkInput').value = origin + '?ref=' + u.refCode;
+  const ownCodeEl = $('ownRefCodeDisplay');
+  if (ownCodeEl) ownCodeEl.textContent = u.refCode || 'SATHI-XXXX';
 
   const admin = isAdmin(u);
   $('dashTabAdmin').classList.toggle('hidden', !admin);
   $('dashTabUsers').classList.toggle('hidden', !admin);
   $('dashTabTree').classList.toggle('hidden', !admin);
-  $('adminSearch').classList.toggle('hidden', !admin); $('adminSyncBar').classList.toggle('hidden', !admin); $('adminSyncBar').classList.toggle('flex', admin);
+  $('adminSearch').classList.toggle('hidden', !admin);
+  // Strict: live DB sync row is Master Admin only (9650264613 / 9750264613)
+  const syncBar = $('adminSyncBar');
+  if (syncBar) {
+    syncBar.classList.toggle('hidden', !admin);
+    syncBar.classList.toggle('flex', admin);
+    syncBar.style.display = admin ? 'flex' : 'none';
+    syncBar.setAttribute('aria-hidden', admin ? 'false' : 'true');
+  }
+  updateVideoAdminControls();
   if (admin) {
     renderAdminLeadTable(); renderAdminUserTable(); renderReferralTree(); renderActivityTable();
     const csm = $('cloudStatusMsg');
@@ -1843,6 +2235,31 @@ function shareRefLinkWa() {
   const link = $('refLinkInput').value;
   const text = 'Hey! Check out SathiCare for trusted care and support. Sign up using my link to get started: ' + link;
   window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
+}
+function ownRefSignupLink(code) {
+  return PUBLIC_ORIGIN + '/?ref=' + encodeURIComponent(code || '');
+}
+function copyOwnRefCode() {
+  const u = currentUser(); if (!u || !u.refCode) return showToast('No referral code yet.', 'error');
+  const doToast = () => showToast('Referral code copied!');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(u.refCode).then(doToast).catch(() => { try { const ta = document.createElement('textarea'); ta.value = u.refCode; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); doToast(); } catch (e) {} });
+  } else {
+    try { const ta = document.createElement('textarea'); ta.value = u.refCode; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); doToast(); } catch (e) {}
+  }
+}
+async function shareOwnRefLink() {
+  const u = currentUser(); if (!u || !u.refCode) return showToast('No referral code yet.', 'error');
+  const link = ownRefSignupLink(u.refCode);
+  const text = 'Join SathiCare with my partner referral code ' + u.refCode + ': ' + link;
+  if (navigator.share) {
+    try { await navigator.share({ title: 'SathiCare Partner Referral', text: text, url: link }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(link).then(() => showToast('Signup link copied!')).catch(() => { window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank'); });
+  } else {
+    window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
+  }
 }
 
 function adminQuery() { const el = $('adminSearch'); return el ? el.value.trim().toLowerCase() : ''; }
@@ -2178,6 +2595,7 @@ function refBannerRefresh() {
 function openModal(tab) {
   const u = refreshBtn();
   $('forgotView').classList.add('hidden');
+  if ($('setPassView')) $('setPassView').classList.add('hidden');
   $('authView').classList.toggle('hidden', !!u);
   $('dashView').classList.toggle('hidden', !u);
   if (u) { renderDashboard(); setDashTab('stats'); if (isAdmin(u)) sheetRefresh(); }
@@ -2188,7 +2606,23 @@ function openModal(tab) {
 // pendingReferralCode above) with no valid active session is shown the guest landing page —
 // NEVER an auto-authenticated dashboard — and is prompted straight into the referral sign-up.
 window.addEventListener('DOMContentLoaded', () => {
+  if (isResetLinkUrl()) return; // the dedicated reset-link listener below owns this case
   if (pendingReferralCode && !currentUser()) { setTimeout(() => openModal('signup'), 400); }
+});
+
+/* ---------- Legacy ?action=reset&user=… deep-links → on-site OTP modal (zero redirect) ---------- */
+function isResetLinkUrl() {
+  const p = new URLSearchParams(window.location.search);
+  return p.get('action') === 'reset' && !!p.get('user');
+}
+function checkUrlParamsForReset() {
+  // Retired URL password-set page: open Step-1 OTP flow instead (never leave the site).
+  if (!isResetLinkUrl()) return;
+  const user = decodeURIComponent(new URLSearchParams(window.location.search).get('user') || '').trim();
+  setTimeout(() => openSetNewPasswordModal(user), 200);
+}
+document.addEventListener('DOMContentLoaded', function () {
+  checkUrlParamsForReset();
 });
 function closeModal() {
   lockAdminSession();                       // closing the dashboard re-arms the admin security lock
@@ -2204,7 +2638,7 @@ function logout() {
   window.location.replace(window.location.pathname); // clean homepage, no ?ref= / stale state
 }
 /* =====================================================================================
-   AUTH — Mobile/Email toggle, 6-digit password, login captcha, DOB signup + DOB password reset.
+   AUTH — Mobile/Email toggle, login captcha, DOB on signup, 1-click email password reset.
    No OTP anywhere: nothing secret is ever shown on screen.
    Passwords are never sent to the sheet in plain text — the credential is a salted SHA-256 ("sc1$…"),
    salted with the account identifier so the same login works from any device.
@@ -2235,9 +2669,10 @@ function validDob(v) {
 }
 async function apiPost(payload, ms) {
   const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), ms || 20000);
-  const signedPayload = Object.assign({ secretKey: BACKEND_SECRET_KEY }, payload); // every POST is signed, automatically
+  // MANDATORY: every outgoing POST includes secretKey (addUser, sendResetOtp, verifyOtpAndUpdatePassword, addVideo, deleteVideo, addLead, deleteRow, updateLeadStatus, …)
+  const signedPayload = Object.assign({ secretKey: BACKEND_SECRET_KEY }, payload);
   try {
-    const res = await fetch(SHEET_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(signedPayload), signal: ctl.signal });
+    const res = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(signedPayload), signal: ctl.signal });
     const txt = await res.text();
     try { const o = JSON.parse(txt); return (o && typeof o === 'object') ? o : { status: 'error', error: 'bad_response' }; } catch (e) { return { status: 'error', error: 'bad_response' }; }
   } catch (e) { return { status: 'error', error: 'network' }; }
@@ -2398,89 +2833,242 @@ $('authForm').addEventListener('submit', async e => {
   } finally { busy(false); }
 });
 
-/* ---------- Forgot password: Date-of-Birth verification ---------- */
-let fgMethod = 'phone', fgCtx = null, fgFails = 0, fgLockUntil = 0;
+/* ---------- Forgot password: ZERO-REDIRECT 2-step Email OTP (sendResetOtp → verifyOtpAndUpdatePassword) ---------- */
+let fgMethod = 'phone', fgCtx = null, resetUserFromUrl = null;
 function fgSetMethod(m) {
   fgMethod = m;
   $('fgMethodPhone').className = 'flex-1 py-2 rounded-lg transition ' + (m === 'phone' ? 'tab-on' : 'text-slate-300');
   $('fgMethodEmail').className = 'flex-1 py-2 rounded-lg transition ' + (m === 'email' ? 'tab-on' : 'text-slate-300');
-  $('fgPhoneWrap').classList.toggle('hidden', m !== 'phone'); $('fgEmailWrap').classList.toggle('hidden', m !== 'email');
+  $('fgPhoneMode').classList.toggle('hidden', m !== 'phone');
+  $('fgEmailMode').classList.toggle('hidden', m !== 'email');
+  const hint = $('fgHint');
+  if (hint) {
+    hint.textContent = m === 'phone'
+      ? 'Enter your registered mobile number and the email address where you want to receive the 6-digit OTP.'
+      : 'Enter your registered email and choose where the 6-digit OTP should be delivered.';
+  }
+  if (m === 'email') fgToggleSameEmail();
 }
 $('fgPhone').addEventListener('input', e => e.target.value = e.target.value.replace(/\D/g, ''));
-// (fgNewPass / fgNewPass2 intentionally have no input filter — any character, 6-10 long, is allowed)
+$('fgEmail').addEventListener('input', () => { if ($('fgSameEmail') && $('fgSameEmail').checked) fgSyncSameEmail(); });
+if ($('fgOtp')) $('fgOtp').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6); });
+function fgSyncSameEmail() {
+  const reg = ($('fgEmail').value || '').trim();
+  $('fgTargetEmail').value = reg;
+}
+function fgToggleSameEmail() {
+  const same = $('fgSameEmail') && $('fgSameEmail').checked;
+  const target = $('fgTargetEmail');
+  if (!target) return;
+  if (same) {
+    fgSyncSameEmail();
+    target.readOnly = true;
+    target.classList.add('opacity-70');
+  } else {
+    target.readOnly = false;
+    target.classList.remove('opacity-70');
+    target.value = '';
+  }
+}
+function fgClearBanners() {
+  ['fgErr1', 'fgErr2', 'fgFailBanner', 'fgOtpFailBanner', 'fgSuccessBanner', 'fgNotFoundBanner'].forEach(id => {
+    const el = $(id); if (el) el.classList.add('hidden');
+  });
+  const fail = $('fgFailBanner'); if (fail) fail.textContent = '';
+}
+function fgShowStep(step) {
+  const s1 = $('forgotStep1'), s2 = $('forgotStep2');
+  if (s1) s1.classList.toggle('hidden', step !== 1);
+  if (s2) s2.classList.toggle('hidden', step !== 2);
+}
 function openForgot() {
-  $('authView').classList.add('hidden'); $('forgotView').classList.remove('hidden');
-  $('forgotStep1').classList.remove('hidden'); $('forgotStep2').classList.add('hidden');
-  $('fgErr1').classList.add('hidden'); $('fgErr2').classList.add('hidden');
-  ['fgPhone', 'fgEmail', 'fgDob', 'fgNewPass', 'fgNewPass2'].forEach(i => $(i).value = '');
+  $('authView').classList.add('hidden');
+  if ($('setPassView')) $('setPassView').classList.add('hidden');
+  $('dashView').classList.add('hidden');
+  $('forgotView').classList.remove('hidden');
+  fgShowStep(1);
+  fgClearBanners();
+  ['fgPhone', 'fgEmail', 'fgTargetEmail', 'fgTargetEmailPhone', 'fgOtp', 'fgNewPass', 'fgNewPass2'].forEach(i => { if ($(i)) $(i).value = ''; });
+  if ($('fgSameEmail')) { $('fgSameEmail').checked = false; }
+  if ($('fgTargetEmail')) { $('fgTargetEmail').readOnly = false; $('fgTargetEmail').classList.remove('opacity-70'); }
+  if ($('fgAccountShown')) $('fgAccountShown').textContent = '';
   fgCtx = null; fgSetMethod('phone');
 }
-function closeForgot() { fgCtx = null; $('forgotView').classList.add('hidden'); $('authView').classList.remove('hidden'); }
-function fgFail(msg) { const e = $('fgErr1'); e.textContent = msg; e.classList.remove('hidden'); }
-async function findForgotAccount() {
-  $('fgErr1').classList.add('hidden');
-  if (Date.now() < fgLockUntil) return fgFail('Too many attempts. Please try again in ' + Math.ceil((fgLockUntil - Date.now()) / 60000) + ' minute(s).');
-  const id = normId(fgMethod, fgMethod === 'phone' ? $('fgPhone').value : $('fgEmail').value), dobRaw = $('fgDob').value;
-  if (!validId(fgMethod, id)) return fgFail(fgMethod === 'phone' ? 'Enter a valid 10-digit mobile number.' : 'Enter a valid email address.');
-  if (!validDob(dobRaw)) return fgFail('Please select your Date of Birth.');
-  const dob = normalizeDOB(dobRaw); // DD-MM-YYYY from here on — never compare raw date strings
-
-  // Local-first: scan every cached account by its actual email/phone FIELD (not just the object key — a
-  // record's storage key can drift from its field value after edits/sheet-merges, which is what was
-  // silently breaking this match before). Whichever real key is found is what gets used from here on,
-  // so the password reset below updates the actual account instead of accidentally creating a new one.
-  const localUsers = store.get(USERS) || {};
-  let matchedHandle = null;
-  for (const h in localUsers) {
-    const cand = localUsers[h];
-    const idMatches = fgMethod === 'email'
-      ? String(cand.email || '').trim().toLowerCase() === id
-      : String(cand.phone || '').replace(/\D/g, '') === id;
-    if (idMatches && cand.dob && normalizeDOB(cand.dob) === dob) { matchedHandle = h; break; }
-  }
-  if (matchedHandle) {
-    fgFails = 0; fgCtx = { id: matchedHandle, dob, type: fgMethod };
-    $('fgAccountShown').textContent = fgMethod === 'phone' ? '+91-XXXXXX' + id.slice(-4) : id.replace(/^(.{2}).*(@.*)$/, '$1***$2');
-    $('forgotStep1').classList.add('hidden'); $('forgotStep2').classList.remove('hidden'); $('fgNewPass').focus();
-    return;
-  }
-
-  const btn = $('fgVerifyBtn'), label = btn.textContent; btn.disabled = true; btn.textContent = 'Verifying…';
-  const res = await apiPost({ action: 'verifyDob', identifier: id, type: fgMethod, dob }, 8000);
-  btn.disabled = false; btn.textContent = label;
-  if (res.status === 'success') {
-    fgFails = 0; fgCtx = { id, dob, type: fgMethod };
-    $('fgAccountShown').textContent = fgMethod === 'phone' ? '+91-XXXXXX' + id.slice(-4) : id.replace(/^(.{2}).*(@.*)$/, '$1***$2');
-    $('forgotStep1').classList.add('hidden'); $('forgotStep2').classList.remove('hidden'); $('fgNewPass').focus();
-    return;
-  }
-  if (res.error === 'network' || res.error === 'bad_response') return fgFail(API_ERR[res.error]);
-  if (res.error === 'locked') { fgLockUntil = Date.now() + 15 * 60000; return fgFail('Too many attempts. Please try again in 15 minutes.'); }
-  if (++fgFails >= 5) fgLockUntil = Date.now() + 15 * 60000;
-  fgFail('❌ Identifier or Date of Birth does not match our records.');
+function closeForgot() {
+  fgCtx = null;
+  $('forgotView').classList.add('hidden');
+  if ($('setPassView')) $('setPassView').classList.add('hidden');
+  $('authView').classList.remove('hidden');
 }
-async function confirmReset() {
-  const err = $('fgErr2'); err.classList.add('hidden');
-  const show = m => { err.textContent = m; err.classList.remove('hidden'); };
-  if (!fgCtx) return show('Please verify your details first.');
+function fgBackToStep1() {
+  fgClearBanners();
+  if ($('fgOtp')) $('fgOtp').value = '';
+  if ($('fgNewPass')) $('fgNewPass').value = '';
+  if ($('fgNewPass2')) $('fgNewPass2').value = '';
+  fgShowStep(1);
+}
+function fgFail(msg) { const e = $('fgErr1'); if (!e) return; e.textContent = msg; e.classList.remove('hidden'); }
+function fgFail2(msg) { const e = $('fgErr2'); if (!e) return; e.textContent = msg; e.classList.remove('hidden'); }
+function fgShowFailBanner(msg) {
+  const b = $('fgFailBanner');
+  if (!b) return fgFail(msg);
+  b.textContent = msg || '❌ Could not send OTP. Please try again.';
+  b.classList.remove('hidden');
+}
+function validTargetEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || '').trim()); }
+function fgCollectIdentifier() {
+  let identifier, targetEmail;
+  if (fgMethod === 'phone') {
+    identifier = normId('phone', $('fgPhone').value);
+    targetEmail = ($('fgTargetEmailPhone').value || '').trim().toLowerCase();
+    if (!validId('phone', identifier)) return { error: 'Enter a valid 10-digit mobile number.' };
+  } else {
+    identifier = normId('email', $('fgEmail').value);
+    if ($('fgSameEmail') && $('fgSameEmail').checked) fgSyncSameEmail();
+    targetEmail = ($('fgTargetEmail').value || '').trim().toLowerCase();
+    if (!validId('email', identifier)) return { error: 'Enter a valid registered email address.' };
+  }
+  if (!validTargetEmail(targetEmail)) return { error: 'Enter a valid email address to receive the OTP.' };
+  return { identifier, targetEmail };
+}
+async function sendResetOtp() {
+  fgClearBanners();
+  const collected = fgCollectIdentifier();
+  if (collected.error) return fgFail(collected.error);
+  const { identifier, targetEmail } = collected;
+
+  const btn = $('fgSendOtpBtn'), label = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending OTP…'; }
+  try {
+    const res = await apiPost({
+      action: 'sendResetOtp',
+      secretKey: BACKEND_SECRET_KEY,
+      identifier: identifier,
+      targetEmail: targetEmail
+    }, 15000);
+    const ok = res.status === 'success' || res.success === true || res.ok === true;
+    if (!ok) {
+      const backendMsg = res.message || res.error || res.msg || '';
+      if (res.error === 'network' || res.error === 'bad_response') return fgShowFailBanner(API_ERR[res.error]);
+      return fgShowFailBanner(backendMsg ? ('❌ ' + backendMsg) : '❌ Could not send OTP. Please try again.');
+    }
+    fgCtx = { id: identifier, targetEmail: targetEmail, method: fgMethod };
+    if ($('fgAccountShown')) $('fgAccountShown').textContent = identifier;
+    fgShowStep(2);
+    showToast('✅ OTP sent to your email.');
+    setTimeout(() => { try { $('fgOtp').focus(); } catch (e) {} }, 80);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = label || '✉️ Send OTP to Email'; }
+  }
+}
+async function verifyOtpAndUpdatePassword() {
+  fgClearBanners();
+  const id = (fgCtx && fgCtx.id) || '';
+  if (!id) return fgFail2('Session expired. Please request a new OTP.');
+  const otpVal = ($('fgOtp').value || '').replace(/\D/g, '');
   const pw = $('fgNewPass').value, pw2 = $('fgNewPass2').value;
-  if (!/^.{6,10}$/.test(pw)) return show('Password must be 6 to 10 characters.');
-  if (pw !== pw2) return show('Passwords do not match.');
-  const { id, dob, type } = fgCtx;
+  if (!/^\d{6}$/.test(otpVal)) return fgFail2('Enter the exact 6-digit OTP from your email.');
+  if (!/^.{6,10}$/.test(pw)) return fgFail2('Password must be 6 to 10 characters.');
+  if (pw !== pw2) return fgFail2('Passwords do not match.');
 
-  // Update locally and log them straight in — immediately, regardless of network state.
-  const users = store.get(USERS) || {};
-  const newHash = await hash(pw, id);
-  if (users[id]) { users[id].hash = newHash; users[id].salt = id; }
-  else users[id] = { name: id, salt: id, hash: newHash, created: Date.now(), method: type, blocked: false, email: type === 'email' ? id : null, phone: type === 'phone' ? id : null, dob, referredBy: null, refCode: generateRefCode(users) };
-  store.set(USERS, users);
-  fgCtx = null; $('forgotView').classList.add('hidden'); $('authView').classList.remove('hidden');
-  await finishAuth(id, pw);
-  showToast('✅ Password updated successfully!');
+  const btn = $('fgUpdateBtn'), label = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Verifying…'; }
+  try {
+    const type = id.includes('@') ? 'email' : 'phone';
+    const res = await apiPost({
+      action: 'verifyOtpAndUpdatePassword',
+      secretKey: BACKEND_SECRET_KEY,
+      identifier: id,
+      otp: otpVal,
+      newPassword: pw
+    }, 15000);
 
-  // Background sync — fire-and-forget, never blocks the reset.
-  apiPost({ action: 'updatePassword', identifier: id, targetPhone: type === 'phone' ? id : '-', targetEmail: type === 'email' ? id : '-', dob, newPassword: await credHash(pw, id) }, 15000)
-    .catch(err2 => console.warn('[SathiCare] background password-update sync failed (still updated locally):', err2));
+    const otpBad = /invalid|expired|otp/i.test(String(res.error || '')) || /invalid|expired/i.test(String(res.message || ''));
+    const hardFail = res.status === 'error' && res.error && res.error !== 'network' && res.error !== 'bad_response';
+    if (hardFail || otpBad) {
+      const banner = $('fgOtpFailBanner');
+      if (banner) {
+        banner.textContent = (res.message && /otp|invalid|expired/i.test(res.message))
+          ? ('❌ ' + res.message)
+          : '❌ Invalid or expired OTP. Please try again.';
+        banner.classList.remove('hidden');
+      } else {
+        fgFail2('❌ Invalid or expired OTP. Please try again.');
+      }
+      return;
+    }
+    if (res.error === 'network' || res.error === 'bad_response') return fgFail2(API_ERR[res.error]);
+
+    // Persist locally into master store + legacy sathi_users mirror (crash-proof)
+    const users = store.get(USERS) || {};
+    const newHash = await hash(pw, id);
+    if (users[id]) { users[id].hash = newHash; users[id].salt = id; }
+    else users[id] = { name: (res.user && res.user.name) || id, salt: id, hash: newHash, created: Date.now(), method: type, blocked: false, email: type === 'email' ? id : null, phone: type === 'phone' ? id : null, dob: '', referredBy: null, refCode: generateRefCode(users) };
+    if (res.user) adoptServerUser(users, id, res.user, newHash);
+    store.set(USERS, users);
+    try { localStorage.setItem('sathi_users', JSON.stringify(users)); } catch (e) {}
+
+    fgCtx = null; resetUserFromUrl = null;
+    clearResetUrlParams();
+    $('forgotView').classList.add('hidden');
+    if ($('setPassView')) $('setPassView').classList.add('hidden');
+    showToast('✅ Password successfully updated! Please login with your new password.');
+    openLoginAfterPasswordReset(id);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = label || '🔒 Verify OTP & Update Password'; }
+  }
+}
+/** After OTP reset: close reset UI and open Login with identifier pre-filled + password focused. */
+function openLoginAfterPasswordReset(identifier) {
+  identifier = String(identifier || '').trim();
+  $('forgotView').classList.add('hidden');
+  if ($('setPassView')) $('setPassView').classList.add('hidden');
+  $('dashView').classList.add('hidden');
+  $('authView').classList.remove('hidden');
+  $('modal').classList.remove('hidden');
+  $('modal').classList.add('flex');
+  setTab('login');
+  const isEmail = identifier.includes('@');
+  setMethod(isEmail ? 'email' : 'phone');
+  if (isEmail) {
+    if ($('fEmail')) $('fEmail').value = identifier;
+    if ($('fPhone')) $('fPhone').value = '';
+  } else {
+    if ($('fPhone')) $('fPhone').value = identifier.replace(/\D/g, '').slice(-10);
+    if ($('fEmail')) $('fEmail').value = '';
+  }
+  if ($('fPass')) $('fPass').value = '';
+  if (typeof newCaptcha === 'function') try { newCaptcha(); } catch (e) {}
+  setTimeout(() => { try { $('fPass').focus(); } catch (e) {} }, 120);
+}
+/* Legacy aliases — map old callers onto the OTP flow (no URL redirects) */
+function sendPasswordResetLink() { return sendResetOtp(); }
+function findForgotAccount() { return sendResetOtp(); }
+function confirmReset() { return verifyOtpAndUpdatePassword(); }
+function submitSetNewPassword() { return verifyOtpAndUpdatePassword(); }
+
+function clearResetUrlParams() {
+  try {
+    const u = new URL(window.location.href);
+    u.searchParams.delete('action'); u.searchParams.delete('user'); u.searchParams.delete('token');
+    const qs = u.searchParams.toString();
+    window.history.replaceState({}, '', u.pathname + (qs ? '?' + qs : '') + u.hash);
+  } catch (e) {}
+}
+/* URL deep-link reset is retired — open on-site OTP modal instead of setPassView */
+function openSetNewPasswordModal(userId) {
+  clearResetUrlParams();
+  openModal('login');
+  openForgot();
+  const id = String(userId || '').trim();
+  if (!id) return;
+  if (id.includes('@')) {
+    fgSetMethod('email');
+    if ($('fgEmail')) $('fgEmail').value = id;
+  } else {
+    fgSetMethod('phone');
+    if ($('fgPhone')) $('fgPhone').value = id.replace(/\D/g, '').slice(-10);
+  }
 }
 
 /* ---------- Lead submission: save only (no WhatsApp auto-redirect) ---------- */
@@ -2500,6 +3088,206 @@ $('leadForm').addEventListener('submit', e => {
   setTimeout(() => { $('leadMsg').classList.add('hidden'); setDashTab('stats'); }, 1500);
 });
 refreshBtn();
+
+/* ---------- Sathi AI Support Bot (bilingual + 24h localStorage cleanup) ---------- */
+const SATHI_AI_STORE = 'SATHICARE_AI_CHAT_V2';
+const SATHI_AI_TTL_MS = 24 * 60 * 60 * 1000;
+const SATHI_AI_AGENT_WA = 'https://wa.me/919650264613?text=' + encodeURIComponent('Hi SathiCare Team, I need assistance regarding my account/lead.');
+const SATHI_AI_QUICK = [
+  { q: '🔑 How to reset my password?', key: 'reset' },
+  { q: '💰 Payouts kaise honge?', key: 'payout' },
+  { q: '💬 Agent se baat karni hai', key: 'agent' },
+  { q: '📋 Lead kaise submit kare?', key: 'lead' }
+];
+
+function sathiDetectLang(text) {
+  const t = String(text || '');
+  if (/[\u0900-\u097F]/.test(t)) return 'hi';
+  // Devanagari transliteration / Hinglish cues
+  if (/\b(hai|hain|kya|kaise|kab|mujhe|aap|aapke|mera|meri|paise|password|bhool|bhul|karna|kare|honge|milenge|baat|namaste|kripya|please nahi)\b/i.test(t)) return 'hi';
+  if (/\b(payouts?|password|reset|lead|agent|support|how|when|what|which|where|please|hello|hi)\b/i.test(t) && !/\b(kaise|kab|mujhe|paise|hai)\b/i.test(t)) return 'en';
+  return /[a-z]/i.test(t) ? 'en' : 'hi';
+}
+function sathiAiReply(key, raw) {
+  const t = String(raw || '').toLowerCase();
+  const lang = sathiDetectLang(raw);
+  const hi = lang === 'hi';
+
+  if (key === 'reset' || /reset|forgot|password|paasword|pass\b|bhool|bhul|pasword|otp/.test(t)) {
+    return {
+      text: hi
+        ? 'Password reset ab on-site OTP se hota hai (koi redirect nahi):\n1) Login → Forgot password?\n2) Registered mobile/email + OTP wala email bharo\n3) “Send OTP to Email” dabao\n4) 6-digit OTP + naya password same modal me enter karke verify karo'
+        : 'Password reset is fully on-site with email OTP (no redirects):\n1) Open Login → Forgot password?\n2) Enter registered mobile/email + the inbox for OTP\n3) Tap “Send OTP to Email”\n4) Enter the 6-digit OTP and new password in the same modal',
+      action: 'reset'
+    };
+  }
+
+  if (key === 'payout' || /payout|paise|payment|bonus|commission|earn|₹500|500|kab mil|money|upi|bank/.test(t)) {
+    return {
+      text: hi
+        ? 'Aapke dwara submit ki gayi lead jaise hi complete hoti hai, 24 ghante ke andar aapke UPI ya Bank Account me paise transfer kar diye jayenge jiska live status aap apne dashboard par dekh sakte hain. Payment process ke liye SathiCare ki team aapse khud sampark karegi.'
+        : 'As soon as a lead you submitted is completed, payout is transferred to your UPI or bank account within 24 hours. You can track live status on your dashboard, and the SathiCare team will contact you for the payment process.'
+    };
+  }
+
+  if (key === 'agent' || /agent|support contact|team contact|whatsapp|baat|contact|helpline|call/.test(t)) {
+    return {
+      text: hi
+        ? 'Aap floating button ya neeche diye link se direct WhatsApp par agent se baat kar sakte hain.'
+        : 'You can talk to an agent directly on WhatsApp using the floating button or the link below.',
+      action: 'whatsapp'
+    };
+  }
+
+  if (key === 'lead' || /lead|submit|client|naya lead|new lead|lead kaise/.test(t)) {
+    return {
+      text: hi
+        ? 'Naya client lead submit karne ke steps:\n1) Partner Dashboard me Login karo\n2) “Submit New Lead” tab kholo\n3) Client Name, Mobile aur Interested In bharo\n4) Submit dabao — lead live sync ho jati hai\n5) Overview me status track karo\n\nNeeche se seedha lead form khol sakte ho:'
+        : 'To submit a new client lead:\n1) Log in to Partner Dashboard\n2) Open the “Submit New Lead” tab\n3) Enter client name, mobile, and interest\n4) Submit — it syncs live to the backend\n5) Track status under Overview\n\nUse the button below to jump to the lead form:',
+      action: 'lead'
+    };
+  }
+
+  if (key === 'plans' || /plan|insurance|lic|policy|term|saving|ulip|cover|bima/.test(t)) {
+    return {
+      text: hi
+        ? 'SathiCare LIC framework ke under trusted plans suggest karti hai — term cover, savings, retirement aur family protection. Calculator me budget lock ke baad options dekho; exact plan expert team client se baat karke finalize karti hai.'
+        : 'SathiCare recommends trusted LIC-framework plans for term cover, savings, retirement, and family protection. Use the calculator after budget lock, and our expert team finalizes the best-fit plan with the client.'
+    };
+  }
+
+  if (/hello|hi\b|hey|namaste|hola|help|support|madad/.test(t)) {
+    return {
+      text: hi
+        ? 'Namaste! Main Sathi AI Support hoon 🦊\nPassword reset, payouts, agent contact, ya lead submit — poocho. Quick buttons neeche hain.'
+        : 'Hi! I’m Sathi AI Support 🦊\nAsk about password reset, payouts, agent contact, or lead submission. Quick actions are below.'
+    };
+  }
+
+  return {
+    text: hi
+      ? 'Samajh gaya! Main help kar sakta hoon:\n• Password reset\n• Payouts / paise kab milenge\n• Agent / WhatsApp contact\n• New lead submit\n\nQuick buttons use karo ya sawaal clearly likho.'
+      : 'I can help with:\n• Password reset\n• Payouts & timing\n• Agent / WhatsApp contact\n• Submitting a new lead\n\nUse the quick buttons or type your question clearly.'
+  };
+}
+
+function sathiLoadChat() {
+  try {
+    const raw = localStorage.getItem(SATHI_AI_STORE);
+    if (!raw) return [];
+    const data = JSON.parse(raw);
+    const msgs = Array.isArray(data) ? data : (data && data.messages) || [];
+    const lastTs = msgs.reduce((m, x) => Math.max(m, Number(x.ts) || 0), 0);
+    if (lastTs && (Date.now() - lastTs > SATHI_AI_TTL_MS)) {
+      localStorage.removeItem(SATHI_AI_STORE);
+      return [];
+    }
+    return msgs.filter(m => m && m.text && (Date.now() - (Number(m.ts) || 0) <= SATHI_AI_TTL_MS));
+  } catch (e) { return []; }
+}
+function sathiSaveChat(msgs) {
+  try { localStorage.setItem(SATHI_AI_STORE, JSON.stringify(msgs.slice(-80))); } catch (e) {}
+}
+function sathiWipeIfStale() {
+  const msgs = sathiLoadChat();
+  // sathiLoadChat already wipes when stale; ensure UI cleared
+  return msgs;
+}
+
+function toggleSathiAi(force) {
+  const panel = $('sathiAiPanel'), fab = $('sathiAiFab');
+  if (!panel) return;
+  const open = typeof force === 'boolean' ? force : !panel.classList.contains('open');
+  panel.classList.toggle('open', open);
+  panel.setAttribute('aria-hidden', open ? 'false' : 'true');
+  if (fab) fab.setAttribute('aria-expanded', open ? 'true' : 'false');
+  if (open) {
+    initSathiAiUi(true);
+    setTimeout(() => { try { $('sathiAiInput').focus(); } catch (e) {} }, 50);
+  }
+}
+function initSathiAiUi(forceRender) {
+  const quick = $('sathiAiQuick'), msgsEl = $('sathiAiMsgs');
+  if (!quick || !msgsEl) return;
+  if (quick.dataset.ready !== '1') {
+    quick.dataset.ready = '1';
+    SATHI_AI_QUICK.forEach(item => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'sathi-ai-quick fx-off'; b.textContent = item.q;
+      b.onclick = () => askSathiAi(item.q, item.key);
+      quick.appendChild(b);
+    });
+  }
+  if (forceRender || !msgsEl.dataset.hydrated) {
+    msgsEl.dataset.hydrated = '1';
+    msgsEl.innerHTML = '';
+    const stored = sathiWipeIfStale();
+    if (stored.length) {
+      stored.forEach(m => appendSathiAiBubble(m.role, m.text, m.action, true));
+    } else {
+      appendSathiAiBubble('bot', 'Namaste! Main Sathi AI Support hoon 🦊\nPassword, payouts, agent contact, ya leads — English ya Hinglish me poocho.', null, false);
+    }
+  }
+}
+function sathiActionButton(action) {
+  if (!action) return null;
+  const wrap = document.createElement('div');
+  wrap.className = 'mt-1.5';
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[11px] font-bold px-3 py-2 rounded-lg transition w-full text-left';
+  if (action === 'reset') {
+    btn.textContent = '🔑 Open Password Reset';
+    btn.onclick = () => { toggleSathiAi(false); openModal('login'); openForgot(); };
+  } else if (action === 'whatsapp') {
+    btn.textContent = '💬 Connect with Agent on WhatsApp';
+    btn.onclick = () => window.open(SATHI_AI_AGENT_WA, '_blank', 'noopener');
+  } else if (action === 'lead') {
+    btn.textContent = '📋 Go to Submit Lead Form';
+    btn.onclick = () => {
+      toggleSathiAi(false);
+      const u = currentUser();
+      if (!u) { openModal('login'); showToast('Please log in to submit a lead.'); return; }
+      openModal();
+      setDashTab('lead');
+      setTimeout(() => { try { $('ldName').scrollIntoView({ behavior: 'smooth', block: 'center' }); $('ldName').focus(); } catch (e) {} }, 200);
+    };
+  } else return null;
+  wrap.appendChild(btn);
+  return wrap;
+}
+function appendSathiAiBubble(role, text, action, skipPersist) {
+  const msgs = $('sathiAiMsgs'); if (!msgs) return;
+  const d = document.createElement('div');
+  d.className = 'sathi-ai-bubble ' + (role === 'user' ? 'user' : 'bot');
+  d.textContent = text;
+  msgs.appendChild(d);
+  const actionEl = sathiActionButton(action);
+  if (actionEl) msgs.appendChild(actionEl);
+  msgs.scrollTop = msgs.scrollHeight;
+  if (!skipPersist) {
+    const all = sathiLoadChat();
+    all.push({ role: role, text: text, action: action || null, ts: Date.now() });
+    sathiSaveChat(all);
+  }
+}
+function askSathiAi(text, key) {
+  const box = $('sathiAiMsgs');
+  if (!box || !box.dataset.hydrated) initSathiAiUi(true);
+  appendSathiAiBubble('user', text);
+  const reply = sathiAiReply(key, text);
+  appendSathiAiBubble('bot', reply.text, reply.action);
+}
+function sendSathiAiMsg(e) {
+  if (e) e.preventDefault();
+  const input = $('sathiAiInput'); if (!input) return false;
+  const text = input.value.trim(); if (!text) return false;
+  input.value = '';
+  askSathiAi(text, null);
+  return false;
+}
+// Wipe stale chat on boot; hydrate UI lazily when drawer opens
+sathiWipeIfStale();
 </script>
 <script>
 /* Savings-kid mascot — canvas 2D cartoon character (no dependencies).
